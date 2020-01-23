@@ -115,25 +115,28 @@ Table of Contents
 
 1.  Introduction
 
-   Each instance of a Client can generate it's own asymmetric key pair,
-   and keep its private key secret.
+   This protocol supports the widely deployed use cases supported by
+   OAuth 2.0, and OpenID Connect.  It also supports use cases that are
+   not supported, but have been frequently requested.  This protocol
+   addresses many of the security issues in OAuth 2.0 that arise from
+   sending parameters through a redirection through the user agent, by
+   having all parameters be transmitted directly.
 
-   All clients can authenticate themselves. ???
+   Additionally, the technology landscape has changed since OAuth 2.0
+   was initially drafted.  More interactions happen on mobile devices
+   than PCs.  Modern browsers now directly support asymetric
+   cryptographic functions.  Standards have emerged and are widely
+   deployed for URL safe tokens.
 
-   to be done
+   Additional use cases are now being served with extensions to OAuth
+   2.0.  Smart devices are authorized to access a user's resources.  Web
+   applications that have no server component are prominent.  OpenID
+   Connect extended OAuth 2.0 to support authentication and releasing
+   identity claims.
 
-   10 years later, ris eof mobile, faster processors.
-
-   Identity and Authorization are often performed by the same system.
-
-   Single interaction with the user
-
-   Rise of mobile phones
-
-   Web Cryptography APIs, a single page app can generate a - no public
-   Clients.
-
-   Asymmetric cryptography.
+   This protocol takes advantage of the new capabilities, simplifies the
+   architectural model, and provides support for all the widely deployed
+   use cases.
 
 2.  Protocol
 
