@@ -3,7 +3,7 @@
 This is the working area for the individual Internet-Draft, "Digital IDentity and Authorization protocol".
 
 * [Editor's Copy](https://dickhardt.github.io/hardt-DIDAP-protocol/draft-hardt-DIDAP-protocol.html)
-* [Individual Draft](https://tools.ietf.org/html/draft-hardt-DIDAP-protocol) NOT YET THERE!
+* [Individual Draft](https://tools.ietf.org/html/draft-hardt-DIDAP-protocol) -- NOT YET THERE!
 
 ## Building the Draft
 
