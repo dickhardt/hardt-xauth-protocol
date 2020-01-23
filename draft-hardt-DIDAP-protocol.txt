@@ -4,8 +4,8 @@
 
 Network Working Group                                      D. Hardt, Ed.
 Internet-Draft                                                SignIn.Org
-Intended status: Standards Track                         22 January 2020
-Expires: 25 July 2020
+Intended status: Standards Track                         24 January 2020
+Expires: 27 July 2020
 
 
              Delegated Identity and Authorization protocol
@@ -41,7 +41,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 25 July 2020.
+   This Internet-Draft will expire on 27 July 2020.
 
 Copyright Notice
 
