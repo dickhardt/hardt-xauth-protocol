@@ -22,3 +22,13 @@ This requires that you have the necessary software installed.  See
 
 See the
 [guidelines for contributions](https://github.com/dickhardt/hardt-DIDAP-protocol/blob/master/CONTRIBUTING.md).
+
+## auto reloading on Mac OS
+Notes so I remember how to do this! :)
+
+    brew install watchexec
+    npm install -g reload
+
+    watchexec -c make
+
+    reload -b -s draft-hardt-DIDAP-protocol.html 
