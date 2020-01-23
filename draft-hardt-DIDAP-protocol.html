@@ -6,7 +6,8 @@
 <title>Delegated Identity and Authorization protocol</title>
 <meta name="author" content="Dick Hardt">
 <meta name="description" content="
-       TBD 
+       This protocol allows users and resource owners to delegate resource authorization and identity claims to a server. Client software can then obtain access to resources and/or identity claims by calling the delegated server. 
+       [Editor: this is pretty terse and dense - needs work!] 
     ">
 <meta name="generator" content="xml2rfc 2.16.3">
 <link rel="alternate" type="application/rfc+xml" href="draft-hardt-DIDAP-protocol.xml">
@@ -844,7 +845,8 @@ table.left {
 <h1 id="title">Delegated Identity and Authorization protocol</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">TBD<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">This protocol allows users and resource owners to delegate resource authorization and identity claims to a server. Client software can then obtain access to resources and/or identity claims by calling the delegated server.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">[Editor: this is pretty terse and dense - needs work!]<a href="#section-abstract-2" class="pilcrow">¶</a></p>
 </section>
 <section class="note" id="section-note.1">
       <h2 id="name-note-to-readers">
@@ -1035,77 +1037,83 @@ table.left {
             <p id="section-boilerplate.3-1.9.1"><a href="#section-9" class="xref">9</a>.  <a href="#name-client-authentication" class="xref">Client Authentication</a><a href="#section-boilerplate.3-1.9.1" class="pilcrow">¶</a></p>
 </li>
           <li class="toc ulEmpty" id="section-boilerplate.3-1.10">
-            <p id="section-boilerplate.3-1.10.1"><a href="#section-10" class="xref">10</a>.  <a href="#name-extensibility" class="xref">Extensibility</a><a href="#section-boilerplate.3-1.10.1" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.3-1.10.1"><a href="#section-10" class="xref">10</a>.  <a href="#name-ds-initiated-authentication" class="xref">DS Initiated Authentication and Authorization</a><a href="#section-boilerplate.3-1.10.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.11">
+            <p id="section-boilerplate.3-1.11.1"><a href="#section-11" class="xref">11</a>.  <a href="#name-extensibility" class="xref">Extensibility</a><a href="#section-boilerplate.3-1.11.1" class="pilcrow">¶</a></p>
 <ul class="toc ulEmpty">
-<li class="toc ulEmpty" id="section-boilerplate.3-1.10.2.1">
-                <p id="section-boilerplate.3-1.10.2.1.1"><a href="#section-10.1" class="xref">10.1</a>.  <a href="#name-initiation-request-2" class="xref">Initiation Request</a><a href="#section-boilerplate.3-1.10.2.1.1" class="pilcrow">¶</a></p>
+<li class="toc ulEmpty" id="section-boilerplate.3-1.11.2.1">
+                <p id="section-boilerplate.3-1.11.2.1.1"><a href="#section-11.1" class="xref">11.1</a>.  <a href="#name-client-authentication-mecha" class="xref">Client Authentication Mechanisms</a><a href="#section-boilerplate.3-1.11.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.11.2.2">
+                <p id="section-boilerplate.3-1.11.2.2.1"><a href="#section-11.2" class="xref">11.2</a>.  <a href="#name-initiation-request-2" class="xref">Initiation Request</a><a href="#section-boilerplate.3-1.11.2.2.1" class="pilcrow">¶</a></p>
 <ul class="toc ulEmpty">
-<li class="toc ulEmpty" id="section-boilerplate.3-1.10.2.1.2.1">
-                    <p id="section-boilerplate.3-1.10.2.1.2.1.1"><a href="#section-10.1.1" class="xref">10.1.1</a>.  <a href="#name-client-object-2" class="xref">"client" Object</a><a href="#section-boilerplate.3-1.10.2.1.2.1.1" class="pilcrow">¶</a></p>
+<li class="toc ulEmpty" id="section-boilerplate.3-1.11.2.2.2.1">
+                    <p id="section-boilerplate.3-1.11.2.2.2.1.1"><a href="#section-11.2.1" class="xref">11.2.1</a>.  <a href="#name-client-object-2" class="xref">"client" Object</a><a href="#section-boilerplate.3-1.11.2.2.2.1.1" class="pilcrow">¶</a></p>
 </li>
-                  <li class="toc ulEmpty" id="section-boilerplate.3-1.10.2.1.2.2">
-                    <p id="section-boilerplate.3-1.10.2.1.2.2.1"><a href="#section-10.1.2" class="xref">10.1.2</a>.  <a href="#name-user-object-2" class="xref">"user" Object</a><a href="#section-boilerplate.3-1.10.2.1.2.2.1" class="pilcrow">¶</a></p>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.11.2.2.2.2">
+                    <p id="section-boilerplate.3-1.11.2.2.2.2.1"><a href="#section-11.2.2" class="xref">11.2.2</a>.  <a href="#name-user-object-2" class="xref">"user" Object</a><a href="#section-boilerplate.3-1.11.2.2.2.2.1" class="pilcrow">¶</a></p>
 </li>
-                  <li class="toc ulEmpty" id="section-boilerplate.3-1.10.2.1.2.3">
-                    <p id="section-boilerplate.3-1.10.2.1.2.3.1"><a href="#section-10.1.3" class="xref">10.1.3</a>.  <a href="#name-authorizations-object-3" class="xref">"authorizations" Object</a><a href="#section-boilerplate.3-1.10.2.1.2.3.1" class="pilcrow">¶</a></p>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.11.2.2.2.3">
+                    <p id="section-boilerplate.3-1.11.2.2.2.3.1"><a href="#section-11.2.3" class="xref">11.2.3</a>.  <a href="#name-authorizations-object-3" class="xref">"authorizations" Object</a><a href="#section-boilerplate.3-1.11.2.2.2.3.1" class="pilcrow">¶</a></p>
 </li>
-                  <li class="toc ulEmpty" id="section-boilerplate.3-1.10.2.1.2.4">
-                    <p id="section-boilerplate.3-1.10.2.1.2.4.1"><a href="#section-10.1.4" class="xref">10.1.4</a>.  <a href="#name-claims-object-3" class="xref">"claims" Object</a><a href="#section-boilerplate.3-1.10.2.1.2.4.1" class="pilcrow">¶</a></p>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.11.2.2.2.4">
+                    <p id="section-boilerplate.3-1.11.2.2.2.4.1"><a href="#section-11.2.4" class="xref">11.2.4</a>.  <a href="#name-claims-object-3" class="xref">"claims" Object</a><a href="#section-boilerplate.3-1.11.2.2.2.4.1" class="pilcrow">¶</a></p>
 </li>
                 </ul>
 </li>
-              <li class="toc ulEmpty" id="section-boilerplate.3-1.10.2.2">
-                <p id="section-boilerplate.3-1.10.2.2.1"><a href="#section-10.2" class="xref">10.2</a>.  <a href="#name-interaction-2" class="xref">Interaction</a><a href="#section-boilerplate.3-1.10.2.2.1" class="pilcrow">¶</a></p>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.11.2.3">
+                <p id="section-boilerplate.3-1.11.2.3.1"><a href="#section-11.3" class="xref">11.3</a>.  <a href="#name-interaction-2" class="xref">Interaction</a><a href="#section-boilerplate.3-1.11.2.3.1" class="pilcrow">¶</a></p>
 </li>
-              <li class="toc ulEmpty" id="section-boilerplate.3-1.10.2.3">
-                <p id="section-boilerplate.3-1.10.2.3.1"><a href="#section-10.3" class="xref">10.3</a>.  <a href="#name-access-token-types" class="xref">Access Token Types</a><a href="#section-boilerplate.3-1.10.2.3.1" class="pilcrow">¶</a></p>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.11.2.4">
+                <p id="section-boilerplate.3-1.11.2.4.1"><a href="#section-11.4" class="xref">11.4</a>.  <a href="#name-access-token-types" class="xref">Access Token Types</a><a href="#section-boilerplate.3-1.11.2.4.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
-</li>
-          <li class="toc ulEmpty" id="section-boilerplate.3-1.11">
-            <p id="section-boilerplate.3-1.11.1"><a href="#section-11" class="xref">11</a>.  <a href="#name-rational" class="xref">Rational</a><a href="#section-boilerplate.3-1.11.1" class="pilcrow">¶</a></p>
 </li>
           <li class="toc ulEmpty" id="section-boilerplate.3-1.12">
-            <p id="section-boilerplate.3-1.12.1"><a href="#section-12" class="xref">12</a>.  <a href="#name-acknowledgments" class="xref">Acknowledgments</a><a href="#section-boilerplate.3-1.12.1" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.3-1.12.1"><a href="#section-12" class="xref">12</a>.  <a href="#name-rational" class="xref">Rational</a><a href="#section-boilerplate.3-1.12.1" class="pilcrow">¶</a></p>
 </li>
           <li class="toc ulEmpty" id="section-boilerplate.3-1.13">
-            <p id="section-boilerplate.3-1.13.1"><a href="#section-13" class="xref">13</a>.  <a href="#name-iana-considerations" class="xref">IANA Considerations</a><a href="#section-boilerplate.3-1.13.1" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.3-1.13.1"><a href="#section-13" class="xref">13</a>.  <a href="#name-acknowledgments" class="xref">Acknowledgments</a><a href="#section-boilerplate.3-1.13.1" class="pilcrow">¶</a></p>
 </li>
           <li class="toc ulEmpty" id="section-boilerplate.3-1.14">
-            <p id="section-boilerplate.3-1.14.1"><a href="#section-14" class="xref">14</a>.  <a href="#name-security-considerations" class="xref">Security Considerations</a><a href="#section-boilerplate.3-1.14.1" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.3-1.14.1"><a href="#section-14" class="xref">14</a>.  <a href="#name-iana-considerations" class="xref">IANA Considerations</a><a href="#section-boilerplate.3-1.14.1" class="pilcrow">¶</a></p>
 </li>
           <li class="toc ulEmpty" id="section-boilerplate.3-1.15">
-            <p id="section-boilerplate.3-1.15.1"><a href="#section-15" class="xref">15</a>.  <a href="#name-references" class="xref">References</a><a href="#section-boilerplate.3-1.15.1" class="pilcrow">¶</a></p>
-<ul class="toc ulEmpty">
-<li class="toc ulEmpty" id="section-boilerplate.3-1.15.2.1">
-                <p id="section-boilerplate.3-1.15.2.1.1"><a href="#section-15.1" class="xref">15.1</a>.  <a href="#name-normative-references" class="xref">Normative References</a><a href="#section-boilerplate.3-1.15.2.1.1" class="pilcrow">¶</a></p>
-</li>
-              <li class="toc ulEmpty" id="section-boilerplate.3-1.15.2.2">
-                <p id="section-boilerplate.3-1.15.2.2.1"><a href="#section-15.2" class="xref">15.2</a>.  <a href="#name-informative-references" class="xref">Informative References</a><a href="#section-boilerplate.3-1.15.2.2.1" class="pilcrow">¶</a></p>
-</li>
-            </ul>
+            <p id="section-boilerplate.3-1.15.1"><a href="#section-15" class="xref">15</a>.  <a href="#name-security-considerations" class="xref">Security Considerations</a><a href="#section-boilerplate.3-1.15.1" class="pilcrow">¶</a></p>
 </li>
           <li class="toc ulEmpty" id="section-boilerplate.3-1.16">
-            <p id="section-boilerplate.3-1.16.1"><a href="#section-appendix.a" class="xref">Appendix A</a>.  <a href="#name-document-history" class="xref">Document History</a><a href="#section-boilerplate.3-1.16.1" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.3-1.16.1"><a href="#section-16" class="xref">16</a>.  <a href="#name-references" class="xref">References</a><a href="#section-boilerplate.3-1.16.1" class="pilcrow">¶</a></p>
 <ul class="toc ulEmpty">
 <li class="toc ulEmpty" id="section-boilerplate.3-1.16.2.1">
-                <p id="section-boilerplate.3-1.16.2.1.1"><a href="#section-a.1" class="xref">A.1</a>.  <a href="#name-draft-hardt-didap-protocol-" class="xref">draft-hardt-DIDAP-protocol-00</a><a href="#section-boilerplate.3-1.16.2.1.1" class="pilcrow">¶</a></p>
+                <p id="section-boilerplate.3-1.16.2.1.1"><a href="#section-16.1" class="xref">16.1</a>.  <a href="#name-normative-references" class="xref">Normative References</a><a href="#section-boilerplate.3-1.16.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.16.2.2">
+                <p id="section-boilerplate.3-1.16.2.2.1"><a href="#section-16.2" class="xref">16.2</a>.  <a href="#name-informative-references" class="xref">Informative References</a><a href="#section-boilerplate.3-1.16.2.2.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </li>
           <li class="toc ulEmpty" id="section-boilerplate.3-1.17">
-            <p id="section-boilerplate.3-1.17.1"><a href="#section-appendix.b" class="xref">Appendix B</a>.  <a href="#name-comparison-with-oauth-20-an" class="xref">Comparison with OAuth 2.0 and OpenID Connect</a><a href="#section-boilerplate.3-1.17.1" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.3-1.17.1"><a href="#section-appendix.a" class="xref">Appendix A</a>.  <a href="#name-document-history" class="xref">Document History</a><a href="#section-boilerplate.3-1.17.1" class="pilcrow">¶</a></p>
 <ul class="toc ulEmpty">
 <li class="toc ulEmpty" id="section-boilerplate.3-1.17.2.1">
-                <p id="section-boilerplate.3-1.17.2.1.1"><a href="#section-b.1" class="xref">B.1</a>.  <a href="#name-differences" class="xref">Differences</a><a href="#section-boilerplate.3-1.17.2.1.1" class="pilcrow">¶</a></p>
-</li>
-              <li class="toc ulEmpty" id="section-boilerplate.3-1.17.2.2">
-                <p id="section-boilerplate.3-1.17.2.2.1"><a href="#section-b.2" class="xref">B.2</a>.  <a href="#name-reused" class="xref">Reused</a><a href="#section-boilerplate.3-1.17.2.2.1" class="pilcrow">¶</a></p>
+                <p id="section-boilerplate.3-1.17.2.1.1"><a href="#section-a.1" class="xref">A.1</a>.  <a href="#name-draft-hardt-didap-protocol-" class="xref">draft-hardt-DIDAP-protocol-00</a><a href="#section-boilerplate.3-1.17.2.1.1" class="pilcrow">¶</a></p>
 </li>
             </ul>
 </li>
           <li class="toc ulEmpty" id="section-boilerplate.3-1.18">
-            <p id="section-boilerplate.3-1.18.1"><a href="#section-appendix.c" class="xref"></a>  <a href="#name-authors-address" class="xref">Author's Address</a><a href="#section-boilerplate.3-1.18.1" class="pilcrow">¶</a></p>
+            <p id="section-boilerplate.3-1.18.1"><a href="#section-appendix.b" class="xref">Appendix B</a>.  <a href="#name-comparison-with-oauth-20-an" class="xref">Comparison with OAuth 2.0 and OpenID Connect</a><a href="#section-boilerplate.3-1.18.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.18.2.1">
+                <p id="section-boilerplate.3-1.18.2.1.1"><a href="#section-b.1" class="xref">B.1</a>.  <a href="#name-differences" class="xref">Differences</a><a href="#section-boilerplate.3-1.18.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.18.2.2">
+                <p id="section-boilerplate.3-1.18.2.2.1"><a href="#section-b.2" class="xref">B.2</a>.  <a href="#name-reused" class="xref">Reused</a><a href="#section-boilerplate.3-1.18.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.19">
+            <p id="section-boilerplate.3-1.19.1"><a href="#section-appendix.c" class="xref"></a>  <a href="#name-authors-address" class="xref">Author's Address</a><a href="#section-boilerplate.3-1.19.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </nav>
@@ -1116,9 +1124,9 @@ table.left {
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">This protocol supports the widely deployed use cases supported by OAuth 2.0, and OpenID Connect. It also supports use cases that are not supported, but have been frequently requested. This protocol addresses many of the security issues in OAuth 2.0 that arise from sending parameters through a redirection through the user agent, by having all parameters be transmitted directly.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">Additionally, the technology landscape has changed since OAuth 2.0 was initially drafted. More interactions happen on mobile devices than PCs. Modern browsers now directly support asymetric cryptographic functions. Standards have emerged and are widely deployed for URL safe tokens.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">Additional use cases are now being served with extensions to OAuth 2.0. Smart devices are authorized to access a user's resources. Web applications that have no server component are prominent. OpenID Connect extended OAuth 2.0 to support authentication and releasing identity claims.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-1">This protocol supports the widely deployed use cases supported by OAuth 2.0, and OpenID Connect, as well as use cases those protocols don't support, but have been frequently requested. This protocol addresses many of the security issues in OAuth 2.0 by having parameters securely sent directly between parties, rather than via a browser redirection.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">The technology landscape has changed since OAuth 2.0 was initially drafted. More interactions happen on mobile devices than PCs. Modern browsers now directly support asymetric cryptographic functions. Standards have emerged for signing and encrypting tokens with rich payloads (JOSE) that are widely deployed.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">Additional use cases are now being served with extensions to OAuth 2.0: OpenID Connect added support for authentication and releasing identity claims; <span>[<a href="#RFC8252" class="xref">RFC8252</a>] added support for native apps; </span><span>[<a href="#RFC8628" class="xref">RFC8628</a>] added support for smart devices; and support for </span><span>[<a href="#browser_based_apps" class="xref">browser_based_apps</a>] is being worked on.</span><a href="#section-1-3" class="pilcrow">¶</a></p>
 <p id="section-1-4">This protocol takes advantage of the new capabilities, simplifies the architectural model, and provides support for all the widely deployed use cases.<a href="#section-1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1156,7 +1164,7 @@ table.left {
             <strong>DS Discovery</strong> The Client discovers the DS end point, keys, supported claims and authorizations, and other capabilities.  Some, or all of this information could be manually preconfigured, or dynamically obtained. DS discovery is out of scope of this document.<a href="#section-2.2-1.1" class="pilcrow">¶</a>
 </li>
           <li id="section-2.2-1.2">
-            <strong>Initiation Request</strong> (<a href="#InitiationRequest" class="xref">Section 4.1</a>) The Client creates a request for authorization to API resources and/or identity claims about the User and sends it to the DS.<a href="#section-2.2-1.2" class="pilcrow">¶</a>
+            <strong>Initiation Request</strong> (<a href="#InitiationRequest" class="xref">Section 4.1</a>) The Client creates a request for authorization to API resources and/or identity claims about the User and sends it with an HTTP POST to the DS endpoint.<a href="#section-2.2-1.2" class="pilcrow">¶</a>
 </li>
           <li id="section-2.2-1.3">
             <strong>Initiation Response</strong>  (<a href="#InitiationResponse" class="xref">Section 4.2</a>) The DS processes the request and determines if it needs to interact with the RO or User. If interaction is not required, the DS returns a completion response, otherwise the DS returns a completion handle. If the DS wants the Client to start the interaction, the DS sends interaction instructions to the Client.<a href="#section-2.2-1.3" class="pilcrow">¶</a>
@@ -1165,16 +1173,16 @@ table.left {
             <strong>Interaction</strong> (<a href="#Interaction" class="xref">Section 5</a>) If the DS sent interaction instructions to the Client, the Client executes them. The DS then interacts with the User and/or RO to obtain authorization.<a href="#section-2.2-1.4" class="pilcrow">¶</a>
 </li>
           <li id="section-2.2-1.5">
-            <strong>Completion Request</strong> (<a href="#CompletionRequest" class="xref">Section 6.2</a>) If the Client received a completion handle, it passes it to the DS endpoint to obtain a completion response. The Client may make the completion request while waiting for the interaction to complete.<a href="#section-2.2-1.5" class="pilcrow">¶</a>
+            <strong>Completion Request</strong> (<a href="#CompletionRequest" class="xref">Section 6.2</a>) If the Client received a completion handle and uri, it creates a completion token and does an HTTP GET of the completion URI, including the completion token in an HTTP header. The Client may make the completion request while waiting for the interaction to complete.<a href="#section-2.2-1.5" class="pilcrow">¶</a>
 </li>
           <li id="section-2.2-1.6">
-            <strong>Completion Response</strong> (<a href="#CompletionResponse" class="xref">Section 6.3</a>) When any required interaction has been completed, the DS provides the Client with authorized RS access tokens and User identity claims. The DS may provide refresh handles for each access token if they are authorized. If proof of possession is required for a resource, the DS will provide certificate parameters for the Client to include in the signed request.<a href="#section-2.2-1.6" class="pilcrow">¶</a>
+            <strong>Completion Response</strong> (<a href="#CompletionResponse" class="xref">Section 6.3</a>) When any required interaction has been completed, the DS responds to the Client with authorized RS access tokens and User identity claims. The DS may provide refresh handles and uris for each access token if they are authorized. If proof of possession is required for a accessing a resource, the DS will provide certificate parameters for the Client to include in the signed request.<a href="#section-2.2-1.6" class="pilcrow">¶</a>
 </li>
           <li id="section-2.2-1.7">
-            <strong>Resource Request</strong> (<a href="#Resource" class="xref">Section 7</a>) The Client uses an access token with the RS, signing it if proof of possession is required.<a href="#section-2.2-1.7" class="pilcrow">¶</a>
+            <strong>Resource Request</strong> (<a href="#Resource" class="xref">Section 7</a>) The Client uses an access token with the RS, or creates a JOSE access token with the access handle if proof of possession is required for access.<a href="#section-2.2-1.7" class="pilcrow">¶</a>
 </li>
           <li id="section-2.2-1.8">
-            <strong>Access Token Refresh</strong> (<a href="#Refresh" class="xref">Section 8</a>) The Client passes the refresh handle to the DS end point and receives a completion response.<a href="#section-2.2-1.8" class="pilcrow">¶</a>
+            <strong>Access Token Refresh</strong> (<a href="#Refresh" class="xref">Section 8</a>) If the Client received a refresh handle and uri, it creates a refresh token and does an HTTP GET of the refresh URI, including the refresh token in an HTTP header.<a href="#section-2.2-1.8" class="pilcrow">¶</a>
 </li>
         </ol>
 </section>
@@ -1188,10 +1196,10 @@ table.left {
       </h2>
 <p id="section-3-1">The Client obtains the following metadata about the DS prior to initiating a request:<a href="#section-3-1" class="pilcrow">¶</a></p>
 <p id="section-3-2"><strong>Endpoint</strong> - the endpoint of the DS.<a href="#section-3-2" class="pilcrow">¶</a></p>
-<p id="section-3-3"><strong>Audience</strong> - the string identifier for the DS. Used in "aud" parameters.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-3"><strong>ds</strong> - the unique string identifier for the DS. Used in "ds" parameters of JOSE tokens.<a href="#section-3-3" class="pilcrow">¶</a></p>
 <p id="section-3-4"><strong>Algorithms</strong> - the asymetric cryptographic algorithms supported by the DS.<a href="#section-3-4" class="pilcrow">¶</a></p>
 <p id="section-3-5"><strong>Authorizations</strong> - the authorizations the Client may ask for, if any.<a href="#section-3-5" class="pilcrow">¶</a></p>
-<p id="section-3-6"><strong>Identity Claims</strong> - the identity claims the client may request, if any, and what public keys the claims will be signed with.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-6"><strong>Identity Claims</strong> - the identity claims the Client may request, if any, and what public keys the claims will be signed with.<a href="#section-3-6" class="pilcrow">¶</a></p>
 <p id="section-3-7"><strong>Initiation Request Encryption</strong> - if the DS requires the the initiation request to be encrypted, and which public key to use.<a href="#section-3-7" class="pilcrow">¶</a></p>
 <p id="section-3-8"><strong>Completion Response Signing</strong> - if the DS will sign the completion response, and the matching public key to verify the signature.<a href="#section-3-8" class="pilcrow">¶</a></p>
 </section>
@@ -1223,7 +1231,7 @@ table.left {
 }
 
 "payload": { 
-    "aud"   :"https://provider.example",
+    "ds"    :"https://ds.example",
     "iat"   :"1579046092",
     "nonce" :"f6a60810-3d07-41ac-81e7-b958c0dd21e4",
     "client": {
@@ -1264,7 +1272,7 @@ table.left {
 }
 
 "payload": { 
-    "aud":"https://provider.example",
+    "ds":"https://ds.example",
     "iat":"1579046092",
     "nonce":"0d1998d8-fbfa-4879-b942-85a88bff1f3b",
     "client": {
@@ -1277,7 +1285,7 @@ table.left {
     "user": {
         "identifiers": {
             "oidc": {
-                "iss": "https://provider.example",
+                "iss": "https://ds.example",
                 "sub": "123456789"
             }
         }
@@ -1294,7 +1302,7 @@ table.left {
           <h4 id="name-payload-attributes">
 <a href="#section-4.1.1" class="section-number selfRef">4.1.1. </a><a href="#name-payload-attributes" class="section-name selfRef">Payload Attributes</a>
           </h4>
-<p id="section-4.1.1-1"><strong>aud</strong> - the audience of the request which is the unique string identifier for the DS per <span>[<a href="#RFC7519" class="xref">RFC7519</a>] section 4.1.3</span><a href="#section-4.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-1"><strong>ds</strong> - the  unique string identifier for the DS<a href="#section-4.1.1-1" class="pilcrow">¶</a></p>
 <p id="section-4.1.1-2"><strong>iat</strong> - the time of the request per <span>[<a href="#RFC7519" class="xref">RFC7519</a>] section 4.1.6.</span><a href="#section-4.1.1-2" class="pilcrow">¶</a></p>
 <p id="section-4.1.1-3"><strong>nonce</strong> - a unique identifier for this request. The completion response MUST contain a matching nonce value.<a href="#section-4.1.1-3" class="pilcrow">¶</a></p>
 </section>
@@ -1342,6 +1350,7 @@ table.left {
 <p id="section-4.1.2-8">[Editor: do we need max pixels or max chars for qrcode interaction? Either passed to DS, or max specified values here?]<a href="#section-4.1.2-8" class="pilcrow">¶</a></p>
 <p id="section-4.1.2-9">[Editor: other possible interaction models could be a <code>webview</code>, where the Client can display a web page, or a <code>message</code>, where the client can only display a text message]<a href="#section-4.1.2-9" class="pilcrow">¶</a></p>
 <p id="section-4.1.2-10">[Editor: we may need to include interaction types for iOS and Android as the mobile OS APIs evolve.]<a href="#section-4.1.2-10" class="pilcrow">¶</a></p>
+<p id="section-4.1.2-11">[Editor: does the Client include parameters if it wants the completion response signed and/or encrypted?]<a href="#section-4.1.2-11" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="user-object">
@@ -1362,7 +1371,7 @@ table.left {
               <strong>oidc</strong> - is an object containing both the <code>iss</code> and <code>sub</code> attributes from an OpenID Connect ID Token per <span>[<a href="#OIDC" class="xref">OIDC</a>] Section 2.</span><a href="#section-4.1.3-3.3" class="pilcrow">¶</a>
 </li>
           </ul>
-<p id="section-4.1.3-4">The user and identifiers object are included to improve the user experience by the DS. The DS MUST authenticate the User independent of these values.<a href="#section-4.1.3-4" class="pilcrow">¶</a></p>
+<p id="section-4.1.3-4">The user and identifiers objects are included to improve the user experience by the DS. The DS MUST authenticate the User independent of these values.<a href="#section-4.1.3-4" class="pilcrow">¶</a></p>
 <p id="section-4.1.3-5">[Editor: include full ID Token? multiple identifiers of the same type?]<a href="#section-4.1.3-5" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1377,13 +1386,13 @@ table.left {
               <strong>oauth_scope</strong> - a string containing the OAuth 2.0 scope per <span>[<a href="#RFC6749" class="xref">RFC6749</a>] section 3.3.</span><a href="#section-4.1.4-2.1" class="pilcrow">¶</a>
 </li>
             <li id="section-4.1.4-2.2">
-              <strong>oauth_rich</strong> - an authorization_details object per <span>[<a href="#RAR" class="xref">RAR</a>]</span><a href="#section-4.1.4-2.2" class="pilcrow">¶</a>
+              <strong>oauth_rich</strong> - an authorization_details object per <span>[<a href="#RAR" class="xref">RAR</a>]. The oauth_rich request is independent of the oauth_scope request.</span><a href="#section-4.1.4-2.2" class="pilcrow">¶</a>
 </li>
             <li id="section-4.1.4-2.3">
               <strong>oauth_rich_list</strong> - an array of authorization_details objects per <span>[<a href="#RAR" class="xref">RAR</a>]</span><a href="#section-4.1.4-2.3" class="pilcrow">¶</a>
 </li>
           </ul>
-<p id="section-4.1.4-3">Only one of oauth_rich and oauth_rich_list SHOULD be included.<a href="#section-4.1.4-3" class="pilcrow">¶</a></p>
+<p id="section-4.1.4-3">The authorizations object MUST contain only one of oauth_rich and oauth_rich_list.<a href="#section-4.1.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="claims-object">
@@ -1441,11 +1450,12 @@ table.left {
 <pre>
 {
     "interaction": {
-        "type"  : "popup",
-        "uri"   : "https://ds.example.com/endpoint/ey5gs32..."
+        "type"   : "popup",
+        "uri"    : "https://ds.example/endpoint/ey5gs32..."
     },
     "completion": {
-        "handle" : "eyJhb958.example.completion.handle.9yf3szM"
+        "handle" : "eyJhb958.example.completion.handle.9yf3szM",
+        "uri"    : "https://ds.example/completion/ey7snHGs"
     }
 }
 </pre>
@@ -1477,10 +1487,13 @@ table.left {
           <h4 id="name-completion-object">
 <a href="#section-4.2.2" class="section-number selfRef">4.2.2. </a><a href="#name-completion-object" class="section-name selfRef">"completion" Object</a>
           </h4>
-<p id="section-4.2.2-1">The completion object MUST have one attribute:<a href="#section-4.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.2-1">The completion object has the following attributes:<a href="#section-4.2.2-1" class="pilcrow">¶</a></p>
 <ul>
 <li id="section-4.2.2-2.1">
               <strong>handle</strong> - the completion handle.<a href="#section-4.2.2-2.1" class="pilcrow">¶</a>
+</li>
+            <li id="section-4.2.2-2.2">
+              <strong>uri</strong> - the completion URI.<a href="#section-4.2.2-2.2" class="pilcrow">¶</a>
 </li>
           </ul>
 </section>
@@ -1538,7 +1551,7 @@ table.left {
       <h2 id="name-completion">
 <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-completion" class="section-name selfRef">Completion</a>
       </h2>
-<p id="section-6-1">If the Client received a completion handle from the DS in the initiation response, it creates a completion token and makes a request to the DS, passing the completion token in the HTTP Authorization header with the JOSE parameter. The DS will then response with the completion response, which are the results of the initiation request unless there was an error or the connection timed out with an HTTP 408 response.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-1">If the Client received a completion handle and uri from the DS in the initiation response, it creates a completion token and makes a GET request to the completion URI, passing the Client constructed completion token in the HTTP Authorization header with the JOSE parameter. The DS will then response with the completion response, which are the results of the initiation request unless there was an error or the connection timed out with an HTTP 408 response.<a href="#section-6-1" class="pilcrow">¶</a></p>
 <div id="creating-a-completion-token">
 <section id="section-6.1">
         <h3 id="name-creating-a-completion-token">
@@ -1546,10 +1559,10 @@ table.left {
         </h3>
 <p id="section-6.1-1">The completion token is a JWS, and the Client uses the same private key and header used to create the initiation request <a href="#InitiationRequest" class="xref">Section 4.1</a>. 
 The payload of the completion token contains:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
-<p id="section-6.1-2"><strong>aud</strong> - the audience of the completion token, which is the unique string identifier for the DS.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+<p id="section-6.1-2"><strong>ds</strong> - the unique string identifier for the DS.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
 <p id="section-6.1-3"><strong>iat</strong> - the time the completion token was created.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
 <p id="section-6.1-4"><strong>jti</strong> - a unique identifier for the completion token per <span>[<a href="#RFC7519" class="xref">RFC7519</a>] section 4.1.7.</span><a href="#section-6.1-4" class="pilcrow">¶</a></p>
-<p id="section-6.1-5"><strong>completion_handle</strong> the completion handle the DS provided the Client in the initiation response <a href="#InitiationResponse" class="xref">Section 4.2</a>.<a href="#section-6.1-5" class="pilcrow">¶</a></p>
+<p id="section-6.1-5"><strong>handle</strong> the completion handle the DS provided the Client in the initiation response <a href="#InitiationResponse" class="xref">Section 4.2</a>.<a href="#section-6.1-5" class="pilcrow">¶</a></p>
 <p id="section-6.1-6">A non-normative example of the header and payload of a completion token follows:<a href="#section-6.1-6" class="pilcrow">¶</a></p>
 <div class="artwork art-text alignLeft" id="section-6.1-7">
 <pre>
@@ -1565,10 +1578,10 @@ The payload of the completion token contains:<a href="#section-6.1-1" class="pil
 }
 
 "payload": {
-    "aud": "https://provider.example",
+    "ds":  "https://ds.example",
     "iat": "1579046092",
     "jti": "f6d72254-4f23-417f-b55e-14ad323b1dc1",
-    "completion_handle": "eyJhb958.example.completion.handle.9yf3szM"
+    "handle": "eyJhb958.example.completion.handle.9yf3szM"
 }
 </pre>
 <a href="#section-6.1-7" class="pilcrow">¶</a>
@@ -1584,9 +1597,9 @@ The payload of the completion token contains:<a href="#section-6.1-1" class="pil
 <p id="section-6.2-2">A non-normative completion request example:<a href="#section-6.2-2" class="pilcrow">¶</a></p>
 <div class="artwork art-text alignLeft" id="section-6.2-3">
 <pre>
-GET /endpoint/eyJhb958.example.completion.handle.9yf3szM HTTP/1.3
-Host: provider.example
-Authorization: JOSE eyJhbGciOiJFU.example.completion.token.haDwskpFDBWwwQD6wA
+GET /completion/ey7snHGs HTTP/1.3
+Host: ds.example
+Authorization: JOSE eyJhbGciOiJFU.example.completion.token.haDwskpFDBW
 </pre>
 <a href="#section-6.2-3" class="pilcrow">¶</a>
 </div>
@@ -1598,7 +1611,7 @@ Authorization: JOSE eyJhbGciOiJFU.example.completion.token.haDwskpFDBWwwQD6wA
 <a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-completion-response" class="section-name selfRef">Completion Response</a>
         </h3>
 <p id="section-6.3-1">The DS verifies the completion token, and if then provides a response according to what the User and/or RO have authorized if required. If no signature or encryption was required, the DS will respond with a JSON document with content-type set to application/JSON.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
-<p id="section-6.3-2">Example non-normative completion response JSON documents for the 2 examples in {#InitiationRequest}:<a href="#section-6.3-2" class="pilcrow">¶</a></p>
+<p id="section-6.3-2">Example non-normative completion response JSON documents for the 2 examples in <a href="#InitiationRequest" class="xref">Section 4.1</a>:<a href="#section-6.3-2" class="pilcrow">¶</a></p>
 <div class="artwork art-text alignLeft" id="section-6.3-3">
 <pre>
 { 
@@ -1606,18 +1619,18 @@ Authorization: JOSE eyJhbGciOiJFU.example.completion.token.haDwskpFDBWwwQD6wA
     "nonce":"f6a60810-3d07-41ac-81e7-b958c0dd21e4",
     "authorizations": {
         "oauth_scope": {
-            "scope"             : "read_contacts",
-            "expires_in"        : "3600"
-            "type"              : "bearer"
-            "access_token"      : "eyJJ2D6.example.access.token.mZf9pTSpA"
+            "scope"         : "read_contacts",
+            "expires_in"    : "3600",
+            "type"          : "bearer",
+            "token"         : "eyJJ2D6.example.access.token.mZf9p"
         }
     },
     "claims": {
         "oidc": {
-            "id_token" : "eyJhbUzI1N.example.id.token.YRw5DhaDwpFDBW",
+            "id_token"      : "eyJhbUzI1N.example.id.token.YRw5DFdbW",
             "userinfo" : {
-                "name"           : "John Doe",
-                "picture"        : "https://photos.example/p/eyJzdkiO"
+                "name"      : "John Doe",
+                "picture"   : "https://photos.example/p/eyJzdkiO"
             }
         }
     }
@@ -1628,13 +1641,18 @@ Authorization: JOSE eyJhbGciOiJFU.example.completion.token.haDwskpFDBWwwQD6wA
     "nonce":"0d1998d8-fbfa-4879-b942-85a88bff1f3b",
     "authorizations": {
         "oauth_scope": {
-            "scope"             : "read_calendar write_calendar",
-            "expires_in"        : "3600"
-            "type"              : "jose"
-            "access_handle"     : "ey.example.access.handle.9yf3szM",
-            "refresh_handle"    : "ey.example.refresh.handle.Jl4FzM",
-            "jwk"               : {
-                "x5u": "https://provider.example/jwk/VBUEOIQA82" 
+            "scope"         : "read_calendar write_calendar",
+            "expires_in"    : "3600",
+            "type"          : "jose",
+            "access": {
+                "handle"    : "ey.example.access.handle.9yf3szM",
+                "jwk": {
+                    "x5u"   : "https://ds.example/jwk/VBUEOIQA82" 
+                }       
+            },
+            "refresh": {
+                "handle"    : "ey.example.refresh.handle.Jl4FzM",
+                "uri"       : "https://ds.example/refresh/eyj34"
             }
         }
     }
@@ -1662,19 +1680,32 @@ Authorization: JOSE eyJhbGciOiJFU.example.completion.token.haDwskpFDBWwwQD6wA
                   <strong>type</strong> - the type of access: "bearer" or "jose". See <a href="#TokenTypes" class="xref">Section 6.3.3</a> for details.<a href="#section-6.3.1-2.1.2.2" class="pilcrow">¶</a>
 </li>
                 <li id="section-6.3.1-2.1.2.3">
-                  <strong>access_token</strong> - an access token for accessing the resource(s) if the token type is "bearer".<a href="#section-6.3.1-2.1.2.3" class="pilcrow">¶</a>
+                  <strong>token</strong> - an access token for accessing the resource(s). Included if the type of access is "bearer".<a href="#section-6.3.1-2.1.2.3" class="pilcrow">¶</a>
 </li>
                 <li id="section-6.3.1-2.1.2.4">
-                  <strong>refresh_handle</strong> - an optional handle to refresh the access token or handle. See <a href="#Refresh" class="xref">Section 8</a><a href="#section-6.3.1-2.1.2.4" class="pilcrow">¶</a>
+                  <strong>expires_in</strong> - an optional value specifying how many seconds until the access token or handle expire.<a href="#section-6.3.1-2.1.2.4" class="pilcrow">¶</a>
 </li>
                 <li id="section-6.3.1-2.1.2.5">
-                  <strong>expires_in</strong> - an optional value specifying how many seconds before the access token or handle will expire.<a href="#section-6.3.1-2.1.2.5" class="pilcrow">¶</a>
+                  <p id="section-6.3.1-2.1.2.5.1"><strong>refresh</strong> - an optional object containing parameters required to refresh an access token or handle.      <a href="#section-6.3.1-2.1.2.5.1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-6.3.1-2.1.2.5.2.1">
+                      <strong>handle</strong> - an refresh handle used to create the refresh token. See <a href="#Refresh" class="xref">Section 8</a><a href="#section-6.3.1-2.1.2.5.2.1" class="pilcrow">¶</a>
+</li>
+                    <li id="section-6.3.1-2.1.2.5.2.2">
+                      <strong>uri</strong> - the refresh uri the Client will use to refresh.<a href="#section-6.3.1-2.1.2.5.2.2" class="pilcrow">¶</a>
+</li>
+                  </ul>
 </li>
                 <li id="section-6.3.1-2.1.2.6">
-                  <strong>access_handle</strong> - an access handle to use to create the JOSE access token. Required if the token type is "jose".<a href="#section-6.3.1-2.1.2.6" class="pilcrow">¶</a>
+                  <p id="section-6.3.1-2.1.2.6.1"><strong>access</strong> - an object containing the parameters needed to access resources requiring proof of possession. Included if the type of access is "jose".      <a href="#section-6.3.1-2.1.2.6.1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-6.3.1-2.1.2.6.2.1">
+                      <strong>handle</strong> - the access handle to use to create the JOSE access token.<a href="#section-6.3.1-2.1.2.6.2.1" class="pilcrow">¶</a>
 </li>
-                <li id="section-6.3.1-2.1.2.7">
-                  <strong>jwk</strong> - the jwk value to use when signing the JOSE access token. Required if the token type is "jose".<a href="#section-6.3.1-2.1.2.7" class="pilcrow">¶</a>
+                    <li id="section-6.3.1-2.1.2.6.2.2">
+                      <strong>jwk</strong> - the jwk value to use when signing the JOSE access token.<a href="#section-6.3.1-2.1.2.6.2.2" class="pilcrow">¶</a>
+</li>
+                  </ul>
 </li>
               </ul>
 </li>
@@ -1748,7 +1779,7 @@ The verified claims the user consented to be released. [Editor: details TBD]<a h
           <h4 id="name-response-encryption">
 <a href="#section-6.3.5" class="section-number selfRef">6.3.5. </a><a href="#name-response-encryption" class="section-name selfRef">Response Encryption</a>
           </h4>
-<p id="section-6.3.5-1">The DS MAY encrypt the response using the public key provided by the Client, using {{JWE}.<a href="#section-6.3.5-1" class="pilcrow">¶</a></p>
+<p id="section-6.3.5-1">The DS MAY encrypt the response using the public key provided by the Client, using JWE per <span>[<a href="#RFC7516" class="xref">RFC7516</a>].</span><a href="#section-6.3.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="error-responses-1">
@@ -1778,7 +1809,7 @@ The verified claims the user consented to be released. [Editor: details TBD]<a h
         <h3 id="name-bearer-token-access">
 <a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-bearer-token-access" class="section-name selfRef">Bearer Token Access</a>
         </h3>
-<p id="section-7.1-1">If the token type in the completion response was "bearer", then the Client can access the resource per Section 2.1 of {RFC6750}<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-1">If the token type in the completion response was "bearer", then the Client can access the resource per Section 2.1 of <span>[<a href="#RFC6750" class="xref">RFC6750</a>]</span><a href="#section-7.1-1" class="pilcrow">¶</a></p>
 <p id="section-7.1-2">A non-normative example follows:<a href="#section-7.1-2" class="pilcrow">¶</a></p>
 <div class="artwork art-text alignLeft" id="section-7.1-3">
 <pre>
@@ -1800,14 +1831,14 @@ Authorization: bearer eyJJ2D6.example.access.token.mZf9pTSpA
     "alg": "ES256",
     "typ": "JOSE",
     "jwk": {
-        "x5u": "https://provider.example/jwk/VBUEOIQA82" 
+        "x5u": "https://ds.example/jwk/VBUEOIQA82" 
     }
 }
 
 "payload": {
-    "iat": "1579046092",
-    "jti": "f6d72254-4f23-417f-b55e-14ad323b1dc1",
-    "access_handle": "ey.example.access.handle.9yf3szM"
+    "iat"    : "1579046092",
+    "jti"    : "f6d72254-4f23-417f-b55e-14ad323b1dc1",
+    "handle" : "ey.example.access.handle.9yf3szM"
 }
 </pre>
 <a href="#section-7.2-2" class="pilcrow">¶</a>
@@ -1815,7 +1846,7 @@ Authorization: bearer eyJJ2D6.example.access.token.mZf9pTSpA
 <p id="section-7.2-3">The payload contains the following attributes:<a href="#section-7.2-3" class="pilcrow">¶</a></p>
 <p id="section-7.2-4"><strong>iat</strong> - the time the JOSE access token was created.<a href="#section-7.2-4" class="pilcrow">¶</a></p>
 <p id="section-7.2-5"><strong>jti</strong> a unique identifier for the JOSE access token per <span>[<a href="#RFC7519" class="xref">RFC7519</a>] section 4.1.7.</span><a href="#section-7.2-5" class="pilcrow">¶</a></p>
-<p id="section-7.2-6"><strong>access_handle</strong> the access handle the DS provided the Client in the completion response <a href="#CompletionResponse" class="xref">Section 6.3</a>.<a href="#section-7.2-6" class="pilcrow">¶</a></p>
+<p id="section-7.2-6"><strong>handle</strong> the access handle the DS provided the Client in the completion response <a href="#CompletionResponse" class="xref">Section 6.3</a>.<a href="#section-7.2-6" class="pilcrow">¶</a></p>
 <p id="section-7.2-7">The Client then sets the HTTP Authorization header in the resource request to have the "jose" parameter, followed by the JOSE access token. A non-normative example follows:<a href="#section-7.2-7" class="pilcrow">¶</a></p>
 <div class="artwork art-text alignLeft" id="section-7.2-8">
 <pre>
@@ -1834,15 +1865,10 @@ Authorization: JOSE eyJhbG.example.token.kwwQb958
       <h2 id="name-access-token-or-handle-refr">
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-access-token-or-handle-refr" class="section-name selfRef">Access Token or Handle Refresh</a>
       </h2>
-<p id="section-8-1">A non-normative refresh request example:<a href="#section-8-1" class="pilcrow">¶</a></p>
-<div class="artwork art-text alignLeft" id="section-8-2">
+<p id="section-8-1">If the Client received a refresh handle and uri from the DS in the initiation response, it creates a refresh token and makes a GET request to the refresh URI, passing the Client constructed refresh token in the HTTP Authorization header with the JOSE parameter. The refresh token is constructed the same as the completion token <a href="#CompletionRequest" class="xref">Section 6.2</a>. The DS will then respond with a refresh response, that is of the same format of the object that contained the refresh handle and uri in the completion response <a href="#CompletionResponse" class="xref">Section 6.3</a>.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-2">A non-normative example of a refresh token header and payload:<a href="#section-8-2" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-8-3">
 <pre>
-GET /endpoint/eyJhb958.example.handle.9yf3szM HTTP/1.3
-Host: provider.example
-Authorization: JOSE eyJhbG.example.refresh.token.kwwQb958
-
-
-
 "header": {
     "alg": "ES256",
     "typ": "JOSE",
@@ -1850,30 +1876,43 @@ Authorization: JOSE eyJhbG.example.refresh.token.kwwQb958
 }
 
 "payload": {
-    "aud": "https://provider.example",
-    "iat": "1579046092",
-    "jti": "332c2348-f9ed-4278-98eb-7e39b20347ee",
-    "refresh_handle": "eyJhb.example.refresh.handle.9yf3szM",
-    "client_id": "di3872h34dkJW"
+    "ds"        : "https://ds.example",
+    "iat"       : "1579046092",
+    "jti"       : "332c2348-f9ed-4278-98eb-7e39b20347ee",
+    "handle"    : "eyJhb.example.refresh.handle.9yf3szM",
 }
 </pre>
-<a href="#section-8-2" class="pilcrow">¶</a>
+<a href="#section-8-3" class="pilcrow">¶</a>
 </div>
-<p id="section-8-3">A non-normative example access handle refresh response:<a href="#section-8-3" class="pilcrow">¶</a></p>
-<div class="artwork art-text alignLeft" id="section-8-4">
+<p id="section-8-4">A non-normative example refresh request:<a href="#section-8-4" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-8-5">
+<pre>
+GET /refresh/eyJhb958 HTTP/1.3
+Host: ds.example
+Authorization: JOSE eyJhbG.example.refresh.token.kwwQb958
+</pre>
+<a href="#section-8-5" class="pilcrow">¶</a>
+</div>
+<p id="section-8-6">A non-normative example access handle refresh response:<a href="#section-8-6" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-8-7">
 <pre>
 {
     "scope"             : "read_calendar write_calendar",
-    "expires_in"        : "3600"
-    "type"              : "jose"
-    "refresh_handle"    : "ey.example.refresh.handle.Jl4FczM",
-    "access_handle"     : "ey.example.access.handle.i3872i34",
-    "jwk"               : {
-        "x5u": "https://provider.example/jwk/VBUEOIQA82" 
+    "expires_in"        : "3600",
+    "type"              : "jose",
+    "access": {
+        "handle"        : "ey.example.access.handle.9yf3iWszM",
+        "jwk": {
+            "x5u"       : "https://ds.example/jwk/VBUEOIQA82" 
+        }       
+    },
+    "refresh": {
+        "handle"        : "ey.example.refresh.handle.4SkjIi",
+        "uri"           : "https://ds.example/refresh/eyJl4FzM"
     }
 }
 </pre>
-<a href="#section-8-4" class="pilcrow">¶</a>
+<a href="#section-8-7" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -1882,145 +1921,187 @@ Authorization: JOSE eyJhbG.example.refresh.token.kwwQb958
       <h2 id="name-client-authentication">
 <a href="#section-9" class="section-number selfRef">9. </a><a href="#name-client-authentication" class="section-name selfRef">Client Authentication</a>
       </h2>
-<p id="section-9-1">The Client uses the same private key to sign the initiation request, the completion token, the refresh token, and the JOSE access token.<a href="#section-9-1" class="pilcrow">¶</a></p>
-<p id="section-9-2">Each instance of a Registered Client MAY have its own private key and then include a certificate or certificate chain, or reference to either, in the JWS header jwk object that binds its public key to the public key the DS has for the Registered Client.<a href="#section-9-2" class="pilcrow">¶</a></p>
-<p id="section-9-3">For JOSE access tokens, the DS creates a certificate containing the Client's public key so that the resource can verify the public key belongs to an authorized Client.<a href="#section-9-3" class="pilcrow">¶</a></p>
+<p id="section-9-1">All calls from the Client to the DS are authenticated with the same private key and JWS header. This Client authenticates by signing the initiation request, the completion token, and the refresh token.<a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-2">When accessing resources that require proof of possession, the Client uses the same private key, but the DS supplied jwk object. The DS supplied jwk object is a certificate or certificate chain with a public key the resource trusts, so that the resource can verify the authorized client, allowing Registered and Unregistered Clients to access proof of possession resources the same way.<a href="#section-9-2" class="pilcrow">¶</a></p>
+<p id="section-9-3">Each instance of a Registered Client MAY have its own private key and then include a certificate or certificate chain, or reference to either, in the JWS header jwk object that binds its public key to the public key the DS has for the Registered Client.<a href="#section-9-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="ds-initiated-authentication-and-authorization">
+<section id="section-10">
+      <h2 id="name-ds-initiated-authentication">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-ds-initiated-authentication" class="section-name selfRef">DS Initiated Authentication and Authorization</a>
+      </h2>
+<p id="section-10-1">[Editor: this is a straw man on how to support DS Initiated authentication, JIT provisioning, and authorization]<a href="#section-10-1" class="pilcrow">¶</a></p>
+<p id="section-10-2">There are a number of user experiences where the User starts at the DS, and then is redirected to the Client, which MUST be a Registered Client.<a href="#section-10-2" class="pilcrow">¶</a></p>
+<ol type="1" start="1" class="normal" id="section-10-3">
+        <li id="section-10-3.1">The User is at the DS and wants to use the Client.<a href="#section-10-3.1" class="pilcrow">¶</a>
+</li>
+        <li id="section-10-3.2">The DS creates a completion handle and uri representing the User, any identity claims the User has consented to be shared with the Client, any authorizations the User or RO have consented to be shared with the Client, and the Client.<a href="#section-10-3.2" class="pilcrow">¶</a>
+</li>
+        <li id="section-10-3.3">The DS redirects the User to a URL the Client has configured to accept DS initiated authentication, passing the completion handle and uri as query parameters "handle" and "uri" respectively.<a href="#section-10-3.3" class="pilcrow">¶</a>
+</li>
+        <li id="section-10-3.4">The Client then creates a completion token and makes a completion request per <a href="#CompletionRequest" class="xref">Section 6.2</a>, and the DS responds per <a href="#CompletionResponse" class="xref">Section 6.3</a>.<a href="#section-10-3.4" class="pilcrow">¶</a>
+</li>
+      </ol>
+<p id="section-10-4">The Client now has the identity claims for the User, and any authorizations. Client can perform just in time provisioning if it is a new User.<a href="#section-10-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="extensibility">
-<section id="section-10">
+<section id="section-11">
       <h2 id="name-extensibility">
-<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-extensibility" class="section-name selfRef">Extensibility</a>
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-extensibility" class="section-name selfRef">Extensibility</a>
       </h2>
-<p id="section-10-1">This standard can be extended in a number of areas.<a href="#section-10-1" class="pilcrow">¶</a></p>
-<div id="initiation-request">
-<section id="section-10.1">
-        <h3 id="name-initiation-request-2">
-<a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-initiation-request-2" class="section-name selfRef">Initiation Request</a>
+<p id="section-11-1">This standard can be extended in a number of areas:<a href="#section-11-1" class="pilcrow">¶</a></p>
+<div id="client-authentication-mechanisms">
+<section id="section-11.1">
+        <h3 id="name-client-authentication-mecha">
+<a href="#section-11.1" class="section-number selfRef">11.1. </a><a href="#name-client-authentication-mecha" class="section-name selfRef">Client Authentication Mechanisms</a>
         </h3>
-<p id="section-10.1-1">An additional top level object could be added to the initiation request payload if the DS can handle delegations other than authorizations or claims.<a href="#section-10.1-1" class="pilcrow">¶</a></p>
+<p id="section-11.1-1">An extension could define other mechanisms for the Client to authenticate. For example COSE for constrained environments using COAP, MTLS, HTTP signing if and when a standard is adopted and deployed.<a href="#section-11.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="initiation-request">
+<section id="section-11.2">
+        <h3 id="name-initiation-request-2">
+<a href="#section-11.2" class="section-number selfRef">11.2. </a><a href="#name-initiation-request-2" class="section-name selfRef">Initiation Request</a>
+        </h3>
+<p id="section-11.2-1">An additional top level object could be added to the initiation request payload if the DS can handle delegations other than authorizations or claims.<a href="#section-11.2-1" class="pilcrow">¶</a></p>
 <div id="client-object-1">
-<section id="section-10.1.1">
+<section id="section-11.2.1">
           <h4 id="name-client-object-2">
-<a href="#section-10.1.1" class="section-number selfRef">10.1.1. </a><a href="#name-client-object-2" class="section-name selfRef">"client" Object</a>
+<a href="#section-11.2.1" class="section-number selfRef">11.2.1. </a><a href="#name-client-object-2" class="section-name selfRef">"client" Object</a>
           </h4>
-<p id="section-10.1.1-1">Other information about the Client that the DS would require related to an extension.<a href="#section-10.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-11.2.1-1">Other information about the Client that the DS would require related to an extension.<a href="#section-11.2.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="user-object-1">
-<section id="section-10.1.2">
+<section id="section-11.2.2">
           <h4 id="name-user-object-2">
-<a href="#section-10.1.2" class="section-number selfRef">10.1.2. </a><a href="#name-user-object-2" class="section-name selfRef">"user" Object</a>
+<a href="#section-11.2.2" class="section-number selfRef">11.2.2. </a><a href="#name-user-object-2" class="section-name selfRef">"user" Object</a>
           </h4>
-<p id="section-10.1.2-1">Other information about the Client that the DS would require related to an extension.<a href="#section-10.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-11.2.2-1">Other information about the Client that the DS would require related to an extension.<a href="#section-11.2.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authorizations-object-2">
-<section id="section-10.1.3">
+<section id="section-11.2.3">
           <h4 id="name-authorizations-object-3">
-<a href="#section-10.1.3" class="section-number selfRef">10.1.3. </a><a href="#name-authorizations-object-3" class="section-name selfRef">"authorizations" Object</a>
+<a href="#section-11.2.3" class="section-number selfRef">11.2.3. </a><a href="#name-authorizations-object-3" class="section-name selfRef">"authorizations" Object</a>
           </h4>
-<p id="section-10.1.3-1">Additional types of authorizations in addition to OAuth 2.0 scopes and RAR.<a href="#section-10.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-11.2.3-1">Additional types of authorizations in addition to OAuth 2.0 scopes and RAR.<a href="#section-11.2.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="claims-object-2">
-<section id="section-10.1.4">
+<section id="section-11.2.4">
           <h4 id="name-claims-object-3">
-<a href="#section-10.1.4" class="section-number selfRef">10.1.4. </a><a href="#name-claims-object-3" class="section-name selfRef">"claims" Object</a>
+<a href="#section-11.2.4" class="section-number selfRef">11.2.4. </a><a href="#name-claims-object-3" class="section-name selfRef">"claims" Object</a>
           </h4>
-<p id="section-10.1.4-1">Additional types of identity claims in addition to OpenID Connect claims and Verified Credentials.<a href="#section-10.1.4-1" class="pilcrow">¶</a></p>
+<p id="section-11.2.4-1">Additional types of identity claims in addition to OpenID Connect claims and Verified Credentials.<a href="#section-11.2.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
 </div>
 <div id="interaction">
-<section id="section-10.2">
+<section id="section-11.3">
         <h3 id="name-interaction-2">
-<a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-interaction-2" class="section-name selfRef">Interaction</a>
+<a href="#section-11.3" class="section-number selfRef">11.3. </a><a href="#name-interaction-2" class="section-name selfRef">Interaction</a>
         </h3>
-<p id="section-10.2-1">Additional mechanisms for the Client to start an interaction with the User.<a href="#section-10.2-1" class="pilcrow">¶</a></p>
+<p id="section-11.3-1">Additional mechanisms for the Client to start an interaction with the User.<a href="#section-11.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="access-token-types">
-<section id="section-10.3">
+<section id="section-11.4">
         <h3 id="name-access-token-types">
-<a href="#section-10.3" class="section-number selfRef">10.3. </a><a href="#name-access-token-types" class="section-name selfRef">Access Token Types</a>
+<a href="#section-11.4" class="section-number selfRef">11.4. </a><a href="#name-access-token-types" class="section-name selfRef">Access Token Types</a>
         </h3>
-<p id="section-10.3-1">Additional mechanisms for the Client to present authorization to a resource.<a href="#section-10.3-1" class="pilcrow">¶</a></p>
+<p id="section-11.4-1">Additional mechanisms for the Client to present authorization to a resource.<a href="#section-11.4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
 </div>
 <div id="rational">
-<section id="section-11">
+<section id="section-12">
       <h2 id="name-rational">
-<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-rational" class="section-name selfRef">Rational</a>
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-rational" class="section-name selfRef">Rational</a>
       </h2>
-<ol type="1" start="1" class="normal" id="section-11-1">
-        <li id="section-11-1.1">
-          <p id="section-11-1.1.1"><strong>Why use JOSE to authenticate the initiation request? Why not a human readable post that uses HTTP signing?</strong><a href="#section-11-1.1.1" class="pilcrow">¶</a></p>
-<p id="section-11-1.1.2">
-There is no HTTP signing standard at this time, and the Client is already creating JOSE tokens for the completion request, refresh request, and proof of possession resource access. A signed token allows a separate of concerns and trust in the implementation of the DS. The signed token can be passed between components that can each independently verify the token and perform actions.<a href="#section-11-1.1.2" class="pilcrow">¶</a></p>
+<ol type="1" start="1" class="normal" id="section-12-1">
+        <li id="section-12-1.1">
+          <p id="section-12-1.1.1"><strong>Why is there only one mechanism for the Client to authenticate with the DS? Why not support other mechanisms?</strong><a href="#section-12-1.1.1" class="pilcrow">¶</a></p>
+<p id="section-12-1.1.2">
+Having choices requires implementers to understand which choice is preferable for them. Having one common mechanism for the Client to authenticate simplifies most implementations. Extensions can specify other mechanisms that are preferable in certain environments.<a href="#section-12-1.1.2" class="pilcrow">¶</a></p>
 </li>
-        <li id="section-11-1.2">
-          <p id="section-11-1.2.1"><strong>Why is there only one mechanism for the Client to authenticate?</strong><a href="#section-11-1.2.1" class="pilcrow">¶</a></p>
-<p id="section-11-1.2.2">
-Having only one mechanism for the Client to authenticate keeps things simpler for the DS, the Client, and the resource (if it is a proof of possession JOSE access). Both Registered Clients, and Unregistered Clients can have a private key, eliminating the public Client issues in OAuth 2.0, as an Unregistered Client can create an ephemeral key pair. Using asymetric cryptography also allows each instance of a Registered Client to have its own private key if it can obtain a certificate binding its public key to the public key the DS has for the Client.<a href="#section-11-1.2.2" class="pilcrow">¶</a></p>
+        <li id="section-12-1.2">
+          <strong>Why is the Client authentication JWS rather than MTLS?</strong>
+ MTLS cannot be used by an Unregistered Client. MTLS requires access below the application layer, that is often not available on some platforms. JWS is done at the application layer. Many DS deployments will be an application behind a proxy performing TLS, and there are risks in the proxy passing on the results of MTLS.<a href="#section-12-1.2" class="pilcrow">¶</a>
 </li>
-        <li id="section-11-1.3">
-          <p id="section-11-1.3.1"><strong>Why does the DS not return any parameters to the Client in the redirect url?</strong><a href="#section-11-1.3.1" class="pilcrow">¶</a></p>
-<p id="section-11-1.3.2">
-The redirection from the Client to the DS is solely for the DS to interact with the User. The redirect from the DS back to the Client, is to allow the Client to resume interactions with the User. The identity of the Client is independent of the URI the DS redirects to. All interaction mechanisms exchange information between the Client and the DS the same way.<a href="#section-11-1.3.2" class="pilcrow">¶</a></p>
+        <li id="section-12-1.3">
+          <strong>Why is the Client authentication JWS rather than HTTP signing?</strong>
+ There is currently no widely deployed HTTP signing standard. Additionally, HTTP signing requires passing all the relevant parts of the HTTP request to downstream services in a DS that may need to independently verify the Client identity.<a href="#section-12-1.3" class="pilcrow">¶</a>
 </li>
-        <li id="section-11-1.4">
-          <strong>Why is it a Delegated Server, not an Authorization Server?</strong>
- This broadens the DS to serve both as an OAuth AS, and an OpenID Connect OpenID Provider, both are servers that have had functionality delegated to them. It also provides extensibility for other delegations. Additionally, it differentiates this protocol from OAuth 2.0 and OpenID Connect.<a href="#section-11-1.4" class="pilcrow">¶</a>
+        <li id="section-12-1.4">
+          <p id="section-12-1.4.1"><strong>What are the advantages of using JWS for the Client to authenticate to the DS and a resource?</strong><a href="#section-12-1.4.1" class="pilcrow">¶</a></p>
+<p id="section-12-1.4.2">
+Both Registered Clients, and Unregistered Clients can have a private key, eliminating the public Client issues in OAuth 2.0, as an Unregistered Client can create an ephemeral key pair. Using asymetric cryptography also allows each instance of a Registered Client to have its own private key if it can obtain a certificate binding its public key to the public key the DS has for the Client. Signed tokens can be passed to downstream components in a DS or resource to enable independent verification of the Client.<a href="#section-12-1.4.2" class="pilcrow">¶</a></p>
 </li>
-        <li id="section-11-1.5">
-          <strong>Why not use bearer tokens for completion and refresh?</strong>
- By requiring the Client to prove possession of it's private key, the completion and refresh tokens are not as sensitive, and the security of the protocol is enhanced as leakage of the tokens does not enable access to functionality. As the Client is creating JOSE token for the initiation request, the same mechanism for completion and refresh tokens is not an implementation burden.<a href="#section-11-1.5" class="pilcrow">¶</a>
+        <li id="section-12-1.5">
+          <p id="section-12-1.5.1"><strong>Why does the DS not return any parameters to the Client in the redirect url?</strong><a href="#section-12-1.5.1" class="pilcrow">¶</a></p>
+<p id="section-12-1.5.2">
+Passing parameters via a browser redirection is the source of many of the security risks in OAuth 2.0. It also presents a challenge for smart devices. In this protocol, the redirection from the Client to the DS is enable the DS to interact with the User, and the redirection back to the Client is to hand back the interaction to the Client. Unlike OAuth 2.0, the identity of the Client is independent of the URI the DS redirects to.<a href="#section-12-1.5.2" class="pilcrow">¶</a></p>
 </li>
-        <li id="section-11-1.6">
-          <p id="section-11-1.6.1"><strong>Why is there not a UserInfo endpoint as there is in OpenID Connect?</strong><a href="#section-11-1.6.1" class="pilcrow">¶</a></p>
-<p id="section-11-1.6.2">
-In OpenID Connect, the UserInfo endpoint allowed access the identity claims independent of the ID Token. Allowing the Client to retrieve claims separate from the ID Token allows the Client to minimize the personal identifiable information in an ID Token that may be managed separately from the other claims. Some Clients may not need the "sub" identifier, and not need an ID Token. This protocol provides both mechanisms in the same call. [Editor: is there some other reason why the UserInfo endpoint was provided in OpenID Connect?]<a href="#section-11-1.6.2" class="pilcrow">¶</a></p>
+        <li id="section-12-1.6">
+          <p id="section-12-1.6.1"><strong>Why is it a Delegated Server, not an Authorization Server?</strong><a href="#section-12-1.6.1" class="pilcrow">¶</a></p>
+<p id="section-12-1.6.2">
+This broadens the DS to serve both as an OAuth AS, and an OpenID Connect OpenID Provider, both are servers that have had functionality delegated to them. It also provides extensibility for other delegations. Additionally, it differentiates a an implementation of this protocol when referencing the server.<a href="#section-12-1.6.2" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-12-1.7">
+          <p id="section-12-1.7.1"><strong>Why not use bearer tokens for completion and refresh?</strong><a href="#section-12-1.7.1" class="pilcrow">¶</a></p>
+<p id="section-12-1.7.2">
+By requiring the Client to prove possession of it's private key, the completion and refresh tokens are not as sensitive, and the security of the protocol is enhanced as leakage of the tokens does not enable access to functionality.<a href="#section-12-1.7.2" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-12-1.8">
+          <p id="section-12-1.8.1"><strong>Why is there not a UserInfo endpoint as there is in OpenID Connect?</strong><a href="#section-12-1.8.1" class="pilcrow">¶</a></p>
+<p id="section-12-1.8.2">
+In OpenID Connect, the UserInfo endpoint allowed access the identity claims independent of the ID Token. Allowing the Client to retrieve claims separate from the ID Token allows the Client to minimize the personal identifiable information in an ID Token that may be managed separately from the other claims. Some Clients may not need the "sub" identifier, and not need an ID Token. This protocol provides both mechanisms in the same call. [Editor: is there some other reason why the UserInfo endpoint was provided in OpenID Connect?]<a href="#section-12-1.8.2" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-12-1.9">
+          <p id="section-12-1.9.1"><strong>Why do is there a Client ID? Could we not use a fingerprint of the public key to identify the Client?</strong><a href="#section-12-1.9.1" class="pilcrow">¶</a></p>
+<p id="section-12-1.9.2">
+When supporting Clients, it is useful to be able to refer to a permanent identifier for a Registered Client. Using a fingerprint or public key to identify the Client has the Client identifier change everytime the key is rotated. A DS logging Client activity will have a single identifier to track a Client.<a href="#section-12-1.9.2" class="pilcrow">¶</a></p>
 </li>
       </ol>
 </section>
 </div>
 <div id="acknowledgments">
-<section id="section-12">
+<section id="section-13">
       <h2 id="name-acknowledgments">
-<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="section-12-1">This draft derives many of its concepts from Justin Richer's Transactional Authorization draft <span>[<a href="#TxAuth" class="xref">TxAuth</a>]</span><a href="#section-12-1" class="pilcrow">¶</a></p>
-<p id="section-12-2">TBC<a href="#section-12-2" class="pilcrow">¶</a></p>
+<p id="section-13-1">This draft derives many of its concepts from Justin Richer's Transactional Authorization draft <span>[<a href="#TxAuth" class="xref">TxAuth</a>]. Thanks to Justin for his strong critique of this draft.</span><a href="#section-13-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">
-<section id="section-13">
+<section id="section-14">
       <h2 id="name-iana-considerations">
-<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+<a href="#section-14" class="section-number selfRef">14. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-13-1">[ JOSE parameter for Authorization HTTP header ]<a href="#section-13-1" class="pilcrow">¶</a></p>
-<p id="section-13-2">TBC<a href="#section-13-2" class="pilcrow">¶</a></p>
+<p id="section-14-1">[ JOSE parameter for Authorization HTTP header ]<a href="#section-14-1" class="pilcrow">¶</a></p>
+<p id="section-14-2">TBC<a href="#section-14-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="security-considerations">
-<section id="section-14">
+<section id="section-15">
       <h2 id="name-security-considerations">
-<a href="#section-14" class="section-number selfRef">14. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+<a href="#section-15" class="section-number selfRef">15. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-14-1">TBC<a href="#section-14-1" class="pilcrow">¶</a></p>
+<p id="section-15-1">TBC<a href="#section-15-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<section id="section-15">
+<section id="section-16">
       <h2 id="name-references">
-<a href="#section-15" class="section-number selfRef">15. </a><a href="#name-references" class="section-name selfRef">References</a>
+<a href="#section-16" class="section-number selfRef">16. </a><a href="#name-references" class="section-name selfRef">References</a>
       </h2>
-<section id="section-15.1">
+<section id="section-16.1">
         <h3 id="name-normative-references">
-<a href="#section-15.1" class="section-number selfRef">15.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+<a href="#section-16.1" class="section-number selfRef">16.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
 <dt id="OIDC">[OIDC]</dt>
@@ -2061,11 +2142,15 @@ In OpenID Connect, the UserInfo endpoint allowed access the identity claims inde
             <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc7519">https://www.rfc-editor.org/info/rfc7519</a>&gt;</span>. </dd>
 </dl>
 </section>
-<section id="section-15.2">
+<section id="section-16.2">
         <h3 id="name-informative-references">
-<a href="#section-15.2" class="section-number selfRef">15.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+<a href="#section-16.2" class="section-number selfRef">16.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
+<dt id="browser_based_apps">[browser_based_apps]</dt>
+        <dd>
+<span class="refAuthor">Parecki, A.</span><span class="refAuthor"> and D. Waite</span>, <span class="refTitle">"OAuth 2.0 for Browser-Based Apps"</span>, <time datetime="2019-09">September 2019</time>
+          <span>, &lt;<a href="https://tools.ietf.org/html/draft-ietf-oauth-browser-based-apps-04">https://tools.ietf.org/html/draft-ietf-oauth-browser-based-apps-04</a>&gt;</span>. </dd>
 <dt id="QR_Code">[QR_Code]</dt>
         <dd>
 <span class="refAuthor"></span>, <span class="refTitle">"ISO/IEC 18004:2015 - Information technology - Automatic identification and data capture techniques - QR Code bar code symbology specification"</span>, <time datetime="2015-02">February 2015</time>
@@ -2073,11 +2158,19 @@ In OpenID Connect, the UserInfo endpoint allowed access the identity claims inde
 <dt id="RAR">[RAR]</dt>
         <dd>
 <span class="refAuthor">Lodderstedt, T.</span><span class="refAuthor">, Richer, J.</span><span class="refAuthor">, and B. Campbell</span>, <span class="refTitle">"OAuth 2.0 Rich Authorization Requests"</span>, <time datetime="2019-11">November 2019</time>
-          <span>, &lt;<a href="https://tools.ietf.org/id/draft-lodderstedt-oauth-rar-03.html">https://tools.ietf.org/id/draft-lodderstedt-oauth-rar-03.html</a>&gt;</span>. </dd>
+          <span>, &lt;<a href="https://tools.ietf.org/html/draft-lodderstedt-oauth-rar-03">https://tools.ietf.org/html/draft-lodderstedt-oauth-rar-03</a>&gt;</span>. </dd>
+<dt id="RFC8252">[RFC8252]</dt>
+        <dd>
+<span class="refAuthor">Denniss, W.</span><span class="refAuthor"> and J. Bradley</span>, <span class="refTitle">"OAuth 2.0 for Native Apps"</span>, <span class="seriesInfo">BCP 212</span>, <span class="seriesInfo">RFC 8252</span>, <span class="seriesInfo">DOI 10.17487/RFC8252</span>, <time datetime="2017-10">October 2017</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc8252">https://www.rfc-editor.org/info/rfc8252</a>&gt;</span>. </dd>
+<dt id="RFC8628">[RFC8628]</dt>
+        <dd>
+<span class="refAuthor">Denniss, W.</span><span class="refAuthor">, Bradley, J.</span><span class="refAuthor">, Jones, M.</span><span class="refAuthor">, and H. Tschofenig</span>, <span class="refTitle">"OAuth 2.0 Device Authorization Grant"</span>, <span class="seriesInfo">RFC 8628</span>, <span class="seriesInfo">DOI 10.17487/RFC8628</span>, <time datetime="2019-08">August 2019</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc8628">https://www.rfc-editor.org/info/rfc8628</a>&gt;</span>. </dd>
 <dt id="TxAuth">[TxAuth]</dt>
         <dd>
 <span class="refAuthor">Richer, J.</span>, <span class="refTitle">"Transactional Authorization"</span>, <time datetime="2019-12">December 2019</time>
-          <span>, &lt;<a href="https://tools.ietf.org/html/draft-richer-transactional-authz-04#section-6">https://tools.ietf.org/html/draft-richer-transactional-authz-04#section-6</a>&gt;</span>. </dd>
+          <span>, &lt;<a href="https://tools.ietf.org/html/draft-richer-transactional-authz-04">https://tools.ietf.org/html/draft-richer-transactional-authz-04</a>&gt;</span>. </dd>
 <dt id="W3C_VC">[W3C_VC]</dt>
       <dd>
 <span class="refAuthor">Sporny, M.</span><span class="refAuthor">, Noble, G.</span><span class="refAuthor">, and D. Chadwick</span>, <span class="refTitle">"Verifiable Credentials Data Model 1.0"</span>, <time datetime="2019-11">November 2019</time>
