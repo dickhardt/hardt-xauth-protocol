@@ -1341,7 +1341,7 @@ table.left {
               </ul>
 </li>
             <li id="section-4.1.2-7.2">
-              <strong>redirect_uri</strong> - this attribute is included if the type is redirect. It is the URI that the Client requests the DS to redirect the User to after the DS has completed interacting with the User. If the Client manages state in URL, then the redirect_uri should contain that state.<a href="#section-4.1.2-7.2" class="pilcrow">¶</a>
+              <strong>redirect_uri</strong> - this attribute is included if the type is redirect. It is the URI that the Client requests the DS to redirect the User to after the DS has completed interacting with the User. If the Client manages state in URLs, then the redirect_uri should contain that state.<a href="#section-4.1.2-7.2" class="pilcrow">¶</a>
 </li>
             <li id="section-4.1.2-7.3">
               <strong>ui_locales</strong> - End-User's preferred languages and scripts for the user interface, represented as a space-separated list of <span>[<a href="#RFC5646" class="xref">RFC5646</a>] language tag values, ordered by preference.</span><a href="#section-4.1.2-7.3" class="pilcrow">¶</a>
@@ -1552,7 +1552,7 @@ table.left {
 <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-completion" class="section-name selfRef">Completion</a>
       </h2>
 <p id="section-6-1">If the Client received a completion handle and uri from the DS in the initiation response, it creates a completion token and makes a GET request to the completion URI, passing the Client constructed completion token in the HTTP Authorization header with the JOSE parameter. The DS will then response with the completion response, which are the results of the initiation request unless there was an error or the connection timed out with an HTTP 408 response.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<div id="creating-a-completion-token">
+<div id="CompletionToken">
 <section id="section-6.1">
         <h3 id="name-creating-a-completion-token">
 <a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-creating-a-completion-token" class="section-name selfRef">Creating a Completion Token</a>
@@ -1593,7 +1593,7 @@ The payload of the completion token contains:<a href="#section-6.1-1" class="pil
         <h3 id="name-completion-request">
 <a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-completion-request" class="section-name selfRef">Completion Request</a>
         </h3>
-<p id="section-6.2-1">The Client creates a completion URL by appending "/" and the completion handle to the DS endpoint. The Client then makes an HTTP Get call to the completion URL, setting the HTTP Authorization header to have the JOSE parameter, followed by the completion token.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-1">The Client then makes an HTTP GET call to the completion uri, setting the HTTP Authorization header to have the JOSE parameter, followed by the completion token.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
 <p id="section-6.2-2">A non-normative completion request example:<a href="#section-6.2-2" class="pilcrow">¶</a></p>
 <div class="artwork art-text alignLeft" id="section-6.2-3">
 <pre>
@@ -1610,7 +1610,7 @@ Authorization: JOSE eyJhbGciOiJFU.example.completion.token.haDwskpFDBW
         <h3 id="name-completion-response">
 <a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-completion-response" class="section-name selfRef">Completion Response</a>
         </h3>
-<p id="section-6.3-1">The DS verifies the completion token, and if then provides a response according to what the User and/or RO have authorized if required. If no signature or encryption was required, the DS will respond with a JSON document with content-type set to application/JSON.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.3-1">The DS verifies the completion token, and then provides a response according to what the User and/or RO have authorized if required. If no signature or encryption was required, the DS will respond with a JSON document with content-type set to application/JSON.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
 <p id="section-6.3-2">Example non-normative completion response JSON documents for the 2 examples in <a href="#InitiationRequest" class="xref">Section 4.1</a>:<a href="#section-6.3-2" class="pilcrow">¶</a></p>
 <div class="artwork art-text alignLeft" id="section-6.3-3">
 <pre>
@@ -1865,9 +1865,11 @@ Authorization: JOSE eyJhbG.example.token.kwwQb958
       <h2 id="name-access-token-or-handle-refr">
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-access-token-or-handle-refr" class="section-name selfRef">Access Token or Handle Refresh</a>
       </h2>
-<p id="section-8-1">If the Client received a refresh handle and uri from the DS in the initiation response, it creates a refresh token and makes a GET request to the refresh URI, passing the Client constructed refresh token in the HTTP Authorization header with the JOSE parameter. The refresh token is constructed the same as the completion token <a href="#CompletionRequest" class="xref">Section 6.2</a>. The DS will then respond with a refresh response, that is of the same format of the object that contained the refresh handle and uri in the completion response <a href="#CompletionResponse" class="xref">Section 6.3</a>.<a href="#section-8-1" class="pilcrow">¶</a></p>
-<p id="section-8-2">A non-normative example of a refresh token header and payload:<a href="#section-8-2" class="pilcrow">¶</a></p>
-<div class="artwork art-text alignLeft" id="section-8-3">
+<p id="section-8-1">If the Client received a refresh handle and uri from the DS in the initiation response, and it wants a fresh access token or handle, it creates a refresh token using the refresh handle in the same manner that the Client creates a completion token <a href="#CompletionToken" class="xref">Section 6.1</a>.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-2">The Client then makes an HTTP GET call to the refresh uri, setting the HTTP Authorization header to have the JOSE parameter, followed by the refresh token.<a href="#section-8-2" class="pilcrow">¶</a></p>
+<p id="section-8-3">The DS will then respond with a refresh response, that is of the same format of the object that contained the refresh handle and uri in the completion response <a href="#CompletionResponse" class="xref">Section 6.3</a>.<a href="#section-8-3" class="pilcrow">¶</a></p>
+<p id="section-8-4">A non-normative example of a refresh token header and payload:<a href="#section-8-4" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-8-5">
 <pre>
 "header": {
     "alg": "ES256",
@@ -1882,19 +1884,19 @@ Authorization: JOSE eyJhbG.example.token.kwwQb958
     "handle"    : "eyJhb.example.refresh.handle.9yf3szM",
 }
 </pre>
-<a href="#section-8-3" class="pilcrow">¶</a>
+<a href="#section-8-5" class="pilcrow">¶</a>
 </div>
-<p id="section-8-4">A non-normative example refresh request:<a href="#section-8-4" class="pilcrow">¶</a></p>
-<div class="artwork art-text alignLeft" id="section-8-5">
+<p id="section-8-6">A non-normative example refresh request:<a href="#section-8-6" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-8-7">
 <pre>
 GET /refresh/eyJhb958 HTTP/1.3
 Host: ds.example
 Authorization: JOSE eyJhbG.example.refresh.token.kwwQb958
 </pre>
-<a href="#section-8-5" class="pilcrow">¶</a>
+<a href="#section-8-7" class="pilcrow">¶</a>
 </div>
-<p id="section-8-6">A non-normative example access handle refresh response:<a href="#section-8-6" class="pilcrow">¶</a></p>
-<div class="artwork art-text alignLeft" id="section-8-7">
+<p id="section-8-8">A non-normative example access handle refresh response:<a href="#section-8-8" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-8-9">
 <pre>
 {
     "scope"             : "read_calendar write_calendar",
@@ -1912,7 +1914,7 @@ Authorization: JOSE eyJhbG.example.refresh.token.kwwQb958
     }
 }
 </pre>
-<a href="#section-8-7" class="pilcrow">¶</a>
+<a href="#section-8-9" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
