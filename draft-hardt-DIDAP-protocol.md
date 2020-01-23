@@ -1,7 +1,7 @@
 ---
 docname: draft-hardt-DIDAP-protocol-00
 title: Delegated Identity and Authorization protocol
-date: 2020-01-22
+date: 2020-01-24
 
 category: std
 ipr: trust200902
