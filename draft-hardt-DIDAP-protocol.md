@@ -276,7 +276,7 @@ The name and uri will be displayed by the DS when prompting for authorization.
     + **redirect** - the Client will redirect the user agent to the interaction URI provided by the DS. The DS will redirect to the redirect_uri when the interaction is completed,
     + **qrcode** - the Client will convert the interaction URI to a QR Code per {{QR Code}} and display it to the User, along with a text message. The User will scan the QR Code and/or follow the message instructions.
 
-+ **redirect_uri** - this attribute is included if the type is redirect. It is the URI that the Client requests the DS to redirect the User to after the DS has completed interacting with the User. If the Client manages state in URL, then the redirect_uri should contain that state.
++ **redirect_uri** - this attribute is included if the type is redirect. It is the URI that the Client requests the DS to redirect the User to after the DS has completed interacting with the User. If the Client manages state in URLs, then the redirect_uri should contain that state.
 
 + **ui_locales** - End-User's preferred languages and scripts for the user interface, represented as a space-separated list of {{RFC5646}} language tag values, ordered by preference.
 
@@ -403,7 +403,7 @@ The Client will create a {{QR Code}} of the uri attribute of the interaction obj
 
 If the Client received a completion handle and uri from the DS in the initiation response, it creates a completion token and makes a GET request to the completion URI, passing the Client constructed completion token in the HTTP Authorization header with the JOSE parameter. The DS will then response with the completion response, which are the results of the initiation request unless there was an error or the connection timed out with an HTTP 408 response.
 
-## Creating a Completion Token
+## Creating a Completion Token {#CompletionToken}
 
 The completion token is a JWS, and the Client uses the same private key and header used to create the initiation request {{InitiationRequest}}. 
 The payload of the completion token contains:
@@ -441,8 +441,7 @@ A non-normative example of the header and payload of a completion token follows:
 
 ## Completion Request {#CompletionRequest}
 
-The Client creates a completion URL by appending "/" and the completion handle to the DS endpoint. The Client then makes an HTTP Get call to the completion URL, setting the HTTP Authorization header to have the JOSE parameter, followed by the completion token.
-
+The Client then makes an HTTP GET call to the completion uri, setting the HTTP Authorization header to have the JOSE parameter, followed by the completion token.
 
 A non-normative completion request example:
 
@@ -452,7 +451,7 @@ A non-normative completion request example:
 
 ## Completion Response {#CompletionResponse}
 
-The DS verifies the completion token, and if then provides a response according to what the User and/or RO have authorized if required. If no signature or encryption was required, the DS will respond with a JSON document with content-type set to application/JSON.
+The DS verifies the completion token, and then provides a response according to what the User and/or RO have authorized if required. If no signature or encryption was required, the DS will respond with a JSON document with content-type set to application/JSON.
 
 Example non-normative completion response JSON documents for the 2 examples in {{InitiationRequest}}:
 
@@ -624,7 +623,12 @@ The Client then sets the HTTP Authorization header in the resource request to ha
 
 # Access Token or Handle Refresh {#Refresh}
 
-If the Client received a refresh handle and uri from the DS in the initiation response, it creates a refresh token and makes a GET request to the refresh URI, passing the Client constructed refresh token in the HTTP Authorization header with the JOSE parameter. The refresh token is constructed the same as the completion token {{CompletionRequest}}. The DS will then respond with a refresh response, that is of the same format of the object that contained the refresh handle and uri in the completion response {{CompletionResponse}}.
+If the Client received a refresh handle and uri from the DS in the initiation response, and it wants a fresh access token or handle, it creates a refresh token using the refresh handle in the same manner that the Client creates a completion token {{CompletionToken}}.
+
+
+The Client then makes an HTTP GET call to the refresh uri, setting the HTTP Authorization header to have the JOSE parameter, followed by the refresh token.
+
+The DS will then respond with a refresh response, that is of the same format of the object that contained the refresh handle and uri in the completion response {{CompletionResponse}}.
 
 A non-normative example of a refresh token header and payload:
 
