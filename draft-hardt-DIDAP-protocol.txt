@@ -1,0 +1,1104 @@
+
+
+
+
+Network Working Group                                      D. Hardt, Ed.
+Internet-Draft                                                SignIn.Org
+Intended status: Standards Track                         20 January 2020
+Expires: 23 July 2020
+
+
+             Delegated Identity and Authorization protocol
+                     draft-hardt-DIDAP-protocol-00
+
+Abstract
+
+   TBD
+
+Note to Readers
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/dickhardt/hardt-DIDAP-protocol
+   (https://github.com/dickhardt/hardt-DIDAP-protocol).
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 23 July 2020.
+
+Copyright Notice
+
+   Copyright (c) 2020 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Simplified BSD License text
+   as described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Simplified BSD License.
+
+Table of Contents
+
+   1.  Introduction
+   2.  Protocol
+       2.1.  Parties
+       2.2.  Sequence
+   3.  Discovery
+   4.  Initiation
+       4.1.  Initiation Request
+             4.1.1.  Payload Attributes
+             4.1.2.  "client" Object
+             4.1.3.  "user" Object
+             4.1.4.  "authorizations" Object
+             4.1.5.  "claims" Object
+             4.1.6.  Payload Signing
+             4.1.7.  Payload Encryption
+       4.2.  Initiation Response
+             4.2.1.  "interaction" Object
+             4.2.2.  "completion" Object
+             4.2.3.  Error Responses
+   5.  Interaction
+       5.1.  popup
+       5.2.  redirect
+       5.3.  qrcode
+   6.  Completion
+       6.1.  Creating a Completion Token
+       6.2.  Completion Request
+       6.3.  Completion Response
+             6.3.1.  "authorizations" Object
+             6.3.2.  "claims" Object
+             6.3.3.  Access Types
+             6.3.4.  Response Signing
+             6.3.5.  Response Encryption
+             6.3.6.  Error Responses
+   7.  Resource Request
+       7.1.  Bearer Token Access
+       7.2.  Proof of Possession Access
+   8.  Access Token or Handle Refresh
+   9.  Client Authentication
+   10.  Extensibility
+       10.1.  Initiation Request
+              10.1.1.  "client" Object
+              10.1.2.  "user" Object
+              10.1.3.  "authorizations" Object
+              10.1.4.  "claims" Object
+       10.2.  Interaction
+       10.3.  Access Token Types
+   11.  Rational
+   12.  Acknowledgments
+   13.  IANA Considerations
+   14.  Security Considerations
+   15.  References
+       15.1.  Normative References
+       15.2.  Informative References
+   Appendix A.  Document History
+       A.1.  draft-hardt-DIDAP-protocol-00
+   Appendix B.  Comparison with OAuth 2.0 and OpenID Connect
+       B.1.  Differences
+       B.2.  Reused
+   Author's Address
+
+1.  Introduction
+
+   Each instance of a Client can generate it's own asymmetric key pair,
+   and keep its private key secret.
+
+   All clients can authenticate themselves. ???
+
+   to be done
+
+   10 years later, ris eof mobile, faster processors.
+
+   Identity and Authorization are often performed by the same system.
+
+   Single interaction with the user
+
+   Rise of mobile phones
+
+   Web Cryptography APIs, a single page app can generate a - no public
+   Clients.
+
+   Asymmetric cryptography.
+
+2.  Protocol
+
+2.1.  Parties
+
+   *  Delegated Server (DS) - provides the Client: authorization to API
+      resources; and/or identity claims about the User.  The DS may
+      require explicit consent from the RO or User to provide these to
+      the Client.
+
+   *  Client - requests authorization to API resources, and/or identity
+      claims about the User.  There are two classes of Clients: those
+      that have previously registered with the DS, and have a client id
+      (Registered Clients), and those that have not (Unregistered
+      Clients).  A User may be interacting with the Client.
+
+   *  User - the person who has delegated making identity claims about
+      themselves to the DS, and is interacting with the Client.
+
+   *  Resource Server (RS) - has API resources that require an access
+      token from the DS for access.
+
+   *  Resource Owner (RO) - owns the RS, and has delegated RS access
+      token creation to the DS.  The RO may be the same entity as the
+      User, or may be a different entity that the DS interacts with
+      independent of the Client.
+
+2.2.  Sequence
+
+   1.  *DS Discovery* The Client discovers the DS end point, keys,
+       supported claims and authorizations, and other capabilities.
+       Some, or all of this information could be manually preconfigured,
+       or dynamically obtained.  DS discovery is out of scope of this
+       document.
+
+   2.  *Initiation Request* (Section 4.1) The Client creates a request
+       for authorization to API resources and/or identity claims about
+       the User and sends it to the DS.
+
+   3.  *Initiation Response* (Section 4.2) The DS processes the request
+       and determines if it needs to interact with the RO or User.  If
+       interaction is not required, the DS returns a completion
+       response, otherwise the DS returns a completion handle.  If the
+       DS wants the Client to start the interaction, the DS sends
+       interaction instructions to the Client.
+
+   4.  *Interaction* (Section 5) If the DS sent interaction instructions
+       to the Client, the Client executes them.  The DS then interacts
+       with the User and/or RO to obtain authorization.
+
+   5.  *Completion Request* (Section 6.2) If the Client received a
+       completion handle, it passes it to the DS endpoint to obtain a
+       completion response.  The Client may make the completion request
+       while waiting for the interaction to complete.
+
+   6.  *Completion Response* (Section 6.3) When any required interaction
+       has been completed, the DS provides the Client with authorized RS
+       access tokens and User identity claims.  The DS may provide
+       refresh handles for each access token if they are authorized.  If
+       proof of possession is required for a resource, the DS will
+       provide certificate parameters for the Client to include in the
+       signed request.
+
+   7.  *Resource Request* (Section 7) The Client uses an access token
+       with the RS, signing it if proof of possession is required.
+
+   8.  *Access Token Refresh* (Section 8) The Client passes the refresh
+       handle to the DS end point and receives a completion response.
+
+3.  Discovery
+
+   The Client obtains the following metadata about the DS prior to
+   initiating a request:
+
+   *Endpoint* - the endpoint of the DS.
+
+   *Audience* - the string identifier for the DS.  Used in "aud"
+   parameters.
+
+   *Algorithms* - the asymetric cryptographic algorithms supported by
+   the DS.
+
+   *Authorizations* - the authorizations the Client may ask for, if any.
+
+   *Identity Claims* - the identity claims the client may request, if
+   any, and what public keys the claims will be signed with.
+
+   *Initiation Request Encryption* - if the DS requires the the
+   initiation request to be encrypted, and which public key to use.
+
+   *Completion Response Signing* - if the DS will sign the completion
+   response, and the matching public key to verify the signature.
+
+4.  Initiation
+
+   The Client initiates a request for authorizations and/or identity
+   claims with an initiation request.
+
+4.1.  Initiation Request
+
+   The Client creates a payload, signs it using JWS [RFC7515], and sends
+   the signed payload to the DS end point using HTTP POST, with a
+   content-type of application/jose.  The payload is a JSON document and
+   MUST include a client object.  The payload MAY include a user object.
+   The payload MUST include an authorizations or claims object, or both.
+
+   Following is a non-normative example of an initiation request JWS
+   header and payload for an Unregistered Client implemented as a single
+   page app (SPA).  The Client wants to interact with the User with a
+   popup and is requesting identity claims about the User and read
+   access to the User's contacts:
+
+   "header": {
+       "alg": "ES256",
+       "typ": "JOSE",
+       "jwk": {
+           "kty":"EC",
+           "crv":"P-256",
+           "x":"Kgl5DJSgLyV-G32osmLhFKxJ97FoMW0dZVEqDG-Cwo4",
+           "y":"GsL4mOM4x2e6iON8BHvRDQ6AgXAPnw0m0SfdlREV7i4"
+       }
+   }
+
+   "payload": {
+       "aud"   :"https://provider.example",
+       "iat"   :"1579046092",
+       "nonce" :"f6a60810-3d07-41ac-81e7-b958c0dd21e4",
+       "client": {
+           "display": {
+               "name"  : "SPA Display Name",
+               "uri"   : "https://spa.example/about"
+           },
+           "interaction": {
+               "type": "popup"
+           }
+       },
+       "authorizations": {
+           "oauth_scope": "read_contacts"
+       },
+       "claims": {
+           "oidc": {
+               "id_token" : {
+                   "email"          : { "essential" : true },
+                   "email_verified" : { "essential" : true }
+               },
+               "userinfo" : {
+                   "name"           : { "essential" : true },
+                   "picture"        : null
+               }
+           }
+       }
+   }
+
+   Following is a non-normative example of an initiation request JWS
+   header and payload for a Registered Client implemented as a backend
+   service with a simple web interface, that has previously
+   authenticated the User, and is requesting additional authorization:
+
+   "header": {
+       "alg": "ES256",
+       "typ": "JOSE",
+       "kid": "1"
+   }
+
+   "payload": {
+       "aud":"https://provider.example",
+       "iat":"1579046092",
+       "nonce":"0d1998d8-fbfa-4879-b942-85a88bff1f3b",
+       "client": {
+           "id": "di3872h34dkJW",
+           "interaction": {
+               "type": "redirect",
+               "uri": "https://web.example/return"
+           }
+       },
+       "user": {
+           "identifiers": {
+               "oidc": {
+                   "iss": "https://provider.example",
+                   "sub": "123456789"
+               }
+           }
+       },
+       "authorizations": {
+           "oauth_scope": "read_calendar write_calendar"
+       }
+   }
+
+4.1.1.  Payload Attributes
+
+   *aud* - the audience of the request which is the unique string
+   identifier for the DS per [RFC7519] section 4.1.3
+
+   *iat* - the time of the request per [RFC7519] section 4.1.6.
+
+   *nonce* - a unique identifier for this request.  The completion
+   response MUST contain a matching nonce value.
+
+4.1.2.  "client" Object
+
+   The client object MUST contain the client_id attribute for Registered
+   Clients, or the display object for Unregistered Clients.  If the
+   Client can interact with the User, then an interaction object is
+   included.
+
+   *client_id* - the identifier the DS has for the Client.
+
+   *display* - the display object contains the following attributes:
+
+   *  *name* - a string that represents the Client
+
+   *  *uri* - a URI representing the Client
+
+   The name and uri will be displayed by the DS when prompting for
+   authorization.
+
+   *interaction* - the interaction object contains the type of
+   interaction the Client will provide the User.  Other attributes are
+   dependent on the interaction type value.
+
+   *  *type* - contains one of the following values.  Types are listed
+      from highest to lowest fidelity.  The interaction URI is the value
+      returned by the DS in the initiation response interaction object
+      Section 4.2.1, if a User interaction is required by the DS.
+
+      -  *popup* - the Client will load the interaction URI in a modal
+         popup window.  The DS will close the window when the
+         interaction is complete.
+
+      -  *redirect* - the Client will redirect the user agent to the
+         interaction URI provided by the DS.  The DS will redirect to
+         the redirect_uri when the interaction is completed,
+
+      -  *qrcode* - the Client will convert the interaction URI to a QR
+         Code per [QR_Code] and display it to the User, along with a
+         text message.  The User will scan the QR Code and/or follow the
+         message instructions.
+
+   *  *redirect_uri* - this attribute is included if the type is
+      redirect.  It is the URI that the Client requests the DS to
+      redirect the User to after the DS has completed interacting with
+      the User.  If the Client manages state in URL, then the
+      redirect_uri should contain that state.
+
+   *  *ui_locales* - End-User's preferred languages and scripts for the
+      user interface, represented as a space-separated list of [RFC5646]
+      language tag values, ordered by preference.
+
+   [Editor: do we need max pixels or max chars for qrcode interaction?
+   Either passed to DS, or max specified values here?]
+
+   [Editor: other possible interaction models could be a "webview",
+   where the Client can display a web page, or a "message", where the
+   client can only display a text message]
+
+   [Editor: we may need to include interaction types for iOS and Android
+   as the mobile OS APIs evolve.]
+
+4.1.3.  "user" Object
+
+   The user object is optional.
+
+   *identifiers* - the identifiers object contains one or more of the
+   following identifiers for the User:
+
+   *  *phone_number* - contains a phone number per Section 5 of
+      [RFC3966].
+
+   *  *email* - contains an email address per [RFC5322].
+
+   *  *oidc* - is an object containing both the "iss" and "sub"
+      attributes from an OpenID Connect ID Token per [OIDC] Section 2.
+
+   The user and identifiers object are included to improve the user
+   experience by the DS.  The DS MUST authenticate the User independent
+   of these values.
+
+   [Editor: include full ID Token? multiple identifiers of the same
+   type?]
+
+4.1.4.  "authorizations" Object
+
+   The optional authorizations object contains a dictionary of resource
+   objects the Client is requesting authorization to access.  The
+   authorizations object may contain one or more of:
+
+   *  *oauth_scope* - a string containing the OAuth 2.0 scope per
+      [RFC6749] section 3.3.
+
+   *  *oauth_rich* - an authorization_details object per [RAR]
+
+   *  *oauth_rich_list* - an array of authorization_details objects per
+      [RAR]
+
+   Only one of oauth_rich and oauth_rich_list SHOULD be included.
+
+4.1.5.  "claims" Object
+
+   The optional claims object contains one or more identity claims being
+   requested.  The claims may contain:
+
+   *  *oidc* - an object that contains one or both of the following
+      objects:
+
+      -  *userinfo* - claims that will be returned as text strings
+
+      -  *id_token* - claims that will be included in the returned ID
+         Token
+
+   The contents of the userinfo and id_token objects are defined by
+   [OIDC] Section 5.  The completion response Section 6.3 will contain,
+   if authorized, the claims requested in the userinfo and id_token
+   objects.  There is no UserInfo endpoint as there is in [OIDC]
+   Section 5.3.
+
+   *  vc - [Editor: define how W3C Verifiable Credentials [W3C_VC] can
+      be requested ]
+
+4.1.6.  Payload Signing
+
+   The initiation request payload is signed per JWS [RFC7515] with the
+   private key matching the public key included, or referenced by the
+   jwk object or kid attribute of the JWS header object.  The resulting
+   JWS [RFC7515] compact serialization token is the body of the HTTP
+   POST to the DS.  An Unregistered Client MUST generate an asymetric
+   key pair and include the public key in the JWS header's jwk object.
+
+4.1.7.  Payload Encryption
+
+   The DS may require the initiation request payload to be encrypted.
+   If so, the JWS signed token is encrypted per JWE [RFC7516] using the
+   public key and algorithm provided by the DS.
+
+4.2.  Initiation Response
+
+   If no interaction is required the DS will return a completion
+   response per Section 6.3.  If the DS wants the Client to start the
+   interaction, the DS will return an HTTP 200 response with a content-
+   type of application/json will include an interaction object.  If an
+   interaction is required, wether started by the Client, or the DS,
+   there MUST be a completion object in the response.
+
+   A non-normative example of an initiation response follows:
+
+   {
+       "interaction": {
+           "type"  : "popup",
+           "uri"   : "https://ds.example.com/endpoint/ey5gs32..."
+       },
+       "completion": {
+           "handle" : "eyJhb958.example.completion.handle.9yf3szM"
+       }
+   }
+
+   [Editor: do we want to allow the DS to optionally return a period of
+   time the Client must wait before making a completion request?  Prefer
+   to keep it simple for client and let the client call when it is
+   ready.]
+
+4.2.1.  "interaction" Object
+
+   uri to redirect to, or popup, or show in QR, or message to be
+   displayed
+
+   If the DS wants the Client to start the interaction, the DS MUST
+   select one of the interaction mechanisms provided by the Client in
+   the initiation request, and include the matching attribute in the
+   interaction object:
+
+   *  *type* - this MUST match the type provided by the Client in the
+      initiation request client.interaction object.
+
+   *  *uri* - the URI to interact with the User per the type.  This may
+      be a temporary short URL if the type is qrcode so that it is easy
+      to scan.
+
+   *  *message* - a text string to display to the User if type is
+      qrcode.
+
+4.2.2.  "completion" Object
+
+   The completion object MUST have one attribute:
+
+   *  *handle* - the completion handle.
+
+4.2.3.  Error Responses
+
+   TBD
+
+5.  Interaction
+
+   If the DS wants the Client to initiate the interaction with the User,
+   then the DS will return an interaction object Section 4.2.1 so that
+   the Client can can hand off interactions with the User to the DS.
+   The Client will initiate the interaction with the User in one of the
+   following ways:
+
+5.1.  popup
+
+   The Client will create a new popup child browser window containing
+   the value of the uri attribute of the interaction object.  [Editor:
+   more details on how to do this]
+
+   The DS will close the window when the interactions with the User are
+   complete.  [Editor: confirm DS can do this still on all browsers, or
+   does Client need to close]
+
+   The DS MAY respond to the completion request Section 6.2 before the
+   popup window has been closed.
+
+5.2.  redirect
+
+   The Client will redirect the User to the value of the uri attribute
+   of the interaction object.  When the DS interactions with the User
+   are complete, the DS will redirect the User to the redirect_uri the
+   Client provided in the initiation request.
+
+   If the Client made a completion request when starting the
+   interaction, the DS MAY respond to the completion request Section 6.2
+   before the User has been redirected back to the Client.
+
+5.3.  qrcode
+
+   The Client will create a [QR_Code] of the uri attribute of the
+   interaction object and display the resulting graphic and the message
+   attribute of the interaction object as a text string.
+
+6.  Completion
+
+   If the Client received a completion handle from the DS in the
+   initiation response, it creates a completion token and makes a
+   request to the DS, passing the completion token in the HTTP
+   Authorization header with the JOSE parameter.  The DS will then
+   response with the completion response, which are the results of the
+   initiation request unless there was an error or the connection timed
+   out with an HTTP 408 response.
+
+6.1.  Creating a Completion Token
+
+   The completion token is a JWS, and the Client uses the same private
+   key and header used to create the initiation request Section 4.1.
+   The payload of the completion token contains:
+
+   *aud* - the audience of the completion token, which is the unique
+   string identifier for the DS.
+
+   *iat* - the time the completion token was created.
+
+   *jti* - a unique identifier for the completion token per [RFC7519]
+   section 4.1.7.
+
+   *completion_handle* the completion handle the DS provided the Client
+   in the initiation response Section 4.2.
+
+   A non-normative example of the header and payload of a completion
+   token follows:
+
+   "header": {
+       "alg": "ES256",
+       "typ": "JOSE",
+       "jwk": {
+           "kty":"EC",
+           "crv":"P-256",
+           "x":"Kgl5DJSgLyV-G32osmLhFKxJ97FoMW0dZVEqDG-Cwo4",
+           "y":"GsL4mOM4x2e6iON8BHvRDQ6AgXAPnw0m0SfdlREV7i4"
+       }
+   }
+
+   "payload": {
+       "aud": "https://provider.example",
+       "iat": "1579046092",
+       "jti": "f6d72254-4f23-417f-b55e-14ad323b1dc1",
+       "completion_handle": "eyJhb958.example.completion.handle.9yf3szM"
+   }
+
+6.2.  Completion Request
+
+   The Client creates a completion URL by appending "/" and the
+   completion handle to the DS endpoint.  The Client then makes an HTTP
+   Get call to the completion URL, setting the HTTP Authorization header
+   to have the JOSE parameter, followed by the completion token.
+
+   A non-normative completion request example:
+
+   GET /endpoint/eyJhb958.example.completion.handle.9yf3szM HTTP/1.3
+   Host: provider.example
+   Authorization: JOSE eyJhbGciOiJFU.example.completion.token.haDwskpFDBWwwQD6wA
+
+6.3.  Completion Response
+
+   The DS verifies the completion token, and if then provides a response
+   according to what the User and/or RO have authorized if required.  If
+   no signature or encryption was required, the DS will respond with a
+   JSON document with content-type set to application/JSON.
+
+   Example non-normative completion response JSON documents for the 2
+   examples in {#InitiationRequest}:
+
+   {
+       "iat":"15790460234",
+       "nonce":"f6a60810-3d07-41ac-81e7-b958c0dd21e4",
+       "authorizations": {
+           "oauth_scope": {
+               "scope"             : "read_contacts",
+               "expires_in"        : "3600"
+               "type"              : "bearer"
+               "access_token"      : "eyJJ2D6.example.access.token.mZf9pTSpA"
+           }
+       },
+       "claims": {
+           "oidc": {
+               "id_token" : "eyJhbUzI1N.example.id.token.YRw5DhaDwpFDBW",
+               "userinfo" : {
+                   "name"           : "John Doe",
+                   "picture"        : "https://photos.example/p/eyJzdkiO"
+               }
+           }
+       }
+   }
+
+   {
+       "iat":"15790460234",
+       "nonce":"0d1998d8-fbfa-4879-b942-85a88bff1f3b",
+       "authorizations": {
+           "oauth_scope": {
+               "scope"             : "read_calendar write_calendar",
+               "expires_in"        : "3600"
+               "type"              : "jose"
+               "access_handle"     : "ey.example.access.handle.9yf3szM",
+               "refresh_handle"    : "ey.example.refresh.handle.Jl4FzM",
+               "jwk"               : {
+                   "x5u": "https://provider.example/jwk/VBUEOIQA82"
+               }
+           }
+       }
+   }
+
+   Details of the JSON document:
+
+   *iat* - the time the response was made.
+
+   *nonce* - the nonce that was included in the initiation request
+   Section 4.1.
+
+6.3.1.  "authorizations" Object
+
+   There is an authorizations object in the completion response if there
+   was an authorizations object in the initiation request.
+
+   *  *oauth_scope* - if there was an oauth_scope object in the
+      initiation request, this object will be returned if some or all of
+      the scopes were authorized
+
+      -  *scope* - the scopes the Client was granted authorization for.
+         This will be all, or a subset, of what was requested.
+
+      -  *type* - the type of access: "bearer" or "jose".  See
+         Section 6.3.3 for details.
+
+      -  *access_token* - an access token for accessing the resource(s)
+         if the token type is "bearer".
+
+      -  *refresh_handle* - an optional handle to refresh the access
+         token or handle.  See Section 8
+
+      -  *expires_in* - an optional value specifying how many seconds
+         before the access token or handle will expire.
+
+      -  *access_handle* - an access handle to use to create the JOSE
+         access token.  Required if the token type is "jose".
+
+      -  *jwk* - the jwk value to use when signing the JOSE access
+         token.  Required if the token type is "jose".
+
+   *  *oauth_rich* - if there was an oauth_rich object in the initiation
+      request, this object will be returned if some or all of the
+      authorization requests were granted.  The contents are the same as
+      the oauth_scope object, except the "scope" parameter is replaced
+      with the details object:
+
+      -  *details* - the authorization details that were granted.
+
+   *  *oauth_rich_list* - if there was an oauth_rich_list object in the
+      initiation request, this object will contain a list matching each
+      item in the list of the initiation request.  Each response will be
+      the same as the oauth_rich object.
+
+6.3.2.  "claims" Object
+
+   There is a claims object in the completion response if there was a
+   claims object in the initiation request.
+
+   *  *oidc*
+
+      -  *userinfo* - a dictionary of the identity claims the user
+         consented to be released, if any.
+
+      -  *id_token* - an OpenID Connect ID Token containing the claims
+         the user consented to be released.
+
+   *  *vc*
+
+      The verified claims the user consented to be released.  [Editor:
+      details TBD]
+
+6.3.3.  Access Types
+
+   There are two types of access:
+
+   *  *bearer* - the DS provides a bearer access token that the Client
+      can use to access resources per Section 7.1.
+
+   *  *jose* - the DS provides an access handle that the Client uses to
+      create a JWS to access resources per Section 7.2.
+
+   The string values of the access types are case insensitive.
+
+6.3.4.  Response Signing
+
+   The DS MAY sign the response with a JWS per [RFC7515] and the private
+   key matching the public key the DS defined as its completion response
+   signing key.
+
+6.3.5.  Response Encryption
+
+   The DS MAY encrypt the response using the public key provided by the
+   Client, using {{JWE}.
+
+6.3.6.  Error Responses
+
+   *  *408* Request Timeout.  The DS may return a 408 code if it wants
+      to terminate the completion request.  The Client SHOULD generate a
+      fresh completion token and make a new completion request.
+
+7.  Resource Request
+
+   Once the Client has an access token or handle, the Client can access
+   protected resources.
+
+7.1.  Bearer Token Access
+
+   If the token type in the completion response was "bearer", then the
+   Client can access the resource per Section 2.1 of {RFC6750}
+
+   A non-normative example follows:
+
+   Authorization: bearer eyJJ2D6.example.access.token.mZf9pTSpA
+
+7.2.  Proof of Possession Access
+
+   If the token type in the completion response was "jose", then the
+   Client creates a JOSE access token for each API call, signing it with
+   its private key, but setting the jwk object in the JWS header to be
+   the jwk value returned in the completion response Section 6.3.  This
+   allows the DS to provide the resource with a certificate binding the
+   Client's private key to the authorization granted.  A non-normative
+   example of the header and payload of the JWS follows:
+
+   "header": {
+       "alg": "ES256",
+       "typ": "JOSE",
+       "jwk": {
+           "x5u": "https://provider.example/jwk/VBUEOIQA82"
+       }
+   }
+
+   "payload": {
+       "iat": "1579046092",
+       "jti": "f6d72254-4f23-417f-b55e-14ad323b1dc1",
+       "access_handle": "ey.example.access.handle.9yf3szM"
+   }
+
+   The payload contains the following attributes:
+
+   *iat* - the time the JOSE access token was created.
+
+   *jti* a unique identifier for the JOSE access token per [RFC7519]
+   section 4.1.7.
+
+   *access_handle* the access handle the DS provided the Client in the
+   completion response Section 6.3.
+
+   The Client then sets the HTTP Authorization header in the resource
+   request to have the "jose" parameter, followed by the JOSE access
+   token.  A non-normative example follows:
+
+   GET /calendar HTTP/1.3
+   Host: calendar.example
+   Authorization: JOSE eyJhbG.example.token.kwwQb958
+
+8.  Access Token or Handle Refresh
+
+   A non-normative refresh request example:
+
+   GET /endpoint/eyJhb958.example.handle.9yf3szM HTTP/1.3
+   Host: provider.example
+   Authorization: JOSE eyJhbG.example.refresh.token.kwwQb958
+
+
+
+   "header": {
+       "alg": "ES256",
+       "typ": "JOSE",
+       "kid": "1"
+   }
+
+   "payload": {
+       "aud": "https://provider.example",
+       "iat": "1579046092",
+       "jti": "332c2348-f9ed-4278-98eb-7e39b20347ee",
+       "refresh_handle": "eyJhb.example.refresh.handle.9yf3szM",
+       "client_id": "di3872h34dkJW"
+   }
+
+   A non-normative example access handle refresh response:
+
+   {
+       "scope"             : "read_calendar write_calendar",
+       "expires_in"        : "3600"
+       "type"              : "jose"
+       "refresh_handle"    : "ey.example.refresh.handle.Jl4FczM",
+       "access_handle"     : "ey.example.access.handle.i3872i34",
+       "jwk"               : {
+           "x5u": "https://provider.example/jwk/VBUEOIQA82"
+       }
+   }
+
+9.  Client Authentication
+
+   The Client uses the same private key to sign the initiation request,
+   the completion token, the refresh token, and the JOSE access token.
+
+   Each instance of a Registered Client MAY have its own private key and
+   then include a certificate or certificate chain, or reference to
+   either, in the JWS header jwk object that binds its public key to the
+   public key the DS has for the Registered Client.
+
+   For JOSE access tokens, the DS creates a certificate containing the
+   Client's public key so that the resource can verify the public key
+   belongs to an authorized Client.
+
+10.  Extensibility
+
+   This standard can be extended in a number of areas.
+
+10.1.  Initiation Request
+
+   An additional top level object could be added to the initiation
+   request payload if the DS can handle delegations other than
+   authorizations or claims.
+
+10.1.1.  "client" Object
+
+   Other information about the Client that the DS would require related
+   to an extension.
+
+10.1.2.  "user" Object
+
+   Other information about the Client that the DS would require related
+   to an extension.
+
+10.1.3.  "authorizations" Object
+
+   Additional types of authorizations in addition to OAuth 2.0 scopes
+   and RAR.
+
+10.1.4.  "claims" Object
+
+   Additional types of identity claims in addition to OpenID Connect
+   claims and Verified Credentials.
+
+10.2.  Interaction
+
+   Additional mechanisms for the Client to start an interaction with the
+   User.
+
+10.3.  Access Token Types
+
+   Additional mechanisms for the Client to present authorization to a
+   resource.
+
+11.  Rational
+
+   1.  *Why use JOSE to authenticate the initiation request?  Why not a
+       human readable post that uses HTTP signing?*
+
+       There is no HTTP signing standard at this time, and the Client is
+       already creating JOSE tokens for the completion request, refresh
+       request, and proof of possession resource access.  A signed token
+       allows a separate of concerns and trust in the implementation of
+       the DS.  The signed token can be passed between components that
+       can each independently verify the token and perform actions.
+
+   2.  *Why is there only one mechanism for the Client to authenticate?*
+
+       Having only one mechanism for the Client to authenticate keeps
+       things simpler for the DS, the Client, and the resource (if it is
+       a proof of possession JOSE access).  Both Registered Clients, and
+       Unregistered Clients can have a private key, eliminating the
+       public Client issues in OAuth 2.0, as an Unregistered Client can
+       create an ephemeral key pair.  Using asymetric cryptography also
+       allows each instance of a Registered Client to have its own
+       private key if it can obtain a certificate binding its public key
+       to the public key the DS has for the Client.
+
+   3.  *Why does the DS not return any parameters to the Client in the
+       redirect url?*
+
+       The redirection from the Client to the DS is solely for the DS to
+       interact with the User.  The redirect from the DS back to the
+       Client, is to allow the Client to resume interactions with the
+       User.  The identity of the Client is independent of the URI the
+       DS redirects to.  All interaction mechanisms exchange information
+       between the Client and the DS the same way.
+
+   4.  *Why is it a Delegated Server, not an Authorization Server?* This
+       broadens the DS to serve both as an OAuth AS, and an OpenID
+       Connect OpenID Provider, both are servers that have had
+       functionality delegated to them.  It also provides extensibility
+       for other delegations.  Additionally, it differentiates this
+       protocol from OAuth 2.0 and OpenID Connect.
+
+   5.  *Why not use bearer tokens for completion and refresh?* By
+       requiring the Client to prove possession of it's private key, the
+       completion and refresh tokens are not as sensitive, and the
+       security of the protocol is enhanced as leakage of the tokens
+       does not enable access to functionality.  As the Client is
+       creating JOSE token for the initiation request, the same
+       mechanism for completion and refresh tokens is not an
+       implementation burden.
+
+   6.  *Why is there not a UserInfo endpoint as there is in OpenID
+       Connect?*
+
+       In OpenID Connect, the UserInfo endpoint allowed access the
+       identity claims independent of the ID Token.  Allowing the Client
+       to retrieve claims separate from the ID Token allows the Client
+       to minimize the personal identifiable information in an ID Token
+       that may be managed separately from the other claims.  Some
+       Clients may not need the "sub" identifier, and not need an ID
+       Token.  This protocol provides both mechanisms in the same call.
+       [Editor: is there some other reason why the UserInfo endpoint was
+       provided in OpenID Connect?]
+
+12.  Acknowledgments
+
+   This draft derives many of its concepts from Justin Richer's
+   Transactional Authorization draft [TxAuth]
+
+   TBC
+
+13.  IANA Considerations
+
+   [ JOSE parameter for Authorization HTTP header ]
+
+   TBC
+
+14.  Security Considerations
+
+   TBC
+
+15.  References
+
+15.1.  Normative References
+
+   [OIDC]     Sakimora, N., Bradley, J., Jones, M., de Medeiros, B., and
+              C. Mortimore, "OpenID Connect Core 1.0", November 2014,
+              <https://openiD.net/specs/openiD-connect-core-1_0.html>.
+
+   [RFC3966]  Schulzrinne, H., "The tel URI for Telephone Numbers",
+              RFC 3966, DOI 10.17487/RFC3966, December 2004,
+              <https://www.rfc-editor.org/info/rfc3966>.
+
+   [RFC5322]  Resnick, P., Ed., "Internet Message Format", RFC 5322,
+              DOI 10.17487/RFC5322, October 2008,
+              <https://www.rfc-editor.org/info/rfc5322>.
+
+   [RFC5646]  Phillips, A., Ed. and M. Davis, Ed., "Tags for Identifying
+              Languages", BCP 47, RFC 5646, DOI 10.17487/RFC5646,
+              September 2009, <https://www.rfc-editor.org/info/rfc5646>.
+
+   [RFC6749]  Hardt, D., Ed., "The OAuth 2.0 Authorization Framework",
+              RFC 6749, DOI 10.17487/RFC6749, October 2012,
+              <https://www.rfc-editor.org/info/rfc6749>.
+
+   [RFC6750]  Jones, M. and D. Hardt, "The OAuth 2.0 Authorization
+              Framework: Bearer Token Usage", RFC 6750,
+              DOI 10.17487/RFC6750, October 2012,
+              <https://www.rfc-editor.org/info/rfc6750>.
+
+   [RFC7515]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
+              Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May
+              2015, <https://www.rfc-editor.org/info/rfc7515>.
+
+   [RFC7516]  Jones, M. and J. Hildebrand, "JSON Web Encryption (JWE)",
+              RFC 7516, DOI 10.17487/RFC7516, May 2015,
+              <https://www.rfc-editor.org/info/rfc7516>.
+
+   [RFC7519]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
+              (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
+              <https://www.rfc-editor.org/info/rfc7519>.
+
+15.2.  Informative References
+
+   [QR_Code]  "ISO/IEC 18004:2015 - Information technology - Automatic
+              identification and data capture techniques - QR Code bar
+              code symbology specification", February 2015,
+              <https://www.iso.org/standard/62021.html>.
+
+   [RAR]      Lodderstedt, T., Richer, J., and B. Campbell, "OAuth 2.0
+              Rich Authorization Requests", November 2019,
+              <https://tools.ietf.org/id/draft-lodderstedt-oauth-rar-
+              03.html>.
+
+   [TxAuth]   Richer, J., "Transactional Authorization", December 2019,
+              <https://tools.ietf.org/html/draft-richer-transactional-
+              authz-04#section-6>.
+
+   [W3C_VC]   Sporny, M., Noble, G., and D. Chadwick, "Verifiable
+              Credentials Data Model 1.0", November 2019,
+              <https://w3c.github.io/vc-data-model/>.
+
+Appendix A.  Document History
+
+A.1.  draft-hardt-DIDAP-protocol-00
+
+   *  Initial version
+
+Appendix B.  Comparison with OAuth 2.0 and OpenID Connect
+
+B.1.  Differences
+
+   The major differences between this protocol and OAuth 2.0 and OpenID
+   Connect are:
+
+   *  The Client uses a private key to authenticate in this protocol
+      instead of the client secret in OAuth 2.0 and OpenID Connect.
+
+   *  The Client initiates the protocol by making a signed request to
+      the DS instead of redirecting the User to the AS.
+
+   *  The Client does not receive any parameters from a redirection of
+      the User back from the AS.
+
+   *  Refreshing an access token requires creating a refresh token from
+      a refresh handle, rather than an authenticated call with a refresh
+      token.
+
+   *  The Client can request identity claims to be returned independent
+      of the ID Token.  There is no UserInfo endpoint to query claims as
+      there is in OpenID Connect.
+
+B.2.  Reused
+
+   *  This protocol reuses the OAuth 2.0 scopes, client ids, access
+      tokens, and API authorization of OAuth 2.0.
+
+   *  This protocol reuses the client ids, claims and ID Token of OpenID
+      Connect.
+
+Author's Address
+
+   Dick Hardt (editor)
+   SignIn.Org
+   ,
+   United States
+
+   Email: dick.hardt@gmail.com

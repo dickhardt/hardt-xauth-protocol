@@ -1,0 +1,2962 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta name="scripts" content="Common,Latin">
+<title>Delegated Identity and Authorization protocol</title>
+<meta name="author" content="Dick Hardt">
+<meta name="description" content="
+       TBD 
+    ">
+<meta name="generator" content="xml2rfc 2.16.3">
+<link rel="alternate" type="application/rfc+xml" href="draft-hardt-DIDAP-protocol.xml">
+<link rel="license" href="#copyright">
+<style type="text/css">@import url('https://martinthomson.github.io/i-d-template/fonts.css');
+
+html {
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --small-font-size: 14.5px;
+}
+body {
+  max-width: 624px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+#title, h1, h2, h3, h4, h5, h6 {
+  font-family: "Cabin Condensed", sans-serif;
+  font-weight: 600;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+#title {
+  padding: 1em 0 0.2em;
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 26px;
+}
+h4, h5, h6 {
+  font-size: 18px;
+  line-height: 22px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+}
+#abstract+p, #abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 18px;
+  line-height: 24px;
+}
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div, span {
+  position: relative;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 1em 2em;
+}
+ol ol, ul ul, ol ul, ul ol {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+ul.compact, .ulCompact,
+ol.compact, .olCompact {
+  line-height: 100%;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl > dd {
+  margin-bottom: .8em;
+  min-height: 1.3em;
+}
+dl.compact > dd, .dlCompact > dd {
+  margin-bottom: 0em;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href].selfRef {
+  color: var(--text-color);
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px 'Oxygen Mono', monospace;
+}
+pre {
+  border: 1px solid var(--line-color);
+  line-height: 17px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+}
+@media screen {
+  pre {
+    display: inline-block;
+    overflow-x: auto;
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  pre + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5em 0.75em;
+}
+th {
+  text-align: left;
+  background-color: #eee;
+}
+tr:nth-child(2n) > td {
+  background-color: var(--background-color);
+}
+tr:nth-child(2n+1) > td {
+  background-color: var(--highlight-color);
+}
+thead+tbody tr:nth-child(2n) > td {
+  background-color: var(--highlight-color);
+}
+thead+tbody tr:nth-child(2n+1) > td {
+  background-color: var(--background-color);
+}
+table caption {
+  font-style: italic;
+  margin: 0.3em 0;
+  padding: 0;
+  text-align: left;
+}
+table p {
+  /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  visibility: hidden;
+  user-select: none;
+}
+a.pilcrow[href] { color: #ddd; }
+a.pilcrow[href]:hover { text-decoration: none; }
+@media screen {
+  :hover > a.pilcrow {
+    visibility: visible;
+  }
+  a.pilcrow:hover {
+    background-color: transparent;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+}
+
+.role {
+  font-variant: all-small-caps;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 8em;
+}
+#identifiers dt {
+  width: var(--identifier-width);
+  margin: 0;
+  clear: left;
+  float: left;
+  text-align: right;
+}
+#identifiers dd {
+  margin: 0 0 0 calc(1em + var(--identifier-width));
+  min-width: 5em;
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+#toc nav ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+#toc nav li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 7em;
+}
+.references dd {
+  margin-left: 8em;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+.index ul {
+  margin: 0 0 0 1em;
+  padding: 0;
+  list-style: none;
+}
+.index ul ul {
+  margin: 0;
+}
+.index li {
+  margin: 0;
+  text-indent: -2em;
+  padding-left: 2em;
+  padding-bottom: 5px;
+}
+.indexIndex {
+  margin: 0.5em 0 1em;
+}
+.index a {
+  font-weight: 700;
+}
+/* make the index two-column on all but the smallest screens */
+@media (min-width: 600px) {
+  .index ul {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  .index ul ul {
+    column-count: 1;
+    column-gap: 0;
+  }
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 600px) {
+  #authors-addresses {
+    display: relative;
+    padding: 32px 0 0;
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #name-authors-addresses {
+    position: absolute;
+    top: 0px;
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+  }
+}
+
+/* temporary notes */
+.rfcEditorRemove::before {
+  position: absolute;
+  top: 0.2em;
+  right: 0.2em;
+  padding: 0.2em;
+  content: "The RFC Editor will remove this note";
+  color: #b76427;
+  background-color: rgba(249, 232, 105, 0.3);
+}
+.rfcEditorRemove {
+  position: relative;
+  padding-top: 1.8em;
+  background-color: rgba(249, 232, 105, 0.3);
+  border-radius: 3px;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 953px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc.active {
+      opacity: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 8px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active nav {
+    display: block;
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin-top: 2px;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 954px) {
+  body {
+    padding-right: 380px;
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  #toc nav > ul  {
+    margin-bottom: 2em;
+  }
+  #toc ul {
+    margin: 0 0 0 4px;
+    font-size: var(--small-font-size);
+  }
+  #toc ul p, #toc ul li {
+    margin: 2px 0;
+    line-height: 22px;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Changes introduced to fix issues found during implementation */
+
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin: 8px 0.5em 0;
+}
+
+/* Fix the dl styling to match the RFC 7992 attributes */
+dl > dt,
+dl.dlParallel > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+
+/* Provide styling for table cell text alignment */
+table td.text-left,
+table th.text-left {
+  text-align: left;
+}
+table td.text-center,
+table th.text-center {
+  text-align: center;
+}
+table td.text-right,
+table th.text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 20em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+table.right {
+ margin-left: auto;
+ margin-right: 0;
+}
+table.center {
+ margin-left: auto;
+ margin-right: auto;
+}
+table.left {
+ margin-left: 0;
+ margin-right: auto;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  dd {
+    page-break-before: avoid;
+  }
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+/* Tweak the bcp14 keyword presentation */
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+</style>
+<link rel="stylesheet" href="rfc-local.css" type="text/css">
+</head>
+<body>
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">Delegated Identity and Authorization protocol</td>
+<td class="right">January 2020</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Hardt</td>
+<td class="center">Expires 23 July 2020</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div class="document-information">
+<dl id="identifiers">
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-hardt-DIDAP-protocol-00</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2020-01-20" class="published">20 January 2020</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Standards Track</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2020-07-23">23 July 2020</time></dd>
+<dt class="label-authors">Author:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">D. Hardt, <span class="editor">Ed.</span>
+</div>
+<div class="org">SignIn.Org</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Delegated Identity and Authorization protocol</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">TBD<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note" id="section-note.1">
+      <h2 id="name-note-to-readers">
+<a href="#name-note-to-readers" class="section-name selfRef">Note to Readers</a>
+      </h2>
+<p id="section-note.1-1">Source for this draft and an issue tracker can be found at
+  <a href="https://github.com/dickhardt/hardt-DIDAP-protocol">https://github.com/dickhardt/hardt-DIDAP-protocol</a>.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.
+        <a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.
+        <a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."
+        <a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 23 July 2020.
+        <a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2020 IETF Trust and the persons identified as the
+            document authors. All rights reserved.
+        <a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Simplified BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Simplified BSD License.
+        <a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-boilerplate.3">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.1">
+            <p id="section-boilerplate.3-1.1.1"><a href="#section-1" class="xref">1</a>.  <a href="#name-introduction" class="xref">Introduction</a><a href="#section-boilerplate.3-1.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.2">
+            <p id="section-boilerplate.3-1.2.1"><a href="#section-2" class="xref">2</a>.  <a href="#name-protocol" class="xref">Protocol</a><a href="#section-boilerplate.3-1.2.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.2.2.1">
+                <p id="section-boilerplate.3-1.2.2.1.1"><a href="#section-2.1" class="xref">2.1</a>.  <a href="#name-parties" class="xref">Parties</a><a href="#section-boilerplate.3-1.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.2.2.2">
+                <p id="section-boilerplate.3-1.2.2.2.1"><a href="#section-2.2" class="xref">2.2</a>.  <a href="#name-sequence" class="xref">Sequence</a><a href="#section-boilerplate.3-1.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.3">
+            <p id="section-boilerplate.3-1.3.1"><a href="#section-3" class="xref">3</a>.  <a href="#name-discovery" class="xref">Discovery</a><a href="#section-boilerplate.3-1.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.4">
+            <p id="section-boilerplate.3-1.4.1"><a href="#section-4" class="xref">4</a>.  <a href="#name-initiation" class="xref">Initiation</a><a href="#section-boilerplate.3-1.4.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.1">
+                <p id="section-boilerplate.3-1.4.2.1.1"><a href="#section-4.1" class="xref">4.1</a>.  <a href="#name-initiation-request" class="xref">Initiation Request</a><a href="#section-boilerplate.3-1.4.2.1.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.1.2.1">
+                    <p id="section-boilerplate.3-1.4.2.1.2.1.1"><a href="#section-4.1.1" class="xref">4.1.1</a>.  <a href="#name-payload-attributes" class="xref">Payload Attributes</a><a href="#section-boilerplate.3-1.4.2.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.1.2.2">
+                    <p id="section-boilerplate.3-1.4.2.1.2.2.1"><a href="#section-4.1.2" class="xref">4.1.2</a>.  <a href="#name-client-object" class="xref">"client" Object</a><a href="#section-boilerplate.3-1.4.2.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.1.2.3">
+                    <p id="section-boilerplate.3-1.4.2.1.2.3.1"><a href="#section-4.1.3" class="xref">4.1.3</a>.  <a href="#name-user-object" class="xref">"user" Object</a><a href="#section-boilerplate.3-1.4.2.1.2.3.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.1.2.4">
+                    <p id="section-boilerplate.3-1.4.2.1.2.4.1"><a href="#section-4.1.4" class="xref">4.1.4</a>.  <a href="#name-authorizations-object" class="xref">"authorizations" Object</a><a href="#section-boilerplate.3-1.4.2.1.2.4.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.1.2.5">
+                    <p id="section-boilerplate.3-1.4.2.1.2.5.1"><a href="#section-4.1.5" class="xref">4.1.5</a>.  <a href="#name-claims-object" class="xref">"claims" Object</a><a href="#section-boilerplate.3-1.4.2.1.2.5.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.1.2.6">
+                    <p id="section-boilerplate.3-1.4.2.1.2.6.1"><a href="#section-4.1.6" class="xref">4.1.6</a>.  <a href="#name-payload-signing" class="xref">Payload Signing</a><a href="#section-boilerplate.3-1.4.2.1.2.6.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.1.2.7">
+                    <p id="section-boilerplate.3-1.4.2.1.2.7.1"><a href="#section-4.1.7" class="xref">4.1.7</a>.  <a href="#name-payload-encryption" class="xref">Payload Encryption</a><a href="#section-boilerplate.3-1.4.2.1.2.7.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.2">
+                <p id="section-boilerplate.3-1.4.2.2.1"><a href="#section-4.2" class="xref">4.2</a>.  <a href="#name-initiation-response" class="xref">Initiation Response</a><a href="#section-boilerplate.3-1.4.2.2.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.2.2.1">
+                    <p id="section-boilerplate.3-1.4.2.2.2.1.1"><a href="#section-4.2.1" class="xref">4.2.1</a>.  <a href="#name-interaction-object" class="xref">"interaction" Object</a><a href="#section-boilerplate.3-1.4.2.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.2.2.2">
+                    <p id="section-boilerplate.3-1.4.2.2.2.2.1"><a href="#section-4.2.2" class="xref">4.2.2</a>.  <a href="#name-completion-object" class="xref">"completion" Object</a><a href="#section-boilerplate.3-1.4.2.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.4.2.2.2.3">
+                    <p id="section-boilerplate.3-1.4.2.2.2.3.1"><a href="#section-4.2.3" class="xref">4.2.3</a>.  <a href="#name-error-responses" class="xref">Error Responses</a><a href="#section-boilerplate.3-1.4.2.2.2.3.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.5">
+            <p id="section-boilerplate.3-1.5.1"><a href="#section-5" class="xref">5</a>.  <a href="#name-interaction" class="xref">Interaction</a><a href="#section-boilerplate.3-1.5.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.5.2.1">
+                <p id="section-boilerplate.3-1.5.2.1.1"><a href="#section-5.1" class="xref">5.1</a>.  <a href="#name-popup" class="xref">popup</a><a href="#section-boilerplate.3-1.5.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.5.2.2">
+                <p id="section-boilerplate.3-1.5.2.2.1"><a href="#section-5.2" class="xref">5.2</a>.  <a href="#name-redirect" class="xref">redirect</a><a href="#section-boilerplate.3-1.5.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.5.2.3">
+                <p id="section-boilerplate.3-1.5.2.3.1"><a href="#section-5.3" class="xref">5.3</a>.  <a href="#name-qrcode" class="xref">qrcode</a><a href="#section-boilerplate.3-1.5.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.6">
+            <p id="section-boilerplate.3-1.6.1"><a href="#section-6" class="xref">6</a>.  <a href="#name-completion" class="xref">Completion</a><a href="#section-boilerplate.3-1.6.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.6.2.1">
+                <p id="section-boilerplate.3-1.6.2.1.1"><a href="#section-6.1" class="xref">6.1</a>.  <a href="#name-creating-a-completion-token" class="xref">Creating a Completion Token</a><a href="#section-boilerplate.3-1.6.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.6.2.2">
+                <p id="section-boilerplate.3-1.6.2.2.1"><a href="#section-6.2" class="xref">6.2</a>.  <a href="#name-completion-request" class="xref">Completion Request</a><a href="#section-boilerplate.3-1.6.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.6.2.3">
+                <p id="section-boilerplate.3-1.6.2.3.1"><a href="#section-6.3" class="xref">6.3</a>.  <a href="#name-completion-response" class="xref">Completion Response</a><a href="#section-boilerplate.3-1.6.2.3.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.6.2.3.2.1">
+                    <p id="section-boilerplate.3-1.6.2.3.2.1.1"><a href="#section-6.3.1" class="xref">6.3.1</a>.  <a href="#name-authorizations-object-2" class="xref">"authorizations" Object</a><a href="#section-boilerplate.3-1.6.2.3.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.6.2.3.2.2">
+                    <p id="section-boilerplate.3-1.6.2.3.2.2.1"><a href="#section-6.3.2" class="xref">6.3.2</a>.  <a href="#name-claims-object-2" class="xref">"claims" Object</a><a href="#section-boilerplate.3-1.6.2.3.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.6.2.3.2.3">
+                    <p id="section-boilerplate.3-1.6.2.3.2.3.1"><a href="#section-6.3.3" class="xref">6.3.3</a>.  <a href="#name-access-types" class="xref">Access Types</a><a href="#section-boilerplate.3-1.6.2.3.2.3.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.6.2.3.2.4">
+                    <p id="section-boilerplate.3-1.6.2.3.2.4.1"><a href="#section-6.3.4" class="xref">6.3.4</a>.  <a href="#name-response-signing" class="xref">Response Signing</a><a href="#section-boilerplate.3-1.6.2.3.2.4.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.6.2.3.2.5">
+                    <p id="section-boilerplate.3-1.6.2.3.2.5.1"><a href="#section-6.3.5" class="xref">6.3.5</a>.  <a href="#name-response-encryption" class="xref">Response Encryption</a><a href="#section-boilerplate.3-1.6.2.3.2.5.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.6.2.3.2.6">
+                    <p id="section-boilerplate.3-1.6.2.3.2.6.1"><a href="#section-6.3.6" class="xref">6.3.6</a>.  <a href="#name-error-responses-2" class="xref">Error Responses</a><a href="#section-boilerplate.3-1.6.2.3.2.6.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.7">
+            <p id="section-boilerplate.3-1.7.1"><a href="#section-7" class="xref">7</a>.  <a href="#name-resource-request" class="xref">Resource Request</a><a href="#section-boilerplate.3-1.7.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.7.2.1">
+                <p id="section-boilerplate.3-1.7.2.1.1"><a href="#section-7.1" class="xref">7.1</a>.  <a href="#name-bearer-token-access" class="xref">Bearer Token Access</a><a href="#section-boilerplate.3-1.7.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.7.2.2">
+                <p id="section-boilerplate.3-1.7.2.2.1"><a href="#section-7.2" class="xref">7.2</a>.  <a href="#name-proof-of-possession-access" class="xref">Proof of Possession Access</a><a href="#section-boilerplate.3-1.7.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.8">
+            <p id="section-boilerplate.3-1.8.1"><a href="#section-8" class="xref">8</a>.  <a href="#name-access-token-or-handle-refr" class="xref">Access Token or Handle Refresh</a><a href="#section-boilerplate.3-1.8.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.9">
+            <p id="section-boilerplate.3-1.9.1"><a href="#section-9" class="xref">9</a>.  <a href="#name-client-authentication" class="xref">Client Authentication</a><a href="#section-boilerplate.3-1.9.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.10">
+            <p id="section-boilerplate.3-1.10.1"><a href="#section-10" class="xref">10</a>.  <a href="#name-extensibility" class="xref">Extensibility</a><a href="#section-boilerplate.3-1.10.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.10.2.1">
+                <p id="section-boilerplate.3-1.10.2.1.1"><a href="#section-10.1" class="xref">10.1</a>.  <a href="#name-initiation-request-2" class="xref">Initiation Request</a><a href="#section-boilerplate.3-1.10.2.1.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.10.2.1.2.1">
+                    <p id="section-boilerplate.3-1.10.2.1.2.1.1"><a href="#section-10.1.1" class="xref">10.1.1</a>.  <a href="#name-client-object-2" class="xref">"client" Object</a><a href="#section-boilerplate.3-1.10.2.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.10.2.1.2.2">
+                    <p id="section-boilerplate.3-1.10.2.1.2.2.1"><a href="#section-10.1.2" class="xref">10.1.2</a>.  <a href="#name-user-object-2" class="xref">"user" Object</a><a href="#section-boilerplate.3-1.10.2.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.10.2.1.2.3">
+                    <p id="section-boilerplate.3-1.10.2.1.2.3.1"><a href="#section-10.1.3" class="xref">10.1.3</a>.  <a href="#name-authorizations-object-3" class="xref">"authorizations" Object</a><a href="#section-boilerplate.3-1.10.2.1.2.3.1" class="pilcrow">¶</a></p>
+</li>
+                  <li class="toc ulEmpty" id="section-boilerplate.3-1.10.2.1.2.4">
+                    <p id="section-boilerplate.3-1.10.2.1.2.4.1"><a href="#section-10.1.4" class="xref">10.1.4</a>.  <a href="#name-claims-object-3" class="xref">"claims" Object</a><a href="#section-boilerplate.3-1.10.2.1.2.4.1" class="pilcrow">¶</a></p>
+</li>
+                </ul>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.10.2.2">
+                <p id="section-boilerplate.3-1.10.2.2.1"><a href="#section-10.2" class="xref">10.2</a>.  <a href="#name-interaction-2" class="xref">Interaction</a><a href="#section-boilerplate.3-1.10.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.10.2.3">
+                <p id="section-boilerplate.3-1.10.2.3.1"><a href="#section-10.3" class="xref">10.3</a>.  <a href="#name-access-token-types" class="xref">Access Token Types</a><a href="#section-boilerplate.3-1.10.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.11">
+            <p id="section-boilerplate.3-1.11.1"><a href="#section-11" class="xref">11</a>.  <a href="#name-rational" class="xref">Rational</a><a href="#section-boilerplate.3-1.11.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.12">
+            <p id="section-boilerplate.3-1.12.1"><a href="#section-12" class="xref">12</a>.  <a href="#name-acknowledgments" class="xref">Acknowledgments</a><a href="#section-boilerplate.3-1.12.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.13">
+            <p id="section-boilerplate.3-1.13.1"><a href="#section-13" class="xref">13</a>.  <a href="#name-iana-considerations" class="xref">IANA Considerations</a><a href="#section-boilerplate.3-1.13.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.14">
+            <p id="section-boilerplate.3-1.14.1"><a href="#section-14" class="xref">14</a>.  <a href="#name-security-considerations" class="xref">Security Considerations</a><a href="#section-boilerplate.3-1.14.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.15">
+            <p id="section-boilerplate.3-1.15.1"><a href="#section-15" class="xref">15</a>.  <a href="#name-references" class="xref">References</a><a href="#section-boilerplate.3-1.15.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.15.2.1">
+                <p id="section-boilerplate.3-1.15.2.1.1"><a href="#section-15.1" class="xref">15.1</a>.  <a href="#name-normative-references" class="xref">Normative References</a><a href="#section-boilerplate.3-1.15.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.15.2.2">
+                <p id="section-boilerplate.3-1.15.2.2.1"><a href="#section-15.2" class="xref">15.2</a>.  <a href="#name-informative-references" class="xref">Informative References</a><a href="#section-boilerplate.3-1.15.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.16">
+            <p id="section-boilerplate.3-1.16.1"><a href="#section-appendix.a" class="xref">Appendix A</a>.  <a href="#name-document-history" class="xref">Document History</a><a href="#section-boilerplate.3-1.16.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.16.2.1">
+                <p id="section-boilerplate.3-1.16.2.1.1"><a href="#section-a.1" class="xref">A.1</a>.  <a href="#name-draft-hardt-didap-protocol-" class="xref">draft-hardt-DIDAP-protocol-00</a><a href="#section-boilerplate.3-1.16.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.17">
+            <p id="section-boilerplate.3-1.17.1"><a href="#section-appendix.b" class="xref">Appendix B</a>.  <a href="#name-comparison-with-oauth-20-an" class="xref">Comparison with OAuth 2.0 and OpenID Connect</a><a href="#section-boilerplate.3-1.17.1" class="pilcrow">¶</a></p>
+<ul class="toc ulEmpty">
+<li class="toc ulEmpty" id="section-boilerplate.3-1.17.2.1">
+                <p id="section-boilerplate.3-1.17.2.1.1"><a href="#section-b.1" class="xref">B.1</a>.  <a href="#name-differences" class="xref">Differences</a><a href="#section-boilerplate.3-1.17.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="toc ulEmpty" id="section-boilerplate.3-1.17.2.2">
+                <p id="section-boilerplate.3-1.17.2.2.1"><a href="#section-b.2" class="xref">B.2</a>.  <a href="#name-reused" class="xref">Reused</a><a href="#section-boilerplate.3-1.17.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty" id="section-boilerplate.3-1.18">
+            <p id="section-boilerplate.3-1.18.1"><a href="#section-appendix.c" class="xref"></a>  <a href="#name-authors-address" class="xref">Author's Address</a><a href="#section-boilerplate.3-1.18.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Each instance of a Client can generate it's own asymmetric key pair, and keep its private key secret.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">All clients can authenticate themselves. ???<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">to be done<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">10 years later, ris eof mobile, faster processors.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">Identity and Authorization are often performed by the same system.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">Single interaction with the user<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-7">Rise of mobile phones<a href="#section-1-7" class="pilcrow">¶</a></p>
+<p id="section-1-8">Web Cryptography APIs, a single page app can generate a - no public Clients.<a href="#section-1-8" class="pilcrow">¶</a></p>
+<p id="section-1-9">Asymmetric cryptography.<a href="#section-1-9" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="protocol">
+<section id="section-2">
+      <h2 id="name-protocol">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-protocol" class="section-name selfRef">Protocol</a>
+      </h2>
+<div id="parties">
+<section id="section-2.1">
+        <h3 id="name-parties">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-parties" class="section-name selfRef">Parties</a>
+        </h3>
+<ul>
+<li id="section-2.1-1.1">Delegated Server (DS) - provides the Client: authorization to API resources; and/or identity claims about the User. The DS may require explicit consent from the RO or User to provide these to the Client.<a href="#section-2.1-1.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.1-1.2">Client - requests authorization to API resources, and/or identity claims about the User. There are two classes of Clients: those that have previously registered with the DS, and have a client id (Registered Clients), and those that have not (Unregistered Clients). A User may be interacting with the Client.<a href="#section-2.1-1.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.1-1.3">User - the person who has delegated making identity claims about themselves to the DS, and is interacting with the Client.<a href="#section-2.1-1.3" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.1-1.4">Resource Server (RS) - has API resources that require an access token from the DS for access.<a href="#section-2.1-1.4" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.1-1.5">Resource Owner (RO) - owns the RS, and has delegated RS access token creation to the DS. The RO may be the same entity as the User, or may be a different entity that the DS interacts with independent of the Client.<a href="#section-2.1-1.5" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+</div>
+<div id="sequence">
+<section id="section-2.2">
+        <h3 id="name-sequence">
+<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-sequence" class="section-name selfRef">Sequence</a>
+        </h3>
+<ol type="1" start="1" class="normal" id="section-2.2-1">
+          <li id="section-2.2-1.1">
+            <strong>DS Discovery</strong> The Client discovers the DS end point, keys, supported claims and authorizations, and other capabilities.  Some, or all of this information could be manually preconfigured, or dynamically obtained. DS discovery is out of scope of this document.<a href="#section-2.2-1.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.2-1.2">
+            <strong>Initiation Request</strong> (<a href="#InitiationRequest" class="xref">Section 4.1</a>) The Client creates a request for authorization to API resources and/or identity claims about the User and sends it to the DS.<a href="#section-2.2-1.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.2-1.3">
+            <strong>Initiation Response</strong>  (<a href="#InitiationResponse" class="xref">Section 4.2</a>) The DS processes the request and determines if it needs to interact with the RO or User. If interaction is not required, the DS returns a completion response, otherwise the DS returns a completion handle. If the DS wants the Client to start the interaction, the DS sends interaction instructions to the Client.<a href="#section-2.2-1.3" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.2-1.4">
+            <strong>Interaction</strong> (<a href="#Interaction" class="xref">Section 5</a>) If the DS sent interaction instructions to the Client, the Client executes them. The DS then interacts with the User and/or RO to obtain authorization.<a href="#section-2.2-1.4" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.2-1.5">
+            <strong>Completion Request</strong> (<a href="#CompletionRequest" class="xref">Section 6.2</a>) If the Client received a completion handle, it passes it to the DS endpoint to obtain a completion response. The Client may make the completion request while waiting for the interaction to complete.<a href="#section-2.2-1.5" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.2-1.6">
+            <strong>Completion Response</strong> (<a href="#CompletionResponse" class="xref">Section 6.3</a>) When any required interaction has been completed, the DS provides the Client with authorized RS access tokens and User identity claims. The DS may provide refresh handles for each access token if they are authorized. If proof of possession is required for a resource, the DS will provide certificate parameters for the Client to include in the signed request.<a href="#section-2.2-1.6" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.2-1.7">
+            <strong>Resource Request</strong> (<a href="#Resource" class="xref">Section 7</a>) The Client uses an access token with the RS, signing it if proof of possession is required.<a href="#section-2.2-1.7" class="pilcrow">¶</a>
+</li>
+          <li id="section-2.2-1.8">
+            <strong>Access Token Refresh</strong> (<a href="#Refresh" class="xref">Section 8</a>) The Client passes the refresh handle to the DS end point and receives a completion response.<a href="#section-2.2-1.8" class="pilcrow">¶</a>
+</li>
+        </ol>
+</section>
+</div>
+</section>
+</div>
+<div id="discovery">
+<section id="section-3">
+      <h2 id="name-discovery">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-discovery" class="section-name selfRef">Discovery</a>
+      </h2>
+<p id="section-3-1">The Client obtains the following metadata about the DS prior to initiating a request:<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2"><strong>Endpoint</strong> - the endpoint of the DS.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-3"><strong>Audience</strong> - the string identifier for the DS. Used in "aud" parameters.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-4"><strong>Algorithms</strong> - the asymetric cryptographic algorithms supported by the DS.<a href="#section-3-4" class="pilcrow">¶</a></p>
+<p id="section-3-5"><strong>Authorizations</strong> - the authorizations the Client may ask for, if any.<a href="#section-3-5" class="pilcrow">¶</a></p>
+<p id="section-3-6"><strong>Identity Claims</strong> - the identity claims the client may request, if any, and what public keys the claims will be signed with.<a href="#section-3-6" class="pilcrow">¶</a></p>
+<p id="section-3-7"><strong>Initiation Request Encryption</strong> - if the DS requires the the initiation request to be encrypted, and which public key to use.<a href="#section-3-7" class="pilcrow">¶</a></p>
+<p id="section-3-8"><strong>Completion Response Signing</strong> - if the DS will sign the completion response, and the matching public key to verify the signature.<a href="#section-3-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="initiation">
+<section id="section-4">
+      <h2 id="name-initiation">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-initiation" class="section-name selfRef">Initiation</a>
+      </h2>
+<p id="section-4-1">The Client initiates a request for authorizations and/or identity claims with an initiation request.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<div id="InitiationRequest">
+<section id="section-4.1">
+        <h3 id="name-initiation-request">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-initiation-request" class="section-name selfRef">Initiation Request</a>
+        </h3>
+<p id="section-4.1-1">The Client creates a payload, signs it using JWS <span>[<a href="#RFC7515" class="xref">RFC7515</a>], and sends the signed payload to the DS end point using HTTP POST, with a content-type of application/jose. The payload is a JSON document and MUST include a client object. The payload MAY include a user object. The payload MUST include an authorizations or claims object, or both.</span><a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2">Following is a non-normative example of an initiation request JWS header and payload for an Unregistered Client implemented as a single page app (SPA). The Client wants to interact with the User with a popup and is requesting identity claims about the User and read access to the User's contacts:<a href="#section-4.1-2" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-4.1-3">
+<pre>
+"header": {
+    "alg": "ES256",
+    "typ": "JOSE",
+    "jwk": {
+        "kty":"EC",
+        "crv":"P-256",
+        "x":"Kgl5DJSgLyV-G32osmLhFKxJ97FoMW0dZVEqDG-Cwo4",
+        "y":"GsL4mOM4x2e6iON8BHvRDQ6AgXAPnw0m0SfdlREV7i4"
+    }
+}
+
+"payload": { 
+    "aud"   :"https://provider.example",
+    "iat"   :"1579046092",
+    "nonce" :"f6a60810-3d07-41ac-81e7-b958c0dd21e4",
+    "client": {
+        "display": {
+            "name"  : "SPA Display Name",
+            "uri"   : "https://spa.example/about"
+        },
+        "interaction": {
+            "type": "popup"
+        }
+    },
+    "authorizations": {
+        "oauth_scope": "read_contacts"
+    },
+    "claims": {
+        "oidc": {
+            "id_token" : {
+                "email"          : { "essential" : true },
+                "email_verified" : { "essential" : true }
+            },
+            "userinfo" : {
+                "name"           : { "essential" : true },
+                "picture"        : null
+            }
+        }
+    }
+}
+</pre>
+<a href="#section-4.1-3" class="pilcrow">¶</a>
+</div>
+<p id="section-4.1-4">Following is a non-normative example of an initiation request JWS header and payload for a Registered Client implemented as a backend service with a simple web interface, that has previously authenticated the User, and is requesting additional authorization:<a href="#section-4.1-4" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-4.1-5">
+<pre>
+"header": {
+    "alg": "ES256",
+    "typ": "JOSE",
+    "kid": "1"
+}
+
+"payload": { 
+    "aud":"https://provider.example",
+    "iat":"1579046092",
+    "nonce":"0d1998d8-fbfa-4879-b942-85a88bff1f3b",
+    "client": {
+        "id": "di3872h34dkJW",
+        "interaction": {
+            "type": "redirect",
+            "uri": "https://web.example/return"
+        }
+    },
+    "user": {
+        "identifiers": {
+            "oidc": {
+                "iss": "https://provider.example",
+                "sub": "123456789"
+            }
+        }
+    },
+    "authorizations": {
+        "oauth_scope": "read_calendar write_calendar"
+    }
+}
+</pre>
+<a href="#section-4.1-5" class="pilcrow">¶</a>
+</div>
+<div id="payload-attributes">
+<section id="section-4.1.1">
+          <h4 id="name-payload-attributes">
+<a href="#section-4.1.1" class="section-number selfRef">4.1.1. </a><a href="#name-payload-attributes" class="section-name selfRef">Payload Attributes</a>
+          </h4>
+<p id="section-4.1.1-1"><strong>aud</strong> - the audience of the request which is the unique string identifier for the DS per <span>[<a href="#RFC7519" class="xref">RFC7519</a>] section 4.1.3</span><a href="#section-4.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-2"><strong>iat</strong> - the time of the request per <span>[<a href="#RFC7519" class="xref">RFC7519</a>] section 4.1.6.</span><a href="#section-4.1.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.1.1-3"><strong>nonce</strong> - a unique identifier for this request. The completion response MUST contain a matching nonce value.<a href="#section-4.1.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="client-object">
+<section id="section-4.1.2">
+          <h4 id="name-client-object">
+<a href="#section-4.1.2" class="section-number selfRef">4.1.2. </a><a href="#name-client-object" class="section-name selfRef">"client" Object</a>
+          </h4>
+<p id="section-4.1.2-1">The client object MUST contain the client_id attribute for Registered Clients, or the display object for Unregistered Clients. If the Client can interact with the User, then an interaction object is included.<a href="#section-4.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.2-2"><strong>client_id</strong> - the identifier the DS has for the Client.<a href="#section-4.1.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.1.2-3"><strong>display</strong> - the display object contains the following attributes:<a href="#section-4.1.2-3" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-4.1.2-4.1">
+              <strong>name</strong> - a string that represents the Client<a href="#section-4.1.2-4.1" class="pilcrow">¶</a>
+</li>
+            <li id="section-4.1.2-4.2">
+              <strong>uri</strong> - a URI representing the Client<a href="#section-4.1.2-4.2" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-4.1.2-5">The name and uri will be displayed by the DS when prompting for authorization.<a href="#section-4.1.2-5" class="pilcrow">¶</a></p>
+<p id="section-4.1.2-6"><strong>interaction</strong> - the interaction object contains the type of interaction the Client will provide the User. Other attributes are dependent on the interaction type value.<a href="#section-4.1.2-6" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-4.1.2-7.1">
+              <p id="section-4.1.2-7.1.1"><strong>type</strong> - contains one of the following values. Types are listed from highest to lowest fidelity. The interaction URI is the value returned by the DS in the initiation response interaction object <a href="#interactionObject" class="xref">Section 4.2.1</a>, if a User interaction is required by the DS.  <a href="#section-4.1.2-7.1.1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-4.1.2-7.1.2.1">
+                  <strong>popup</strong> - the Client will load the interaction URI in a modal popup window. The DS will close the window when the interaction is complete.<a href="#section-4.1.2-7.1.2.1" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.1.2-7.1.2.2">
+                  <strong>redirect</strong> - the Client will redirect the user agent to the interaction URI provided by the DS. The DS will redirect to the redirect_uri when the interaction is completed,<a href="#section-4.1.2-7.1.2.2" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.1.2-7.1.2.3">
+                  <strong>qrcode</strong> - the Client will convert the interaction URI to a QR Code per <span>[<a href="#QR_Code" class="xref">QR_Code</a>] and display it to the User, along with a text message. The User will scan the QR Code and/or follow the message instructions.</span><a href="#section-4.1.2-7.1.2.3" class="pilcrow">¶</a>
+</li>
+              </ul>
+</li>
+            <li id="section-4.1.2-7.2">
+              <strong>redirect_uri</strong> - this attribute is included if the type is redirect. It is the URI that the Client requests the DS to redirect the User to after the DS has completed interacting with the User. If the Client manages state in URL, then the redirect_uri should contain that state.<a href="#section-4.1.2-7.2" class="pilcrow">¶</a>
+</li>
+            <li id="section-4.1.2-7.3">
+              <strong>ui_locales</strong> - End-User's preferred languages and scripts for the user interface, represented as a space-separated list of <span>[<a href="#RFC5646" class="xref">RFC5646</a>] language tag values, ordered by preference.</span><a href="#section-4.1.2-7.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-4.1.2-8">[Editor: do we need max pixels or max chars for qrcode interaction? Either passed to DS, or max specified values here?]<a href="#section-4.1.2-8" class="pilcrow">¶</a></p>
+<p id="section-4.1.2-9">[Editor: other possible interaction models could be a <code>webview</code>, where the Client can display a web page, or a <code>message</code>, where the client can only display a text message]<a href="#section-4.1.2-9" class="pilcrow">¶</a></p>
+<p id="section-4.1.2-10">[Editor: we may need to include interaction types for iOS and Android as the mobile OS APIs evolve.]<a href="#section-4.1.2-10" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="user-object">
+<section id="section-4.1.3">
+          <h4 id="name-user-object">
+<a href="#section-4.1.3" class="section-number selfRef">4.1.3. </a><a href="#name-user-object" class="section-name selfRef">"user" Object</a>
+          </h4>
+<p id="section-4.1.3-1">The user object is optional.<a href="#section-4.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.3-2"><strong>identifiers</strong> - the identifiers object contains one or more of the following identifiers for the User:<a href="#section-4.1.3-2" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-4.1.3-3.1">
+              <strong>phone_number</strong> - contains a phone number per Section 5 of <span>[<a href="#RFC3966" class="xref">RFC3966</a>].</span><a href="#section-4.1.3-3.1" class="pilcrow">¶</a>
+</li>
+            <li id="section-4.1.3-3.2">
+              <strong>email</strong> - contains an email address per <span>[<a href="#RFC5322" class="xref">RFC5322</a>].</span><a href="#section-4.1.3-3.2" class="pilcrow">¶</a>
+</li>
+            <li id="section-4.1.3-3.3">
+              <strong>oidc</strong> - is an object containing both the <code>iss</code> and <code>sub</code> attributes from an OpenID Connect ID Token per <span>[<a href="#OIDC" class="xref">OIDC</a>] Section 2.</span><a href="#section-4.1.3-3.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-4.1.3-4">The user and identifiers object are included to improve the user experience by the DS. The DS MUST authenticate the User independent of these values.<a href="#section-4.1.3-4" class="pilcrow">¶</a></p>
+<p id="section-4.1.3-5">[Editor: include full ID Token? multiple identifiers of the same type?]<a href="#section-4.1.3-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authorizations-object">
+<section id="section-4.1.4">
+          <h4 id="name-authorizations-object">
+<a href="#section-4.1.4" class="section-number selfRef">4.1.4. </a><a href="#name-authorizations-object" class="section-name selfRef">"authorizations" Object</a>
+          </h4>
+<p id="section-4.1.4-1">The optional authorizations object contains a dictionary of resource objects the Client is requesting authorization to access. The authorizations object may contain one or more of:<a href="#section-4.1.4-1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-4.1.4-2.1">
+              <strong>oauth_scope</strong> - a string containing the OAuth 2.0 scope per <span>[<a href="#RFC6749" class="xref">RFC6749</a>] section 3.3.</span><a href="#section-4.1.4-2.1" class="pilcrow">¶</a>
+</li>
+            <li id="section-4.1.4-2.2">
+              <strong>oauth_rich</strong> - an authorization_details object per <span>[<a href="#RAR" class="xref">RAR</a>]</span><a href="#section-4.1.4-2.2" class="pilcrow">¶</a>
+</li>
+            <li id="section-4.1.4-2.3">
+              <strong>oauth_rich_list</strong> - an array of authorization_details objects per <span>[<a href="#RAR" class="xref">RAR</a>]</span><a href="#section-4.1.4-2.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-4.1.4-3">Only one of oauth_rich and oauth_rich_list SHOULD be included.<a href="#section-4.1.4-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="claims-object">
+<section id="section-4.1.5">
+          <h4 id="name-claims-object">
+<a href="#section-4.1.5" class="section-number selfRef">4.1.5. </a><a href="#name-claims-object" class="section-name selfRef">"claims" Object</a>
+          </h4>
+<p id="section-4.1.5-1">The optional claims object contains one or more identity claims being requested. The claims may contain:<a href="#section-4.1.5-1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-4.1.5-2.1">
+              <p id="section-4.1.5-2.1.1"><strong>oidc</strong> - an object that contains one or both of the following objects:  <a href="#section-4.1.5-2.1.1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-4.1.5-2.1.2.1">
+                  <strong>userinfo</strong> - claims that will be returned as text strings<a href="#section-4.1.5-2.1.2.1" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.1.5-2.1.2.2">
+                  <strong>id_token</strong> - claims that will be included in the returned ID Token<a href="#section-4.1.5-2.1.2.2" class="pilcrow">¶</a>
+</li>
+              </ul>
+</li>
+          </ul>
+<p id="section-4.1.5-3">The contents of the userinfo and id_token objects are defined by <span>[<a href="#OIDC" class="xref">OIDC</a>] Section 5. The completion response </span><a href="#CompletionResponse" class="xref">Section 6.3</a> will contain, if authorized, the claims requested in the userinfo and id_token objects. There is no UserInfo endpoint as there is in <span>[<a href="#OIDC" class="xref">OIDC</a>] Section 5.3.</span><a href="#section-4.1.5-3" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-4.1.5-4.1">vc - [Editor: define how W3C Verifiable Credentials <span>[<a href="#W3C_VC" class="xref">W3C_VC</a>] can be requested ]</span><a href="#section-4.1.5-4.1" class="pilcrow">¶</a>
+</li>
+          </ul>
+</section>
+</div>
+<div id="payload-signing">
+<section id="section-4.1.6">
+          <h4 id="name-payload-signing">
+<a href="#section-4.1.6" class="section-number selfRef">4.1.6. </a><a href="#name-payload-signing" class="section-name selfRef">Payload Signing</a>
+          </h4>
+<p id="section-4.1.6-1">The initiation request payload is signed per JWS <span>[<a href="#RFC7515" class="xref">RFC7515</a>] with the private key matching the public key included, or referenced by the jwk object or kid attribute of the JWS header object. The resulting JWS </span><span>[<a href="#RFC7515" class="xref">RFC7515</a>] compact serialization token is the body of the HTTP POST to the DS. An Unregistered Client MUST generate an asymetric key pair and include the public key in the JWS header's jwk object.</span><a href="#section-4.1.6-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="payload-encryption">
+<section id="section-4.1.7">
+          <h4 id="name-payload-encryption">
+<a href="#section-4.1.7" class="section-number selfRef">4.1.7. </a><a href="#name-payload-encryption" class="section-name selfRef">Payload Encryption</a>
+          </h4>
+<p id="section-4.1.7-1">The DS may require the initiation request payload to be encrypted. If so, the JWS signed token is encrypted per JWE <span>[<a href="#RFC7516" class="xref">RFC7516</a>] using the public key and algorithm provided by the DS.</span><a href="#section-4.1.7-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="InitiationResponse">
+<section id="section-4.2">
+        <h3 id="name-initiation-response">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-initiation-response" class="section-name selfRef">Initiation Response</a>
+        </h3>
+<p id="section-4.2-1">If no interaction is required the DS will return a completion response per <a href="#CompletionResponse" class="xref">Section 6.3</a>. If the DS wants the Client to start the interaction, the DS will return an HTTP 200 response with a content-type of application/json will include an interaction object. If an interaction is required, wether started by the Client, or the DS, there MUST be a completion object in the response.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2">A non-normative example of an initiation response follows:<a href="#section-4.2-2" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-4.2-3">
+<pre>
+{
+    "interaction": {
+        "type"  : "popup",
+        "uri"   : "https://ds.example.com/endpoint/ey5gs32..."
+    },
+    "completion": {
+        "handle" : "eyJhb958.example.completion.handle.9yf3szM"
+    }
+}
+</pre>
+<a href="#section-4.2-3" class="pilcrow">¶</a>
+</div>
+<p id="section-4.2-4">[Editor: do we want to allow the DS to optionally return a period of time the Client must wait before making a completion request? Prefer to keep it simple for client and let the client call when it is ready.]<a href="#section-4.2-4" class="pilcrow">¶</a></p>
+<div id="interactionObject">
+<section id="section-4.2.1">
+          <h4 id="name-interaction-object">
+<a href="#section-4.2.1" class="section-number selfRef">4.2.1. </a><a href="#name-interaction-object" class="section-name selfRef">"interaction" Object</a>
+          </h4>
+<p id="section-4.2.1-1">uri to redirect to, or popup, or show in QR, or message to be displayed<a href="#section-4.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.1-2">If the DS wants the Client to start the interaction, the DS MUST select one of the interaction mechanisms provided by the Client in the initiation request, and include the matching attribute in the interaction object:<a href="#section-4.2.1-2" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-4.2.1-3.1">
+              <strong>type</strong> - this MUST match the type provided by the Client in the initiation request client.interaction object.<a href="#section-4.2.1-3.1" class="pilcrow">¶</a>
+</li>
+            <li id="section-4.2.1-3.2">
+              <strong>uri</strong> - the URI to interact with the User per the type. This may be a temporary short URL if the type is qrcode so that it is easy to scan.<a href="#section-4.2.1-3.2" class="pilcrow">¶</a>
+</li>
+            <li id="section-4.2.1-3.3">
+              <strong>message</strong> - a text string to display to the User if type is qrcode.<a href="#section-4.2.1-3.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+</section>
+</div>
+<div id="completion-object">
+<section id="section-4.2.2">
+          <h4 id="name-completion-object">
+<a href="#section-4.2.2" class="section-number selfRef">4.2.2. </a><a href="#name-completion-object" class="section-name selfRef">"completion" Object</a>
+          </h4>
+<p id="section-4.2.2-1">The completion object MUST have one attribute:<a href="#section-4.2.2-1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-4.2.2-2.1">
+              <strong>handle</strong> - the completion handle.<a href="#section-4.2.2-2.1" class="pilcrow">¶</a>
+</li>
+          </ul>
+</section>
+</div>
+<div id="error-responses">
+<section id="section-4.2.3">
+          <h4 id="name-error-responses">
+<a href="#section-4.2.3" class="section-number selfRef">4.2.3. </a><a href="#name-error-responses" class="section-name selfRef">Error Responses</a>
+          </h4>
+<p id="section-4.2.3-1">TBD<a href="#section-4.2.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="Interaction">
+<section id="section-5">
+      <h2 id="name-interaction">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-interaction" class="section-name selfRef">Interaction</a>
+      </h2>
+<p id="section-5-1">If the DS wants the Client to initiate the interaction with the User, then the DS will return an interaction object <a href="#interactionObject" class="xref">Section 4.2.1</a> so that the Client can can hand off interactions with the User to the DS. The Client will initiate the interaction with the User in one of the following ways:<a href="#section-5-1" class="pilcrow">¶</a></p>
+<div id="popup">
+<section id="section-5.1">
+        <h3 id="name-popup">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-popup" class="section-name selfRef">popup</a>
+        </h3>
+<p id="section-5.1-1">The Client will create a new popup child browser window containing the value of the uri attribute of the interaction object. 
+[Editor: more details on how to do this]<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-2">The DS will close the window when the interactions with the User are complete. [Editor: confirm DS can do this still on all browsers, or does Client need to close]<a href="#section-5.1-2" class="pilcrow">¶</a></p>
+<p id="section-5.1-3">The DS MAY respond to the completion request <a href="#CompletionRequest" class="xref">Section 6.2</a> before the popup window has been closed.<a href="#section-5.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="redirect">
+<section id="section-5.2">
+        <h3 id="name-redirect">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-redirect" class="section-name selfRef">redirect</a>
+        </h3>
+<p id="section-5.2-1">The Client will redirect the User to the value of the uri attribute of the interaction object. When the DS interactions with the User are complete, the DS will redirect the User to the redirect_uri the Client provided in the initiation request.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
+<p id="section-5.2-2">If the Client made a completion request when starting the interaction, the DS MAY respond to the completion request <a href="#CompletionRequest" class="xref">Section 6.2</a> before the User has been redirected back to the Client.<a href="#section-5.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="qrcode">
+<section id="section-5.3">
+        <h3 id="name-qrcode">
+<a href="#section-5.3" class="section-number selfRef">5.3. </a><a href="#name-qrcode" class="section-name selfRef">qrcode</a>
+        </h3>
+<p id="section-5.3-1">The Client will create a <span>[<a href="#QR_Code" class="xref">QR_Code</a>] of the uri attribute of the interaction object and display the resulting graphic and the message attribute of the interaction object as a text string.</span><a href="#section-5.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="completion">
+<section id="section-6">
+      <h2 id="name-completion">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-completion" class="section-name selfRef">Completion</a>
+      </h2>
+<p id="section-6-1">If the Client received a completion handle from the DS in the initiation response, it creates a completion token and makes a request to the DS, passing the completion token in the HTTP Authorization header with the JOSE parameter. The DS will then response with the completion response, which are the results of the initiation request unless there was an error or the connection timed out with an HTTP 408 response.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<div id="creating-a-completion-token">
+<section id="section-6.1">
+        <h3 id="name-creating-a-completion-token">
+<a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-creating-a-completion-token" class="section-name selfRef">Creating a Completion Token</a>
+        </h3>
+<p id="section-6.1-1">The completion token is a JWS, and the Client uses the same private key and header used to create the initiation request <a href="#InitiationRequest" class="xref">Section 4.1</a>. 
+The payload of the completion token contains:<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-2"><strong>aud</strong> - the audience of the completion token, which is the unique string identifier for the DS.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+<p id="section-6.1-3"><strong>iat</strong> - the time the completion token was created.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+<p id="section-6.1-4"><strong>jti</strong> - a unique identifier for the completion token per <span>[<a href="#RFC7519" class="xref">RFC7519</a>] section 4.1.7.</span><a href="#section-6.1-4" class="pilcrow">¶</a></p>
+<p id="section-6.1-5"><strong>completion_handle</strong> the completion handle the DS provided the Client in the initiation response <a href="#InitiationResponse" class="xref">Section 4.2</a>.<a href="#section-6.1-5" class="pilcrow">¶</a></p>
+<p id="section-6.1-6">A non-normative example of the header and payload of a completion token follows:<a href="#section-6.1-6" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-6.1-7">
+<pre>
+"header": {
+    "alg": "ES256",
+    "typ": "JOSE",
+    "jwk": {
+        "kty":"EC",
+        "crv":"P-256",
+        "x":"Kgl5DJSgLyV-G32osmLhFKxJ97FoMW0dZVEqDG-Cwo4",
+        "y":"GsL4mOM4x2e6iON8BHvRDQ6AgXAPnw0m0SfdlREV7i4"
+    }
+}
+
+"payload": {
+    "aud": "https://provider.example",
+    "iat": "1579046092",
+    "jti": "f6d72254-4f23-417f-b55e-14ad323b1dc1",
+    "completion_handle": "eyJhb958.example.completion.handle.9yf3szM"
+}
+</pre>
+<a href="#section-6.1-7" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="CompletionRequest">
+<section id="section-6.2">
+        <h3 id="name-completion-request">
+<a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-completion-request" class="section-name selfRef">Completion Request</a>
+        </h3>
+<p id="section-6.2-1">The Client creates a completion URL by appending "/" and the completion handle to the DS endpoint. The Client then makes an HTTP Get call to the completion URL, setting the HTTP Authorization header to have the JOSE parameter, followed by the completion token.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-2">A non-normative completion request example:<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-6.2-3">
+<pre>
+GET /endpoint/eyJhb958.example.completion.handle.9yf3szM HTTP/1.3
+Host: provider.example
+Authorization: JOSE eyJhbGciOiJFU.example.completion.token.haDwskpFDBWwwQD6wA
+</pre>
+<a href="#section-6.2-3" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="CompletionResponse">
+<section id="section-6.3">
+        <h3 id="name-completion-response">
+<a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-completion-response" class="section-name selfRef">Completion Response</a>
+        </h3>
+<p id="section-6.3-1">The DS verifies the completion token, and if then provides a response according to what the User and/or RO have authorized if required. If no signature or encryption was required, the DS will respond with a JSON document with content-type set to application/JSON.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
+<p id="section-6.3-2">Example non-normative completion response JSON documents for the 2 examples in {#InitiationRequest}:<a href="#section-6.3-2" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-6.3-3">
+<pre>
+{ 
+    "iat":"15790460234",
+    "nonce":"f6a60810-3d07-41ac-81e7-b958c0dd21e4",
+    "authorizations": {
+        "oauth_scope": {
+            "scope"             : "read_contacts",
+            "expires_in"        : "3600"
+            "type"              : "bearer"
+            "access_token"      : "eyJJ2D6.example.access.token.mZf9pTSpA"
+        }
+    },
+    "claims": {
+        "oidc": {
+            "id_token" : "eyJhbUzI1N.example.id.token.YRw5DhaDwpFDBW",
+            "userinfo" : {
+                "name"           : "John Doe",
+                "picture"        : "https://photos.example/p/eyJzdkiO"
+            }
+        }
+    }
+}
+
+{
+    "iat":"15790460234",
+    "nonce":"0d1998d8-fbfa-4879-b942-85a88bff1f3b",
+    "authorizations": {
+        "oauth_scope": {
+            "scope"             : "read_calendar write_calendar",
+            "expires_in"        : "3600"
+            "type"              : "jose"
+            "access_handle"     : "ey.example.access.handle.9yf3szM",
+            "refresh_handle"    : "ey.example.refresh.handle.Jl4FzM",
+            "jwk"               : {
+                "x5u": "https://provider.example/jwk/VBUEOIQA82" 
+            }
+        }
+    }
+}
+</pre>
+<a href="#section-6.3-3" class="pilcrow">¶</a>
+</div>
+<p id="section-6.3-4">Details of the JSON document:<a href="#section-6.3-4" class="pilcrow">¶</a></p>
+<p id="section-6.3-5"><strong>iat</strong> - the time the response was made.<a href="#section-6.3-5" class="pilcrow">¶</a></p>
+<p id="section-6.3-6"><strong>nonce</strong> - the nonce that was included in the initiation request <a href="#InitiationRequest" class="xref">Section 4.1</a>.<a href="#section-6.3-6" class="pilcrow">¶</a></p>
+<div id="authorizations-object-1">
+<section id="section-6.3.1">
+          <h4 id="name-authorizations-object-2">
+<a href="#section-6.3.1" class="section-number selfRef">6.3.1. </a><a href="#name-authorizations-object-2" class="section-name selfRef">"authorizations" Object</a>
+          </h4>
+<p id="section-6.3.1-1">There is an authorizations object in the completion response if there was an authorizations object in the initiation request.<a href="#section-6.3.1-1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-6.3.1-2.1">
+              <p id="section-6.3.1-2.1.1"><strong>oauth_scope</strong> - if there was an oauth_scope object in the initiation request, this object will be returned if some or all of the scopes were authorized  <a href="#section-6.3.1-2.1.1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-6.3.1-2.1.2.1">
+                  <strong>scope</strong> - the scopes the Client was granted authorization for. This will be all, or a subset, of what was requested.<a href="#section-6.3.1-2.1.2.1" class="pilcrow">¶</a>
+</li>
+                <li id="section-6.3.1-2.1.2.2">
+                  <strong>type</strong> - the type of access: "bearer" or "jose". See <a href="#TokenTypes" class="xref">Section 6.3.3</a> for details.<a href="#section-6.3.1-2.1.2.2" class="pilcrow">¶</a>
+</li>
+                <li id="section-6.3.1-2.1.2.3">
+                  <strong>access_token</strong> - an access token for accessing the resource(s) if the token type is "bearer".<a href="#section-6.3.1-2.1.2.3" class="pilcrow">¶</a>
+</li>
+                <li id="section-6.3.1-2.1.2.4">
+                  <strong>refresh_handle</strong> - an optional handle to refresh the access token or handle. See <a href="#Refresh" class="xref">Section 8</a><a href="#section-6.3.1-2.1.2.4" class="pilcrow">¶</a>
+</li>
+                <li id="section-6.3.1-2.1.2.5">
+                  <strong>expires_in</strong> - an optional value specifying how many seconds before the access token or handle will expire.<a href="#section-6.3.1-2.1.2.5" class="pilcrow">¶</a>
+</li>
+                <li id="section-6.3.1-2.1.2.6">
+                  <strong>access_handle</strong> - an access handle to use to create the JOSE access token. Required if the token type is "jose".<a href="#section-6.3.1-2.1.2.6" class="pilcrow">¶</a>
+</li>
+                <li id="section-6.3.1-2.1.2.7">
+                  <strong>jwk</strong> - the jwk value to use when signing the JOSE access token. Required if the token type is "jose".<a href="#section-6.3.1-2.1.2.7" class="pilcrow">¶</a>
+</li>
+              </ul>
+</li>
+            <li id="section-6.3.1-2.2">
+              <p id="section-6.3.1-2.2.1"><strong>oauth_rich</strong> - if there was an oauth_rich object in the initiation request, this object will be returned if some or all of the authorization requests were granted. The contents are the same as the oauth_scope object, except the "scope" parameter is replaced with the details object:  <a href="#section-6.3.1-2.2.1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-6.3.1-2.2.2.1">
+                  <strong>details</strong> - the authorization details that were granted.<a href="#section-6.3.1-2.2.2.1" class="pilcrow">¶</a>
+</li>
+              </ul>
+</li>
+            <li id="section-6.3.1-2.3">
+              <strong>oauth_rich_list</strong> - if there was an oauth_rich_list object in the initiation request, this object will contain a list matching each item in the list of the initiation request. Each response will be the same as the oauth_rich object.<a href="#section-6.3.1-2.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+</section>
+</div>
+<div id="claims-object-1">
+<section id="section-6.3.2">
+          <h4 id="name-claims-object-2">
+<a href="#section-6.3.2" class="section-number selfRef">6.3.2. </a><a href="#name-claims-object-2" class="section-name selfRef">"claims" Object</a>
+          </h4>
+<p id="section-6.3.2-1">There is a claims object in the completion response if there was a claims object in the initiation request.<a href="#section-6.3.2-1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-6.3.2-2.1">
+              <p id="section-6.3.2-2.1.1"><strong>oidc</strong><a href="#section-6.3.2-2.1.1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-6.3.2-2.1.2.1">
+                  <strong>userinfo</strong> - a dictionary of the identity claims the user consented to be released, if any.<a href="#section-6.3.2-2.1.2.1" class="pilcrow">¶</a>
+</li>
+                <li id="section-6.3.2-2.1.2.2">
+                  <strong>id_token</strong> - an OpenID Connect ID Token containing the claims the user consented to be released.<a href="#section-6.3.2-2.1.2.2" class="pilcrow">¶</a>
+</li>
+              </ul>
+</li>
+            <li id="section-6.3.2-2.2">
+              <p id="section-6.3.2-2.2.1"><strong>vc</strong><a href="#section-6.3.2-2.2.1" class="pilcrow">¶</a></p>
+<p id="section-6.3.2-2.2.2">
+The verified claims the user consented to be released. [Editor: details TBD]<a href="#section-6.3.2-2.2.2" class="pilcrow">¶</a></p>
+</li>
+          </ul>
+</section>
+</div>
+<div id="TokenTypes">
+<section id="section-6.3.3">
+          <h4 id="name-access-types">
+<a href="#section-6.3.3" class="section-number selfRef">6.3.3. </a><a href="#name-access-types" class="section-name selfRef">Access Types</a>
+          </h4>
+<p id="section-6.3.3-1">There are two types of access:<a href="#section-6.3.3-1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-6.3.3-2.1">
+              <strong>bearer</strong> - the DS provides a bearer access token that the Client can use to access resources per <a href="#Bearer" class="xref">Section 7.1</a>.<a href="#section-6.3.3-2.1" class="pilcrow">¶</a>
+</li>
+            <li id="section-6.3.3-2.2">
+              <strong>jose</strong> - the DS provides an access handle that the Client uses to create a JWS to access resources per <a href="#POP" class="xref">Section 7.2</a>.<a href="#section-6.3.3-2.2" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-6.3.3-3">The string values of the access types are case insensitive.<a href="#section-6.3.3-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="response-signing">
+<section id="section-6.3.4">
+          <h4 id="name-response-signing">
+<a href="#section-6.3.4" class="section-number selfRef">6.3.4. </a><a href="#name-response-signing" class="section-name selfRef">Response Signing</a>
+          </h4>
+<p id="section-6.3.4-1">The DS MAY sign the response with a JWS per <span>[<a href="#RFC7515" class="xref">RFC7515</a>] and the private key matching the public key the DS defined as its completion response signing key.</span><a href="#section-6.3.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="response-encryption">
+<section id="section-6.3.5">
+          <h4 id="name-response-encryption">
+<a href="#section-6.3.5" class="section-number selfRef">6.3.5. </a><a href="#name-response-encryption" class="section-name selfRef">Response Encryption</a>
+          </h4>
+<p id="section-6.3.5-1">The DS MAY encrypt the response using the public key provided by the Client, using {{JWE}.<a href="#section-6.3.5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="error-responses-1">
+<section id="section-6.3.6">
+          <h4 id="name-error-responses-2">
+<a href="#section-6.3.6" class="section-number selfRef">6.3.6. </a><a href="#name-error-responses-2" class="section-name selfRef">Error Responses</a>
+          </h4>
+<ul>
+<li id="section-6.3.6-1.1">
+              <strong>408</strong> Request Timeout. The DS may return a 408 code if it wants to terminate the completion request. The Client SHOULD generate a fresh completion token and make a new completion request.<a href="#section-6.3.6-1.1" class="pilcrow">¶</a>
+</li>
+          </ul>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="Resource">
+<section id="section-7">
+      <h2 id="name-resource-request">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-resource-request" class="section-name selfRef">Resource Request</a>
+      </h2>
+<p id="section-7-1">Once the Client has an access token or handle, the Client can access protected resources.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<div id="Bearer">
+<section id="section-7.1">
+        <h3 id="name-bearer-token-access">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-bearer-token-access" class="section-name selfRef">Bearer Token Access</a>
+        </h3>
+<p id="section-7.1-1">If the token type in the completion response was "bearer", then the Client can access the resource per Section 2.1 of {RFC6750}<a href="#section-7.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1-2">A non-normative example follows:<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-7.1-3">
+<pre>
+Authorization: bearer eyJJ2D6.example.access.token.mZf9pTSpA
+</pre>
+<a href="#section-7.1-3" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="POP">
+<section id="section-7.2">
+        <h3 id="name-proof-of-possession-access">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-proof-of-possession-access" class="section-name selfRef">Proof of Possession Access</a>
+        </h3>
+<p id="section-7.2-1">If the token type in the completion response was "jose", then the Client creates a JOSE access token for each API call, signing it with its private key, but setting the jwk object in the JWS header to be the jwk value returned in the completion response <a href="#CompletionResponse" class="xref">Section 6.3</a>. This allows the DS to provide the resource with a certificate binding the Client's private key to the authorization granted. A non-normative example of the header and payload of the JWS follows:<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-7.2-2">
+<pre>
+"header": {
+    "alg": "ES256",
+    "typ": "JOSE",
+    "jwk": {
+        "x5u": "https://provider.example/jwk/VBUEOIQA82" 
+    }
+}
+
+"payload": {
+    "iat": "1579046092",
+    "jti": "f6d72254-4f23-417f-b55e-14ad323b1dc1",
+    "access_handle": "ey.example.access.handle.9yf3szM"
+}
+</pre>
+<a href="#section-7.2-2" class="pilcrow">¶</a>
+</div>
+<p id="section-7.2-3">The payload contains the following attributes:<a href="#section-7.2-3" class="pilcrow">¶</a></p>
+<p id="section-7.2-4"><strong>iat</strong> - the time the JOSE access token was created.<a href="#section-7.2-4" class="pilcrow">¶</a></p>
+<p id="section-7.2-5"><strong>jti</strong> a unique identifier for the JOSE access token per <span>[<a href="#RFC7519" class="xref">RFC7519</a>] section 4.1.7.</span><a href="#section-7.2-5" class="pilcrow">¶</a></p>
+<p id="section-7.2-6"><strong>access_handle</strong> the access handle the DS provided the Client in the completion response <a href="#CompletionResponse" class="xref">Section 6.3</a>.<a href="#section-7.2-6" class="pilcrow">¶</a></p>
+<p id="section-7.2-7">The Client then sets the HTTP Authorization header in the resource request to have the "jose" parameter, followed by the JOSE access token. A non-normative example follows:<a href="#section-7.2-7" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-7.2-8">
+<pre>
+GET /calendar HTTP/1.3
+Host: calendar.example
+Authorization: JOSE eyJhbG.example.token.kwwQb958
+</pre>
+<a href="#section-7.2-8" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="Refresh">
+<section id="section-8">
+      <h2 id="name-access-token-or-handle-refr">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-access-token-or-handle-refr" class="section-name selfRef">Access Token or Handle Refresh</a>
+      </h2>
+<p id="section-8-1">A non-normative refresh request example:<a href="#section-8-1" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-8-2">
+<pre>
+GET /endpoint/eyJhb958.example.handle.9yf3szM HTTP/1.3
+Host: provider.example
+Authorization: JOSE eyJhbG.example.refresh.token.kwwQb958
+
+
+
+"header": {
+    "alg": "ES256",
+    "typ": "JOSE",
+    "kid": "1"
+}
+
+"payload": {
+    "aud": "https://provider.example",
+    "iat": "1579046092",
+    "jti": "332c2348-f9ed-4278-98eb-7e39b20347ee",
+    "refresh_handle": "eyJhb.example.refresh.handle.9yf3szM",
+    "client_id": "di3872h34dkJW"
+}
+</pre>
+<a href="#section-8-2" class="pilcrow">¶</a>
+</div>
+<p id="section-8-3">A non-normative example access handle refresh response:<a href="#section-8-3" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-8-4">
+<pre>
+{
+    "scope"             : "read_calendar write_calendar",
+    "expires_in"        : "3600"
+    "type"              : "jose"
+    "refresh_handle"    : "ey.example.refresh.handle.Jl4FczM",
+    "access_handle"     : "ey.example.access.handle.i3872i34",
+    "jwk"               : {
+        "x5u": "https://provider.example/jwk/VBUEOIQA82" 
+    }
+}
+</pre>
+<a href="#section-8-4" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="ClientAuthN">
+<section id="section-9">
+      <h2 id="name-client-authentication">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-client-authentication" class="section-name selfRef">Client Authentication</a>
+      </h2>
+<p id="section-9-1">The Client uses the same private key to sign the initiation request, the completion token, the refresh token, and the JOSE access token.<a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-2">Each instance of a Registered Client MAY have its own private key and then include a certificate or certificate chain, or reference to either, in the JWS header jwk object that binds its public key to the public key the DS has for the Registered Client.<a href="#section-9-2" class="pilcrow">¶</a></p>
+<p id="section-9-3">For JOSE access tokens, the DS creates a certificate containing the Client's public key so that the resource can verify the public key belongs to an authorized Client.<a href="#section-9-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="extensibility">
+<section id="section-10">
+      <h2 id="name-extensibility">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-extensibility" class="section-name selfRef">Extensibility</a>
+      </h2>
+<p id="section-10-1">This standard can be extended in a number of areas.<a href="#section-10-1" class="pilcrow">¶</a></p>
+<div id="initiation-request">
+<section id="section-10.1">
+        <h3 id="name-initiation-request-2">
+<a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-initiation-request-2" class="section-name selfRef">Initiation Request</a>
+        </h3>
+<p id="section-10.1-1">An additional top level object could be added to the initiation request payload if the DS can handle delegations other than authorizations or claims.<a href="#section-10.1-1" class="pilcrow">¶</a></p>
+<div id="client-object-1">
+<section id="section-10.1.1">
+          <h4 id="name-client-object-2">
+<a href="#section-10.1.1" class="section-number selfRef">10.1.1. </a><a href="#name-client-object-2" class="section-name selfRef">"client" Object</a>
+          </h4>
+<p id="section-10.1.1-1">Other information about the Client that the DS would require related to an extension.<a href="#section-10.1.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="user-object-1">
+<section id="section-10.1.2">
+          <h4 id="name-user-object-2">
+<a href="#section-10.1.2" class="section-number selfRef">10.1.2. </a><a href="#name-user-object-2" class="section-name selfRef">"user" Object</a>
+          </h4>
+<p id="section-10.1.2-1">Other information about the Client that the DS would require related to an extension.<a href="#section-10.1.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authorizations-object-2">
+<section id="section-10.1.3">
+          <h4 id="name-authorizations-object-3">
+<a href="#section-10.1.3" class="section-number selfRef">10.1.3. </a><a href="#name-authorizations-object-3" class="section-name selfRef">"authorizations" Object</a>
+          </h4>
+<p id="section-10.1.3-1">Additional types of authorizations in addition to OAuth 2.0 scopes and RAR.<a href="#section-10.1.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="claims-object-2">
+<section id="section-10.1.4">
+          <h4 id="name-claims-object-3">
+<a href="#section-10.1.4" class="section-number selfRef">10.1.4. </a><a href="#name-claims-object-3" class="section-name selfRef">"claims" Object</a>
+          </h4>
+<p id="section-10.1.4-1">Additional types of identity claims in addition to OpenID Connect claims and Verified Credentials.<a href="#section-10.1.4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="interaction">
+<section id="section-10.2">
+        <h3 id="name-interaction-2">
+<a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-interaction-2" class="section-name selfRef">Interaction</a>
+        </h3>
+<p id="section-10.2-1">Additional mechanisms for the Client to start an interaction with the User.<a href="#section-10.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="access-token-types">
+<section id="section-10.3">
+        <h3 id="name-access-token-types">
+<a href="#section-10.3" class="section-number selfRef">10.3. </a><a href="#name-access-token-types" class="section-name selfRef">Access Token Types</a>
+        </h3>
+<p id="section-10.3-1">Additional mechanisms for the Client to present authorization to a resource.<a href="#section-10.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="rational">
+<section id="section-11">
+      <h2 id="name-rational">
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-rational" class="section-name selfRef">Rational</a>
+      </h2>
+<ol type="1" start="1" class="normal" id="section-11-1">
+        <li id="section-11-1.1">
+          <p id="section-11-1.1.1"><strong>Why use JOSE to authenticate the initiation request? Why not a human readable post that uses HTTP signing?</strong><a href="#section-11-1.1.1" class="pilcrow">¶</a></p>
+<p id="section-11-1.1.2">
+There is no HTTP signing standard at this time, and the Client is already creating JOSE tokens for the completion request, refresh request, and proof of possession resource access. A signed token allows a separate of concerns and trust in the implementation of the DS. The signed token can be passed between components that can each independently verify the token and perform actions.<a href="#section-11-1.1.2" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-11-1.2">
+          <p id="section-11-1.2.1"><strong>Why is there only one mechanism for the Client to authenticate?</strong><a href="#section-11-1.2.1" class="pilcrow">¶</a></p>
+<p id="section-11-1.2.2">
+Having only one mechanism for the Client to authenticate keeps things simpler for the DS, the Client, and the resource (if it is a proof of possession JOSE access). Both Registered Clients, and Unregistered Clients can have a private key, eliminating the public Client issues in OAuth 2.0, as an Unregistered Client can create an ephemeral key pair. Using asymetric cryptography also allows each instance of a Registered Client to have its own private key if it can obtain a certificate binding its public key to the public key the DS has for the Client.<a href="#section-11-1.2.2" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-11-1.3">
+          <p id="section-11-1.3.1"><strong>Why does the DS not return any parameters to the Client in the redirect url?</strong><a href="#section-11-1.3.1" class="pilcrow">¶</a></p>
+<p id="section-11-1.3.2">
+The redirection from the Client to the DS is solely for the DS to interact with the User. The redirect from the DS back to the Client, is to allow the Client to resume interactions with the User. The identity of the Client is independent of the URI the DS redirects to. All interaction mechanisms exchange information between the Client and the DS the same way.<a href="#section-11-1.3.2" class="pilcrow">¶</a></p>
+</li>
+        <li id="section-11-1.4">
+          <strong>Why is it a Delegated Server, not an Authorization Server?</strong>
+ This broadens the DS to serve both as an OAuth AS, and an OpenID Connect OpenID Provider, both are servers that have had functionality delegated to them. It also provides extensibility for other delegations. Additionally, it differentiates this protocol from OAuth 2.0 and OpenID Connect.<a href="#section-11-1.4" class="pilcrow">¶</a>
+</li>
+        <li id="section-11-1.5">
+          <strong>Why not use bearer tokens for completion and refresh?</strong>
+ By requiring the Client to prove possession of it's private key, the completion and refresh tokens are not as sensitive, and the security of the protocol is enhanced as leakage of the tokens does not enable access to functionality. As the Client is creating JOSE token for the initiation request, the same mechanism for completion and refresh tokens is not an implementation burden.<a href="#section-11-1.5" class="pilcrow">¶</a>
+</li>
+        <li id="section-11-1.6">
+          <p id="section-11-1.6.1"><strong>Why is there not a UserInfo endpoint as there is in OpenID Connect?</strong><a href="#section-11-1.6.1" class="pilcrow">¶</a></p>
+<p id="section-11-1.6.2">
+In OpenID Connect, the UserInfo endpoint allowed access the identity claims independent of the ID Token. Allowing the Client to retrieve claims separate from the ID Token allows the Client to minimize the personal identifiable information in an ID Token that may be managed separately from the other claims. Some Clients may not need the "sub" identifier, and not need an ID Token. This protocol provides both mechanisms in the same call. [Editor: is there some other reason why the UserInfo endpoint was provided in OpenID Connect?]<a href="#section-11-1.6.2" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="section-12">
+      <h2 id="name-acknowledgments">
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="section-12-1">This draft derives many of its concepts from Justin Richer's Transactional Authorization draft <span>[<a href="#TxAuth" class="xref">TxAuth</a>]</span><a href="#section-12-1" class="pilcrow">¶</a></p>
+<p id="section-12-2">TBC<a href="#section-12-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-13">
+      <h2 id="name-iana-considerations">
+<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-13-1">[ JOSE parameter for Authorization HTTP header ]<a href="#section-13-1" class="pilcrow">¶</a></p>
+<p id="section-13-2">TBC<a href="#section-13-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-14">
+      <h2 id="name-security-considerations">
+<a href="#section-14" class="section-number selfRef">14. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-14-1">TBC<a href="#section-14-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-15">
+      <h2 id="name-references">
+<a href="#section-15" class="section-number selfRef">15. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<section id="section-15.1">
+        <h3 id="name-normative-references">
+<a href="#section-15.1" class="section-number selfRef">15.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="OIDC">[OIDC]</dt>
+        <dd>
+<span class="refAuthor">Sakimora, N.</span><span class="refAuthor">, Bradley, J.</span><span class="refAuthor">, Jones, M.</span><span class="refAuthor">, de Medeiros, B.</span><span class="refAuthor">, and C. Mortimore</span>, <span class="refTitle">"OpenID Connect Core 1.0"</span>, <time datetime="2014-11">November 2014</time>
+          <span>, &lt;<a href="https://openiD.net/specs/openiD-connect-core-1_0.html">https://openiD.net/specs/openiD-connect-core-1_0.html</a>&gt;</span>. </dd>
+<dt id="RFC3966">[RFC3966]</dt>
+        <dd>
+<span class="refAuthor">Schulzrinne, H.</span>, <span class="refTitle">"The tel URI for Telephone Numbers"</span>, <span class="seriesInfo">RFC 3966</span>, <span class="seriesInfo">DOI 10.17487/RFC3966</span>, <time datetime="2004-12">December 2004</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc3966">https://www.rfc-editor.org/info/rfc3966</a>&gt;</span>. </dd>
+<dt id="RFC5322">[RFC5322]</dt>
+        <dd>
+<span class="refAuthor">Resnick, P., Ed.</span>, <span class="refTitle">"Internet Message Format"</span>, <span class="seriesInfo">RFC 5322</span>, <span class="seriesInfo">DOI 10.17487/RFC5322</span>, <time datetime="2008-10">October 2008</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc5322">https://www.rfc-editor.org/info/rfc5322</a>&gt;</span>. </dd>
+<dt id="RFC5646">[RFC5646]</dt>
+        <dd>
+<span class="refAuthor">Phillips, A., Ed.</span><span class="refAuthor"> and M. Davis, Ed.</span>, <span class="refTitle">"Tags for Identifying Languages"</span>, <span class="seriesInfo">BCP 47</span>, <span class="seriesInfo">RFC 5646</span>, <span class="seriesInfo">DOI 10.17487/RFC5646</span>, <time datetime="2009-09">September 2009</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc5646">https://www.rfc-editor.org/info/rfc5646</a>&gt;</span>. </dd>
+<dt id="RFC6749">[RFC6749]</dt>
+        <dd>
+<span class="refAuthor">Hardt, D., Ed.</span>, <span class="refTitle">"The OAuth 2.0 Authorization Framework"</span>, <span class="seriesInfo">RFC 6749</span>, <span class="seriesInfo">DOI 10.17487/RFC6749</span>, <time datetime="2012-10">October 2012</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc6749">https://www.rfc-editor.org/info/rfc6749</a>&gt;</span>. </dd>
+<dt id="RFC6750">[RFC6750]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.</span><span class="refAuthor"> and D. Hardt</span>, <span class="refTitle">"The OAuth 2.0 Authorization Framework: Bearer Token Usage"</span>, <span class="seriesInfo">RFC 6750</span>, <span class="seriesInfo">DOI 10.17487/RFC6750</span>, <time datetime="2012-10">October 2012</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc6750">https://www.rfc-editor.org/info/rfc6750</a>&gt;</span>. </dd>
+<dt id="RFC7515">[RFC7515]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.</span><span class="refAuthor">, Bradley, J.</span><span class="refAuthor">, and N. Sakimura</span>, <span class="refTitle">"JSON Web Signature (JWS)"</span>, <span class="seriesInfo">RFC 7515</span>, <span class="seriesInfo">DOI 10.17487/RFC7515</span>, <time datetime="2015-05">May 2015</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc7515">https://www.rfc-editor.org/info/rfc7515</a>&gt;</span>. </dd>
+<dt id="RFC7516">[RFC7516]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.</span><span class="refAuthor"> and J. Hildebrand</span>, <span class="refTitle">"JSON Web Encryption (JWE)"</span>, <span class="seriesInfo">RFC 7516</span>, <span class="seriesInfo">DOI 10.17487/RFC7516</span>, <time datetime="2015-05">May 2015</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc7516">https://www.rfc-editor.org/info/rfc7516</a>&gt;</span>. </dd>
+<dt id="RFC7519">[RFC7519]</dt>
+      <dd>
+<span class="refAuthor">Jones, M.</span><span class="refAuthor">, Bradley, J.</span><span class="refAuthor">, and N. Sakimura</span>, <span class="refTitle">"JSON Web Token (JWT)"</span>, <span class="seriesInfo">RFC 7519</span>, <span class="seriesInfo">DOI 10.17487/RFC7519</span>, <time datetime="2015-05">May 2015</time>
+            <span>, &lt;<a href="https://www.rfc-editor.org/info/rfc7519">https://www.rfc-editor.org/info/rfc7519</a>&gt;</span>. </dd>
+</dl>
+</section>
+<section id="section-15.2">
+        <h3 id="name-informative-references">
+<a href="#section-15.2" class="section-number selfRef">15.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="QR_Code">[QR_Code]</dt>
+        <dd>
+<span class="refAuthor"></span>, <span class="refTitle">"ISO/IEC 18004:2015 - Information technology - Automatic identification and data capture techniques - QR Code bar code symbology specification"</span>, <time datetime="2015-02">February 2015</time>
+          <span>, &lt;<a href="https://www.iso.org/standard/62021.html">https://www.iso.org/standard/62021.html</a>&gt;</span>. </dd>
+<dt id="RAR">[RAR]</dt>
+        <dd>
+<span class="refAuthor">Lodderstedt, T.</span><span class="refAuthor">, Richer, J.</span><span class="refAuthor">, and B. Campbell</span>, <span class="refTitle">"OAuth 2.0 Rich Authorization Requests"</span>, <time datetime="2019-11">November 2019</time>
+          <span>, &lt;<a href="https://tools.ietf.org/id/draft-lodderstedt-oauth-rar-03.html">https://tools.ietf.org/id/draft-lodderstedt-oauth-rar-03.html</a>&gt;</span>. </dd>
+<dt id="TxAuth">[TxAuth]</dt>
+        <dd>
+<span class="refAuthor">Richer, J.</span>, <span class="refTitle">"Transactional Authorization"</span>, <time datetime="2019-12">December 2019</time>
+          <span>, &lt;<a href="https://tools.ietf.org/html/draft-richer-transactional-authz-04#section-6">https://tools.ietf.org/html/draft-richer-transactional-authz-04#section-6</a>&gt;</span>. </dd>
+<dt id="W3C_VC">[W3C_VC]</dt>
+      <dd>
+<span class="refAuthor">Sporny, M.</span><span class="refAuthor">, Noble, G.</span><span class="refAuthor">, and D. Chadwick</span>, <span class="refTitle">"Verifiable Credentials Data Model 1.0"</span>, <time datetime="2019-11">November 2019</time>
+          <span>, &lt;<a href="https://w3c.github.io/vc-data-model/">https://w3c.github.io/vc-data-model/</a>&gt;</span>. </dd>
+</dl>
+</section>
+</section>
+<div id="document-history">
+<section id="section-appendix.a">
+      <h2 id="name-document-history">
+<a href="#section-appendix.a" class="section-number selfRef">Appendix A. </a><a href="#name-document-history" class="section-name selfRef">Document History</a>
+      </h2>
+<div id="draft-hardt-didap-protocol-00">
+<section id="section-a.1">
+        <h2 id="name-draft-hardt-didap-protocol-">
+<a href="#section-a.1" class="section-number selfRef">A.1. </a><a href="#name-draft-hardt-didap-protocol-" class="section-name selfRef">draft-hardt-DIDAP-protocol-00</a>
+        </h2>
+<ul>
+<li id="section-a.1-1.1">Initial version<a href="#section-a.1-1.1" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="comparison-with-oauth-20-and-openid-connect">
+<section id="section-appendix.b">
+      <h2 id="name-comparison-with-oauth-20-an">
+<a href="#section-appendix.b" class="section-number selfRef">Appendix B. </a><a href="#name-comparison-with-oauth-20-an" class="section-name selfRef">Comparison with OAuth 2.0 and OpenID Connect</a>
+      </h2>
+<div id="differences">
+<section id="section-b.1">
+        <h2 id="name-differences">
+<a href="#section-b.1" class="section-number selfRef">B.1. </a><a href="#name-differences" class="section-name selfRef">Differences</a>
+        </h2>
+<p id="section-b.1-1">The major differences between this protocol and OAuth 2.0 and OpenID Connect are:<a href="#section-b.1-1" class="pilcrow">¶</a></p>
+<ul>
+<li id="section-b.1-2.1">The Client uses a private key to authenticate in this protocol instead of the client secret in OAuth 2.0 and OpenID Connect.<a href="#section-b.1-2.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-b.1-2.2">The Client initiates the protocol by making a signed request to the DS instead of redirecting the User to the AS.<a href="#section-b.1-2.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-b.1-2.3">The Client does not receive any parameters from a redirection of the User back from the AS.<a href="#section-b.1-2.3" class="pilcrow">¶</a>
+</li>
+          <li id="section-b.1-2.4">Refreshing an access token requires creating a refresh token from a refresh handle, rather than an authenticated call with a refresh token.<a href="#section-b.1-2.4" class="pilcrow">¶</a>
+</li>
+          <li id="section-b.1-2.5">The Client can request identity claims to be returned independent of the ID Token. There is no UserInfo endpoint to query claims as there is in OpenID Connect.<a href="#section-b.1-2.5" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+</div>
+<div id="reused">
+<section id="section-b.2">
+        <h2 id="name-reused">
+<a href="#section-b.2" class="section-number selfRef">B.2. </a><a href="#name-reused" class="section-name selfRef">Reused</a>
+        </h2>
+<ul>
+<li id="section-b.2-1.1">This protocol reuses the OAuth 2.0 scopes, client ids, access tokens, and API authorization of OAuth 2.0.<a href="#section-b.2-1.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-b.2-1.2">This protocol reuses the client ids, claims and ID Token of OpenID Connect.<a href="#section-b.2-1.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="section-appendix.c">
+      <h2 id="name-authors-address">
+<a href="#name-authors-address" class="section-name selfRef">Author's Address</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Dick Hardt (<span class="role">editor</span>)</span></div>
+<div dir="auto" class="left"><span class="org">SignIn.Org</span></div>
+<div dir="auto" class="left">,  </div>
+<div dir="auto" class="left"><span class="country-name">United States</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:dick.hardt@gmail.com" class="email">dick.hardt@gmail.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>@import url('https://martinthomson.github.io/i-d-template/fonts.css');
+
+html {
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --small-font-size: 14.5px;
+}
+body {
+  max-width: 624px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+#title, h1, h2, h3, h4, h5, h6 {
+  font-family: "Cabin Condensed", sans-serif;
+  font-weight: 600;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+#title {
+  padding: 1em 0 0.2em;
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 26px;
+}
+h4, h5, h6 {
+  font-size: 18px;
+  line-height: 22px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+}
+#abstract+p, #abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 18px;
+  line-height: 24px;
+}
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div, span {
+  position: relative;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 1em 2em;
+}
+ol ol, ul ul, ol ul, ul ol {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+ul.compact, .ulCompact,
+ol.compact, .olCompact {
+  line-height: 100%;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl > dd {
+  margin-bottom: .8em;
+  min-height: 1.3em;
+}
+dl.compact > dd, .dlCompact > dd {
+  margin-bottom: 0em;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href].selfRef {
+  color: var(--text-color);
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px 'Oxygen Mono', monospace;
+}
+pre {
+  border: 1px solid var(--line-color);
+  line-height: 17px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+}
+@media screen {
+  pre {
+    display: inline-block;
+    overflow-x: auto;
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  pre + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.5em 0.75em;
+}
+th {
+  text-align: left;
+  background-color: #eee;
+}
+tr:nth-child(2n) > td {
+  background-color: var(--background-color);
+}
+tr:nth-child(2n+1) > td {
+  background-color: var(--highlight-color);
+}
+thead+tbody tr:nth-child(2n) > td {
+  background-color: var(--highlight-color);
+}
+thead+tbody tr:nth-child(2n+1) > td {
+  background-color: var(--background-color);
+}
+table caption {
+  font-style: italic;
+  margin: 0.3em 0;
+  padding: 0;
+  text-align: left;
+}
+table p {
+  /* XXX to avoid bottom margin on table row signifiers. If paragraphs should
+     be allowed within tables more generally, it would be far better to select on a class. */
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  visibility: hidden;
+  user-select: none;
+}
+a.pilcrow[href] { color: #ddd; }
+a.pilcrow[href]:hover { text-decoration: none; }
+@media screen {
+  :hover > a.pilcrow {
+    visibility: visible;
+  }
+  a.pilcrow:hover {
+    background-color: transparent;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+}
+
+.role {
+  font-variant: all-small-caps;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 8em;
+}
+#identifiers dt {
+  width: var(--identifier-width);
+  margin: 0;
+  clear: left;
+  float: left;
+  text-align: right;
+}
+#identifiers dd {
+  margin: 0 0 0 calc(1em + var(--identifier-width));
+  min-width: 5em;
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+#toc nav ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+#toc nav li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 7em;
+}
+.references dd {
+  margin-left: 8em;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+.index ul {
+  margin: 0 0 0 1em;
+  padding: 0;
+  list-style: none;
+}
+.index ul ul {
+  margin: 0;
+}
+.index li {
+  margin: 0;
+  text-indent: -2em;
+  padding-left: 2em;
+  padding-bottom: 5px;
+}
+.indexIndex {
+  margin: 0.5em 0 1em;
+}
+.index a {
+  font-weight: 700;
+}
+/* make the index two-column on all but the smallest screens */
+@media (min-width: 600px) {
+  .index ul {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  .index ul ul {
+    column-count: 1;
+    column-gap: 0;
+  }
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 600px) {
+  #authors-addresses {
+    display: relative;
+    padding: 32px 0 0;
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #name-authors-addresses {
+    position: absolute;
+    top: 0px;
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+  }
+}
+
+/* temporary notes */
+.rfcEditorRemove::before {
+  position: absolute;
+  top: 0.2em;
+  right: 0.2em;
+  padding: 0.2em;
+  content: "The RFC Editor will remove this note";
+  color: #b76427;
+  background-color: rgba(249, 232, 105, 0.3);
+}
+.rfcEditorRemove {
+  position: relative;
+  padding-top: 1.8em;
+  background-color: rgba(249, 232, 105, 0.3);
+  border-radius: 3px;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 953px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc.active {
+      opacity: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 8px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active nav {
+    display: block;
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin-top: 2px;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 954px) {
+  body {
+    padding-right: 380px;
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  #toc nav > ul  {
+    margin-bottom: 2em;
+  }
+  #toc ul {
+    margin: 0 0 0 4px;
+    font-size: var(--small-font-size);
+  }
+  #toc ul p, #toc ul li {
+    margin: 2px 0;
+    line-height: 22px;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Changes introduced to fix issues found during implementation */
+
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin: 8px 0.5em 0;
+}
+
+/* Fix the dl styling to match the RFC 7992 attributes */
+dl > dt,
+dl.dlParallel > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+
+/* Provide styling for table cell text alignment */
+table td.text-left,
+table th.text-left {
+  text-align: left;
+}
+table td.text-center,
+table th.text-center {
+  text-align: center;
+}
+table td.text-right,
+table th.text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 20em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Provide table alignment support.  We can't use the alignX classes above
+   since they do unwanted things with caption and other styling. */
+table.right {
+ margin-left: auto;
+ margin-right: 0;
+}
+table.center {
+ margin-left: auto;
+ margin-right: auto;
+}
+table.left {
+ margin-left: 0;
+ margin-right: auto;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  dd {
+    page-break-before: avoid;
+  }
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+/* Tweak the bcp14 keyword presentation */
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+</script>
+</body>
+</html>
