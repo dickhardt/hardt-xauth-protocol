@@ -740,16 +740,18 @@ Additional mechanisms for the Client to present authorization to a resource.
     Having choices requires implementers to understand which choice is preferable for them. Having one common mechanism for the Client to authenticate simplifies most implementations. Extensions can specify other mechanisms that are preferable in certain environments. 
 
 1. **Why is the Client authentication JWS rather than MTLS?**
+
     MTLS cannot be used by an Unregistered Client. MTLS requires access below the application layer, that is often not available on some platforms. JWS is done at the application layer. Many DS deployments will be an application behind a proxy performing TLS, and there are risks in the proxy passing on the results of MTLS.
 
 1. **Why is the Client authentication JWS rather than HTTP signing?**
+
     There is currently no widely deployed HTTP signing standard. Additionally, HTTP signing requires passing all the relevant parts of the HTTP request to downstream services in a DS that may need to independently verify the Client identity.
 
 1. **What are the advantages of using JWS for the Client to authenticate to the DS and a resource?**
     
     Both Registered Clients, and Unregistered Clients can have a private key, eliminating the public Client issues in OAuth 2.0, as an Unregistered Client can create an ephemeral key pair. Using asymetric cryptography also allows each instance of a Registered Client to have its own private key if it can obtain a certificate binding its public key to the public key the DS has for the Client. Signed tokens can be passed to downstream components in a DS or resource to enable independent verification of the Client.
 
-1. **Why does the DS not return any parameters to the Client in the redirect url?**
+1. **Why does the DS not return parameters to the Client in the redirect url?**
 
     Passing parameters via a browser redirection is the source of many of the security risks in OAuth 2.0. It also presents a challenge for smart devices. In this protocol, the redirection from the Client to the DS is enable the DS to interact with the User, and the redirection back to the Client is to hand back the interaction to the Client. Unlike OAuth 2.0, the identity of the Client is independent of the URI the DS redirects to.
 
