@@ -1025,14 +1025,17 @@ Table of Contents
        Extensions can specify other mechanisms that are preferable in
        certain environments.
 
-   2.  *Why is the Client authentication JWS rather than MTLS?* MTLS
-       cannot be used by an Unregistered Client.  MTLS requires access
-       below the application layer, that is often not available on some
-       platforms.  JWS is done at the application layer.  Many DS
-       deployments will be an application behind a proxy performing TLS,
-       and there are risks in the proxy passing on the results of MTLS.
+   2.  *Why is the Client authentication JWS rather than MTLS?*
+
+       MTLS cannot be used by an Unregistered Client.  MTLS requires
+       access below the application layer, that is often not available
+       on some platforms.  JWS is done at the application layer.  Many
+       DS deployments will be an application behind a proxy performing
+       TLS, and there are risks in the proxy passing on the results of
+       MTLS.
 
    3.  *Why is the Client authentication JWS rather than HTTP signing?*
+
        There is currently no widely deployed HTTP signing standard.
        Additionally, HTTP signing requires passing all the relevant
        parts of the HTTP request to downstream services in a DS that may
@@ -1051,7 +1054,7 @@ Table of Contents
        components in a DS or resource to enable independent verification
        of the Client.
 
-   5.  *Why does the DS not return any parameters to the Client in the
+   5.  *Why does the DS not return parameters to the Client in the
        redirect url?*
 
        Passing parameters via a browser redirection is the source of

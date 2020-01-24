@@ -2035,12 +2035,14 @@ Authorization: JOSE eyJhbG.example.refresh.token.kwwQb958
 Having choices requires implementers to understand which choice is preferable for them. Having one common mechanism for the Client to authenticate simplifies most implementations. Extensions can specify other mechanisms that are preferable in certain environments.<a href="#section-12-1.1.2" class="pilcrow">¶</a></p>
 </li>
         <li id="section-12-1.2">
-          <strong>Why is the Client authentication JWS rather than MTLS?</strong>
- MTLS cannot be used by an Unregistered Client. MTLS requires access below the application layer, that is often not available on some platforms. JWS is done at the application layer. Many DS deployments will be an application behind a proxy performing TLS, and there are risks in the proxy passing on the results of MTLS.<a href="#section-12-1.2" class="pilcrow">¶</a>
+          <p id="section-12-1.2.1"><strong>Why is the Client authentication JWS rather than MTLS?</strong><a href="#section-12-1.2.1" class="pilcrow">¶</a></p>
+<p id="section-12-1.2.2">
+MTLS cannot be used by an Unregistered Client. MTLS requires access below the application layer, that is often not available on some platforms. JWS is done at the application layer. Many DS deployments will be an application behind a proxy performing TLS, and there are risks in the proxy passing on the results of MTLS.<a href="#section-12-1.2.2" class="pilcrow">¶</a></p>
 </li>
         <li id="section-12-1.3">
-          <strong>Why is the Client authentication JWS rather than HTTP signing?</strong>
- There is currently no widely deployed HTTP signing standard. Additionally, HTTP signing requires passing all the relevant parts of the HTTP request to downstream services in a DS that may need to independently verify the Client identity.<a href="#section-12-1.3" class="pilcrow">¶</a>
+          <p id="section-12-1.3.1"><strong>Why is the Client authentication JWS rather than HTTP signing?</strong><a href="#section-12-1.3.1" class="pilcrow">¶</a></p>
+<p id="section-12-1.3.2">
+There is currently no widely deployed HTTP signing standard. Additionally, HTTP signing requires passing all the relevant parts of the HTTP request to downstream services in a DS that may need to independently verify the Client identity.<a href="#section-12-1.3.2" class="pilcrow">¶</a></p>
 </li>
         <li id="section-12-1.4">
           <p id="section-12-1.4.1"><strong>What are the advantages of using JWS for the Client to authenticate to the DS and a resource?</strong><a href="#section-12-1.4.1" class="pilcrow">¶</a></p>
@@ -2048,7 +2050,7 @@ Having choices requires implementers to understand which choice is preferable fo
 Both Registered Clients, and Unregistered Clients can have a private key, eliminating the public Client issues in OAuth 2.0, as an Unregistered Client can create an ephemeral key pair. Using asymetric cryptography also allows each instance of a Registered Client to have its own private key if it can obtain a certificate binding its public key to the public key the DS has for the Client. Signed tokens can be passed to downstream components in a DS or resource to enable independent verification of the Client.<a href="#section-12-1.4.2" class="pilcrow">¶</a></p>
 </li>
         <li id="section-12-1.5">
-          <p id="section-12-1.5.1"><strong>Why does the DS not return any parameters to the Client in the redirect url?</strong><a href="#section-12-1.5.1" class="pilcrow">¶</a></p>
+          <p id="section-12-1.5.1"><strong>Why does the DS not return parameters to the Client in the redirect url?</strong><a href="#section-12-1.5.1" class="pilcrow">¶</a></p>
 <p id="section-12-1.5.2">
 Passing parameters via a browser redirection is the source of many of the security risks in OAuth 2.0. It also presents a challenge for smart devices. In this protocol, the redirection from the Client to the DS is enable the DS to interact with the User, and the redirection back to the Client is to hand back the interaction to the Client. Unlike OAuth 2.0, the identity of the Client is independent of the URI the DS redirects to.<a href="#section-12-1.5.2" class="pilcrow">¶</a></p>
 </li>
