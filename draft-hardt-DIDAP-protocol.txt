@@ -456,16 +456,15 @@ Table of Contents
    *  *oidc* - an object that contains one or both of the following
       objects:
 
-      -  *userinfo* - claims that will be returned as text strings
+      -  *userinfo* - claims that will be returned if this is the first
+         interaction with User at the Registered Client
 
       -  *id_token* - claims that will be included in the returned ID
          Token
 
    The contents of the userinfo and id_token objects are defined by
-   [OIDC] Section 5.  The completion response Section 6.3 will contain,
-   if authorized, the claims requested in the userinfo and id_token
-   objects.  There is no UserInfo endpoint as there is in [OIDC]
-   Section 5.3.
+   [OIDC] Section 5.  The completion response is specified in
+   Section 6.3.
 
    *  vc - [Editor: define how W3C Verifiable Credentials [W3C_VC] can
       be requested ]
@@ -761,11 +760,23 @@ Table of Contents
 
    *  *oidc*
 
-      -  *userinfo* - a dictionary of the identity claims the user
-         consented to be released, if any.
-
       -  *id_token* - an OpenID Connect ID Token containing the claims
          the user consented to be released.
+
+      -  *userinfo* - if the Client has not previously received an
+         id_token from the DS for the User, then this object contains a
+         dictionary of the identity claims the user consented to be
+         released, if any.  If the Client has previously received an ID
+         Token from the DS for the User and an id_token was in this
+         request, the userinfo object only contains the attribute
+         "redundant" set to the value true.  If the Client would like to
+         request additional claims about the User, the Client can make a
+         request containing the userinfo object, and not containing the
+         id_token object.
+
+   [Editor: does this work?  It allows depreciation of the UserInfo
+   endpoint, and the associated access token.  It requires state to be
+   managed by the DS, but implementations already manage state.]
 
    *  *vc*
 
@@ -1069,24 +1080,29 @@ Table of Contents
    8.  *Why is there not a UserInfo endpoint as there is in OpenID
        Connect?*
 
-       In OpenID Connect, the UserInfo endpoint allowed access the
-       identity claims independent of the ID Token.  Allowing the Client
-       to retrieve claims separate from the ID Token allows the Client
-       to minimize the personal identifiable information in an ID Token
-       that may be managed separately from the other claims.  Some
-       Clients may not need the "sub" identifier, and not need an ID
-       Token.  This protocol provides both mechanisms in the same call.
-       [Editor: is there some other reason why the UserInfo endpoint was
-       provided in OpenID Connect?]
+       In OpenID Connect, the Client does not know if it has seen the
+       User previously until it receives the ID Token.  By passing an
+       access token for the UserInfo endpoint, the Client can minimize
+       the amount of information returned with the ID Token, and only
+       call the UserInfo endpoint for new Users.
 
-   9.  *Why do is there a Client ID?  Could we not use a fingerprint of
-       the public key to identify the Client?*
+       This simplifies this common flow.  If the User is new to the
+       Client, the userinfo requests are returned, otherwise they are
+       not.  If the Client would like to acquire additional claims about
+       the User after they have authenticated to the Client, the Client
+       can make an additional request that only contains the userinfo
+       object.
+
+   9.  *Why do is there still a Client ID?  Could we not use a
+       fingerprint of the public key to identify the Client?*
 
        When supporting Clients, it is useful to be able to refer to a
        permanent identifier for a Registered Client.  Using a
        fingerprint or public key to identify the Client has the Client
-       identifier change everytime the key is rotated.  A DS logging
+       identifier change every time the key is rotated.  A DS logging
        Client activity will have a single identifier to track a Client.
+       Having a Client ID eases a transition to this protocol from OAuth
+       2.0.
 
 13.  Acknowledgments
 
