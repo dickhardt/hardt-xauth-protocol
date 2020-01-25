@@ -1,7 +1,7 @@
 ---
 docname: draft-hardt-DIDAP-protocol-00
 title: Delegated Identity and Authorization protocol
-date: 2020-01-24
+date: 2020-01-25
 
 category: std
 ipr: trust200902
@@ -60,8 +60,8 @@ informative:
   
   RAR:
     title: OAuth 2.0 Rich Authorization Requests 
-    target: https://tools.ietf.org/html/draft-lodderstedt-oauth-rar-03
-    date: November 3, 2019
+    target: https://tools.ietf.org/html/draft-ietf-oauth-rar-00
+    date: January 21, 2020
     author:
       -
         ins: T. Lodderstedt
@@ -97,92 +97,112 @@ informative:
 
 --- abstract 
 
-This protocol allows users and resource owners to delegate resource authorization and identity claims to a server. Client software can then obtain access to resources and/or identity claims by calling the delegated server. 
+Client software often desires resources or identity claims that are managed independent of the client. This protocol allows a user and/or resource owner to delegate resource authorization and/or identity claims to a server. Client software can then request access to resources and/or identity claims by calling the delegated server. The server acquires consent and authorization from the user and/or resource owner if required, and then returns the authorization and identity claims that were approved. 
 
-\[Editor: this is pretty terse and dense -- needs work!]
+\[Editor: suggestions on how to improve this are welcome!]
 
 --- middle
 
 # Introduction
 
-This protocol supports the widely deployed use cases supported by OAuth 2.0, and OpenID Connect, as well as use cases those protocols don't support, but have been frequently requested. This protocol addresses many of the security issues in OAuth 2.0 by having parameters securely sent directly between parties, rather than via a browser redirection. 
+This protocol supports the widely deployed use cases supported by OAuth 2.0 ({{RFC6749}},{{RFC6750}}), and OpenID Connect ({{OIDC}}), as well as use cases those protocols don't support, but have been frequently requested. This protocol addresses many of the security issues in OAuth 2.0 by having parameters securely sent directly between parties, rather than via a browser redirection. 
 
 The technology landscape has changed since OAuth 2.0 was initially drafted. More interactions happen on mobile devices than PCs. Modern browsers now directly support asymetric cryptographic functions. Standards have emerged for signing and encrypting tokens with rich payloads (JOSE) that are widely deployed.
 
 Additional use cases are now being served with extensions to OAuth 2.0: OpenID Connect added support for authentication and releasing identity claims; {{RFC8252}} added support for native apps; {{RFC8628}} added support for smart devices; and support for {{browser based apps}} is being worked on.
 
-This protocol takes advantage of the new capabilities, simplifies the architectural model, and provides support for all the widely deployed use cases. 
+This protocol simplifies the overall architectural model, takes advantage of today's technology landscape, and provides support for all the widely deployed use cases. 
+
+While this protocol is not backwards compatible with OAuth 2.0, it strives to minimize the migration effort.
 
 # Protocol
 
 ## Parties
 
-- Delegated Server (DS) - provides the Client: authorization to API resources; and/or identity claims about the User. The DS may require explicit consent from the RO or User to provide these to the Client.
+- **Delegated Server** (DS) - provides the Client: authorization to API resources; and/or identity claims about the User. The DS may require explicit consent from the RO or User to provide these to the Client.
 
-- Client - requests authorization to API resources, and/or identity claims about the User. There are two classes of Clients: those that have previously registered with the DS, and have a client id (Registered Clients), and those that have not (Unregistered Clients). A User may be interacting with the Client.
+- **Client** - requests authorization to API resources, and/or identity claims about the User. There are two types of Clients: Registered Clients and Dynamic Clients. A DS may support only one or both types. All Clients have a key to authenticate
 
-- User - the person who has delegated making identity claims about themselves to the DS, and is interacting with the Client.
+- **Registered Client** - a Client that has registered with the DS and has a Client ID to identify itself, and can prove it possesses a key that is linked to the Client ID. The DS may have different policies for what different Registered Clients can request. The Client MAY be interacting  with a User.
 
-- Resource Server (RS) - has API resources that require an access token from the DS for access.
+- **Dynamic Client** - a Client that has not been registered with the DS, and each instance will generate it own key pair so it can prove it is the same instance of the Client on subsequent requests. A single-page application with no server is an example of a Dynamic Client. The Client MUST be interacting  with a User.
 
-- Resource Owner (RO) - owns the RS, and has delegated RS access token creation to the DS. The RO may be the same entity as the User, or may be a different entity that the DS interacts with independent of the Client.
+- **User** - the person who has delegated making identity claims about themselves to the DS, and is interacting with the Client.
 
-## Sequence
+- **Resource Server** (RS) - has API resources that require an access token from the DS for access.
+
+- **Resource Owner** (RO) - owns the RS, and has delegated RS access token creation to the DS. The RO may be the same entity as the User, or may be a different entity that the DS interacts with independent of the Client.
+
+## Additional Terms
+
+The following handles and access token are strings issued by the DS to the Client, that are opaque to the Client.
+
+- **completion handle** - represents the client request. Presented back to the DS in a completion request.
+
+- **access handle** - represents the access the DS has granted the Client. The Client proves possession of its key when presenting an access handle to access an RS. The RS is able to understand the authorizations represented by the access handle directly, or through an introspection call. The RS is able to verify the access handle was issued to the Client that presented it.
+
+- **refresh handle** - represents the access the DS has granted the Client. Presented back to the DS when the Client wants a fresh access token or access handle.
+
+When presenting any of the above handles, the Client always proves possession of its key.
+
+- **access token** - represents the access the DS has granted the Client. The Client presents the access token as a bearer token when accessing an RS. The RS is able to understand the authorizations represented by the access handle directly, or through an introspection call. 
+
+- **Client ID** - a DS unique identifier for a Registered Client.
+
+- **ID Token** - a token as defined in {{OIDC}} Section 2. 
+
+## Sequence {#Sequence}
 
 1. **DS Discovery** The Client discovers the DS end point, keys, supported claims and authorizations, and other capabilities.  Some, or all of this information could be manually preconfigured, or dynamically obtained. DS discovery is out of scope of this document.
  
-2. **Initiation Request** ({{InitiationRequest}}) The Client creates a request for authorization to API resources and/or identity claims about the User and sends it with an HTTP POST to the DS endpoint. 
+2. **Initiation Request** ({{InitiationRequest}}) The Client creates an initiation request ({{InitiationRequestJSON}}) for authorization to API resources and/or identity claims about the User and sends it with an HTTP POST to the DS endpoint. 
 
-3. **Initiation Response**  ({{InitiationResponse}}) The DS processes the request and determines if it needs to interact with the RO or User. If interaction is not required, the DS returns a completion response, otherwise the DS returns a completion handle. If the DS wants the Client to start the interaction, the DS sends interaction instructions to the Client. 
+3. **Initiation Response**  ({{InitiationResponse}}) The DS processes the request and determines if it needs to interact with the RO or User. If interaction is not required, the DS returns a completion response ({{CompletionResponseJSON}}). If interaction is required the DS returns an initiation response ({{InitiationResponseJSON}}) that includes completion handle and uri, and interaction instructions if the DS wants the Client to start the interaction.
 
 4. **Interaction** ({{Interaction}}) If the DS sent interaction instructions to the Client, the Client executes them. The DS then interacts with the User and/or RO to obtain authorization. 
 
-5. **Completion Request** ({{CompletionRequest}}) If the Client received a completion handle and uri, it creates a completion token and does an HTTP GET of the completion URI, including the completion token in an HTTP header. The Client may make the completion request while waiting for the interaction to complete. 
+5. **Completion Request** ({{CompletionRequest}}) The Client sends the completion handle to the completion uri. The Client may make the completion request while waiting for the interaction to complete. 
 
-6. **Completion Response** ({{CompletionResponse}}) When any required interaction has been completed, the DS responds to the Client with authorized RS access tokens and User identity claims. The DS may provide refresh handles and uris for each access token if they are authorized. If proof of possession is required for a accessing a resource, the DS will provide certificate parameters for the Client to include in the signed request. 
+6. **Completion Response** ({{CompletionResponse}}) When any required interaction has been completed, the DS responds to the Client with a completion response ({{CompletionResponseJSON}}) containing authorized RS access tokens and User identity claims. The DS may provide refresh handles and uris for each access token if they are authorized. If proof-of-possession is required for accessing the RS, the DS will provide access handles instead of access tokens.
 
-7. **Resource Request** ({{Resource}}) The Client uses an access token with the RS, or creates a JOSE access token with the access handle if proof of possession is required for access. 
+7. **Resource Request** ({{Bearer}} & {{POP}}) The Client uses an access token with the RS, or the access handle if proof-of-possession is required for access. 
 
-8. **Access Token Refresh** ({{Refresh}}) If the Client received a refresh handle and uri, it creates a refresh token and does an HTTP GET of the refresh URI, including the refresh token in an HTTP header.
+8. **Access Refresh** ({{Refresh}}) If the Client received a refresh handle and uri, it sends the refresh handle to the refresh uri, and receives a fresh access token or handle.
 
-# Discovery
+**Sequence Diagram**
 
-The Client obtains the following metadata about the DS prior to initiating a request:
+    +--------+                                           +-----------+
+    |        |<-(1)------- Discovery ------------------->|           |
+    |        |                                           |           |
+    |        |--(2)------- Initiation Request ---------->|           |
+    |        |                                           |           |
+    |        |<-(3)------- Initiation Response-----------|           |
+    |        |                                           |           |
+    |        |              +-Interaction-+              |           |
+    |        |--(4)-------->|    User     |<-------------|           |
+    |        |              |  and/or RO  |<-------------|           |
+    |        |              +-------------+              | Delegated |
+    | Client |                                           |   Server  |
+    |        |--(5)------- Completion Request ---------->|           |
+    |        |                                           |           |
+    |        |<-(6)------- Completion Response ----------|           |
+    |        |                                           |           |
+    |        |                            +----------+   |           |
+    |        |--(7)-- Resource Request -->| Resource |   |           |
+    |        |                            |  Server  |   |           |
+    |        |<------ Resource Response --|          |   |           |
+    |        |                            +----------+   |           |
+    |        |                                           |           |
+    |        |--(8)------- Refresh Request ------------->|           |
+    |        |                                           |           |
+    |        |<----------- Refresh Response -------------|           |
+    +--------+                                           +-----------+
 
-**Endpoint** - the endpoint of the DS.
+# Initiation Request JSON {#InitiationRequestJSON}
 
-**ds** - the unique string identifier for the DS. Used in "ds" parameters of JOSE tokens.
+Following is a non-normative example where the Client wants to interact with the User with a popup and is requesting identity claims about the User and read access to the User's contacts:
 
-**Algorithms** - the asymetric cryptographic algorithms supported by the DS. 
-
-**Authorizations** - the authorizations the Client may ask for, if any.
-
-**Identity Claims** - the identity claims the Client may request, if any, and what public keys the claims will be signed with.
-
-**Initiation Request Encryption** - if the DS requires the the initiation request to be encrypted, and which public key to use.
-
-**Completion Response Signing** - if the DS will sign the completion response, and the matching public key to verify the signature.
-
-# Initiation
-
-The Client initiates a request for authorizations and/or identity claims with an initiation request.
-
-## Initiation Request {#InitiationRequest}
-
-The Client creates a payload, signs it using JWS {{RFC7515}}, and sends the signed payload to the DS end point using HTTP POST, with a content-type of application/jose. The payload is a JSON document and MUST include a client object. The payload MAY include a user object. The payload MUST include an authorizations or claims object, or both. 
-
-Following is a non-normative example of an initiation request JWS header and payload for an Unregistered Client implemented as a single page app (SPA). The Client wants to interact with the User with a popup and is requesting identity claims about the User and read access to the User's contacts:
-
-    "header": {
-        "alg": "ES256",
-        "typ": "JOSE",
-        "jwk": {
-            "kty":"EC",
-            "crv":"P-256",
-            "x":"Kgl5DJSgLyV-G32osmLhFKxJ97FoMW0dZVEqDG-Cwo4",
-            "y":"GsL4mOM4x2e6iON8BHvRDQ6AgXAPnw0m0SfdlREV7i4"
-        }
-    }
+    Example 1
 
     "payload": { 
         "ds"    :"https://ds.example",
@@ -198,7 +218,8 @@ Following is a non-normative example of an initiation request JWS header and pay
             }
         },
         "authorizations": {
-            "oauth_scope": "read_contacts"
+            "type": "oauth_scope",
+            "scope": "read_contacts"
         },
         "claims": {
             "oidc": {
@@ -215,13 +236,9 @@ Following is a non-normative example of an initiation request JWS header and pay
     }
 
 
-Following is a non-normative example of an initiation request JWS header and payload for a Registered Client implemented as a backend service with a simple web interface, that has previously authenticated the User, and is requesting additional authorization:
+Following is a non-normative example where the Client has previously authenticated the User, and is requesting additional authorization:
 
-    "header": {
-        "alg": "ES256",
-        "typ": "JOSE",
-        "kid": "1"
-    }
+    Example 2
 
     "payload": { 
         "ds":"https://ds.example",
@@ -243,28 +260,34 @@ Following is a non-normative example of an initiation request JWS header and pay
             }
         },
         "authorizations": {
-            "oauth_scope": "read_calendar write_calendar"
+            "type": "oauth_scope",
+            "scope": "read_calendar write_calendar"
         }
     }
 
-### Payload Attributes
 
-**ds** - the  unique string identifier for the DS
+## Top Level Attributes
+
+**ds** - the unique string identifier for the DS
 
 **iat** - the time of the request per [RFC7519] section 4.1.6.
 
 **nonce** - a unique identifier for this request. The completion response MUST contain a matching nonce value.
 
+## "client" Object
+The client object MUST contain the client_id attribute for Registered Clients, or the display object for Dynamic Clients. If the Client can interact with the User, then an interaction object is included.
 
-### "client" Object
-The client object MUST contain the client_id attribute for Registered Clients, or the display object for Unregistered Clients. If the Client can interact with the User, then an interaction object is included.
-
-**client_id** - the identifier the DS has for the Client.
+**client_id** - the identifier the DS has for the Registered Client.
 
 **display** - the display object contains the following attributes:
 
-+ **name** - a string that represents the Client
-+ **uri** - a URI representing the Client 
++ **name** - a string that represents the Dynamic Client
+
+\[Editor: a max length for the name?]
+
++ **uri** - a URI representing the Dynamic Client 
+
+\[Editor: a max length for the name?]
 
 The name and uri will be displayed by the DS when prompting for authorization.
 
@@ -273,22 +296,24 @@ The name and uri will be displayed by the DS when prompting for authorization.
 + **type** - contains one of the following values. Types are listed from highest to lowest fidelity. The interaction URI is the value returned by the DS in the initiation response interaction object {{interactionObject}}, if a User interaction is required by the DS.
 
     + **popup** - the Client will load the interaction URI in a modal popup window. The DS will close the window when the interaction is complete.
-    + **redirect** - the Client will redirect the user agent to the interaction URI provided by the DS. The DS will redirect to the redirect_uri when the interaction is completed,
+
+    + **redirect** - the Client will redirect the user agent to the interaction URI provided by the DS. The DS will redirect to the redirect_uri when the interaction is completed.
+
     + **qrcode** - the Client will convert the interaction URI to a QR Code per {{QR Code}} and display it to the User, along with a text message. The User will scan the QR Code and/or follow the message instructions.
 
-+ **redirect_uri** - this attribute is included if the type is redirect. It is the URI that the Client requests the DS to redirect the User to after the DS has completed interacting with the User. If the Client manages state in URLs, then the redirect_uri should contain that state.
++ **redirect_uri** - this attribute is included if the type is "redirect". It is the URI that the Client requests the DS to redirect the User to after the DS has completed interacting with the User. If the Client manages session state in URIs, then the redirect_uri should contain that state.
 
 + **ui_locales** - End-User's preferred languages and scripts for the user interface, represented as a space-separated list of {{RFC5646}} language tag values, ordered by preference.
 
 \[Editor: do we need max pixels or max chars for qrcode interaction? Either passed to DS, or max specified values here?]
 
-\[Editor: other possible interaction models could be a `webview`, where the Client can display a web page, or a `message`, where the client can only display a text message]
+\[Editor: other possible interaction models could be a "webview", where the Client can display a web page, or just a "message", where the client can only display a text message]
 
 \[Editor: we may need to include interaction types for iOS and Android as the mobile OS APIs evolve.]
 
 \[Editor: does the Client include parameters if it wants the completion response signed and/or encrypted?]
 
-### "user" Object
+## "user" Object
 The user object is optional. 
 
 **identifiers** - the identifiers object contains one or more of the following identifiers for the User:
@@ -297,48 +322,48 @@ The user object is optional.
 
 + **email** - contains an email address per {{RFC5322}}.
 
-+ **oidc** - is an object containing both the `iss` and `sub` attributes from an OpenID Connect ID Token per {{OIDC}} Section 2.
++ **oidc** - is an object containing both the "iss" and "sub" attributes from an OpenID Connect ID Token per {{OIDC}} Section 2.
 
 The user and identifiers objects are included to improve the user experience by the DS. The DS MUST authenticate the User independent of these values.
 
 \[Editor: include full ID Token? multiple identifiers of the same type?]
 
-### "authorizations" Object
+## "authorizations" Object
 
 The optional authorizations object contains a dictionary of resource objects the Client is requesting authorization to access. The authorizations object may contain one or more of:
 
-+ **oauth_scope** - a string containing the OAuth 2.0 scope per {{RFC6749}} section 3.3.
++ **type** - one of the following values: "oauth_scope", "oauth_rich", or "oauth_rich_list". See {{AuthorizationTypes}} for details.
 
-+ **oauth_rich** - an authorization_details object per {{RAR}}. The oauth_rich request is independent of the oauth_scope request.
++ **scope** - a string containing the OAuth 2.0 scope per {{RFC6749}} section 3.3. Present if type is "oauth_scope" or "oauth_rich". 
 
-+ **oauth_rich_list** - an array of authorization_details objects per {{RAR}}
++ **authorization_details** - an authorization_details object per {{RAR}}. Present if type is "oauth_rich".
 
-The authorizations object MUST contain only one of oauth_rich and oauth_rich_list. 
++ **list** - an array objects containing "scope" and "authorization_details". Present if type is "oauth_rich_list". Used when requesting multiple access tokens and/or handles.
 
-### "claims" Object
+\[Editor: details may change as the {{RAR}} document evolves]
+
+## "claims" Object
 The optional claims object contains one or more identity claims being requested. The claims may contain:
 
 + **oidc** - an object that contains one or both of the following objects:
 
-    - **userinfo** - claims that will be returned if this is the first interaction with User at the Registered Client 
+    - **userinfo** - claims that will be returned as a JSON object 
 
-    - **id_token** - claims that will be included in the returned ID Token
+    - **id_token** - claims that will be included in the returned ID Token. If the null value, an ID Token will be returned with no additional claims. 
 
-The contents of the userinfo and id_token objects are defined by {{OIDC}} Section 5. The completion response is specified in {{CompletionResponse}}. 
+The contents of the userinfo and id_token objects are defined by {{OIDC}} Section 5. 
 
-* vc - \[Editor: define how W3C Verifiable Credentials {{W3C VC}} can be requested ]
+* vc - \[Editor: define how W3C Verifiable Credentials {{W3C VC}} can be requested 
 
-### Payload Signing
+## Authorization Types {#AuthorizationTypes}
 
-The initiation request payload is signed per JWS {{RFC7515}} with the private key matching the public key included, or referenced by the jwk object or kid attribute of the JWS header object. The resulting JWS {{RFC7515}} compact serialization token is the body of the HTTP POST to the DS. An Unregistered Client MUST generate an asymetric key pair and include the public key in the JWS header's jwk object.
+- **oauth_scope** - an OAuth 2.0 authorization request per {{RFC6749}} section 3.3
 
-### Payload Encryption
+- **oauth_rich** - a rich authorization request per {{RAR}}
 
-The DS may require the initiation request payload to be encrypted. If so, the JWS signed token is encrypted per JWE {{RFC7516}} using the public key and algorithm provided by the DS.
+- **oauth_rich_list** - a list of rich authorization requests
 
-## Initiation Response {#InitiationResponse}
-
-If no interaction is required the DS will return a completion response per {{CompletionResponse}}. If the DS wants the Client to start the interaction, the DS will return an HTTP 200 response with a content-type of application/json will include an interaction object. If an interaction is required, wether started by the Client, or the DS, there MUST be a completion object in the response.
+# Initiation Response JSON {#InitiationResponseJSON}
 
 A non-normative example of an initiation response follows:
 
@@ -355,7 +380,7 @@ A non-normative example of an initiation response follows:
 
 \[Editor: do we want to allow the DS to optionally return a period of time the Client must wait before making a completion request? Prefer to keep it simple for client and let the client call when it is ready.]
 
-### "interaction" Object {#interactionObject}
+## "interaction" Object {#interactionObject}
 
 uri to redirect to, or popup, or show in QR, or message to be displayed
 
@@ -368,7 +393,9 @@ If the DS wants the Client to start the interaction, the DS MUST select one of t
 
 + **message** - a text string to display to the User if type is qrcode.
 
-### "completion" Object
+\[Editor: do we set a maximum length for the uri and message so that a device knows the maximum it needs to support? A smart device may have limited screen real estate.]
+
+## "completion" Object
 
 The completion object has the following attributes:
 
@@ -376,14 +403,10 @@ The completion object has the following attributes:
 
 + **uri** - the completion URI.
 
-### Error Responses
-
-TBD
-
-# Interaction {#Interaction}
+# Interaction Types {#Interaction}
 If the DS wants the Client to initiate the interaction with the User, then the DS will return an interaction object {{interactionObject}} so that the Client can can hand off interactions with the User to the DS. The Client will initiate the interaction with the User in one of the following ways: 
 
-## popup
+## "popup" Type
 The Client will create a new popup child browser window containing the value of the uri attribute of the interaction object. 
 \[Editor: more details on how to do this]
 
@@ -391,69 +414,18 @@ The DS will close the window when the interactions with the User are complete. \
 
 The DS MAY respond to the completion request {{CompletionRequest}} before the popup window has been closed.
 
-## redirect
+## "redirect" Type
 The Client will redirect the User to the value of the uri attribute of the interaction object. When the DS interactions with the User are complete, the DS will redirect the User to the redirect_uri the Client provided in the initiation request.
 
 If the Client made a completion request when starting the interaction, the DS MAY respond to the completion request {{CompletionRequest}} before the User has been redirected back to the Client. 
 
-## qrcode
+## "qrcode" Type
 The Client will create a {{QR Code}} of the uri attribute of the interaction object and display the resulting graphic and the message attribute of the interaction object as a text string.
 
-# Completion 
 
-If the Client received a completion handle and uri from the DS in the initiation response, it creates a completion token and makes a GET request to the completion URI, passing the Client constructed completion token in the HTTP Authorization header with the JOSE parameter. The DS will then response with the completion response, which are the results of the initiation request unless there was an error or the connection timed out with an HTTP 408 response.
+# Completion Response JSON {#CompletionResponseJSON}
 
-## Creating a Completion Token {#CompletionToken}
-
-The completion token is a JWS, and the Client uses the same private key and header used to create the initiation request {{InitiationRequest}}. 
-The payload of the completion token contains:
-
-**ds** - the unique string identifier for the DS.
-
-**iat** - the time the completion token was created.
-
-**jti** - a unique identifier for the completion token per {{RFC7519}} section 4.1.7.
-
-**handle** the completion handle the DS provided the Client in the initiation response {{InitiationResponse}}.
-
-A non-normative example of the header and payload of a completion token follows:
-
-
-    "header": {
-        "alg": "ES256",
-        "typ": "JOSE",
-        "jwk": {
-            "kty":"EC",
-            "crv":"P-256",
-            "x":"Kgl5DJSgLyV-G32osmLhFKxJ97FoMW0dZVEqDG-Cwo4",
-            "y":"GsL4mOM4x2e6iON8BHvRDQ6AgXAPnw0m0SfdlREV7i4"
-        }
-    }
-
-    "payload": {
-        "ds":  "https://ds.example",
-        "iat": "1579046092",
-        "jti": "f6d72254-4f23-417f-b55e-14ad323b1dc1",
-        "handle": "eyJhb958.example.completion.handle.9yf3szM"
-    }
-
-
-
-## Completion Request {#CompletionRequest}
-
-The Client then makes an HTTP GET call to the completion uri, setting the HTTP Authorization header to have the JOSE parameter, followed by the completion token.
-
-A non-normative completion request example:
-
-    GET /completion/ey7snHGs HTTP/1.3
-    Host: ds.example
-    Authorization: JOSE eyJhbGciOiJFU.example.completion.token.haDwskpFDBW
-
-## Completion Response {#CompletionResponse}
-
-The DS verifies the completion token, and then provides a response according to what the User and/or RO have authorized if required. If no signature or encryption was required, the DS will respond with a JSON document with content-type set to application/JSON.
-
-Example non-normative completion response JSON documents for the 2 examples in {{InitiationRequest}}:
+Example non-normative completion response JSON document for Example 1 in {{InitiationRequestJSON}}:
 
     { 
         "iat":"15790460234",
@@ -477,6 +449,8 @@ Example non-normative completion response JSON documents for the 2 examples in {
         }
     }
 
+Example non-normative completion response JSON document for Example 2 in {{InitiationRequestJSON}}:
+
     {
         "iat":"15790460234",
         "nonce":"0d1998d8-fbfa-4879-b942-85a88bff1f3b",
@@ -484,7 +458,7 @@ Example non-normative completion response JSON documents for the 2 examples in {
             "oauth_scope": {
                 "scope"         : "read_calendar write_calendar",
                 "expires_in"    : "3600",
-                "type"          : "jose",
+                "type"          : "pop",
                 "access": {
                     "handle"    : "ey.example.access.handle.9yf3szM",
                     "jwk": {
@@ -499,15 +473,15 @@ Example non-normative completion response JSON documents for the 2 examples in {
         }
     }
 
-
 Details of the JSON document: 
+
+## Top Level Attributes
 
 **iat** - the time the response was made.
 
-**nonce** - the nonce that was included in the initiation request {{InitiationRequest}}.
+**nonce** - the nonce that was included in the initiation request JSON {{InitiationRequestJSON}}.
 
-
-### "authorizations" Object
+## "authorizations" Object
 
 There is an authorizations object in the completion response if there was an authorizations object in the initiation request. 
 
@@ -515,19 +489,19 @@ There is an authorizations object in the completion response if there was an aut
 
     + **scope** - the scopes the Client was granted authorization for. This will be all, or a subset, of what was requested.
 
-    + **type** - the type of access: "bearer" or "jose". See {{TokenTypes}} for details.
+    + **type** - the type of access: "bearer" or "pop". See {{TokenTypes}} for details.
 
     + **token** - an access token for accessing the resource(s). Included if the type of access is "bearer".
 
     + **expires_in** - an optional value specifying how many seconds until the access token or handle expire. 
 
-    + **refresh** - an optional object containing parameters required to refresh an access token or handle.
+    + **refresh** - an optional object containing parameters required to refresh an access token or handle. See refresh request {{Refresh}}.
 
-        + **handle** - an refresh handle used to create the refresh token. See {{Refresh}}
+        + **handle** - an refresh handle used to create the JSON refresh token. 
 
         + **uri** - the refresh uri the Client will use to refresh.
 
-    + **access** - an object containing the parameters needed to access resources requiring proof of possession. Included if the type of access is "jose".
+    + **access** - an object containing the parameters needed to access resources requiring proof-of-possession. Included if the type of access is "jose".
         
         + **handle** - the access handle to use to create the JOSE access token.
 
@@ -540,13 +514,20 @@ There is an authorizations object in the completion response if there was an aut
 
 + **oauth_rich_list** - if there was an oauth_rich_list object in the initiation request, this object will contain a list matching each item in the list of the initiation request. Each response will be the same as the oauth_rich object. 
 
-### "claims" Object
+## "claims" Object
 
 There is a claims object in the completion response if there was a claims object in the initiation request. 
 
 + **oidc**
 
     - **id_token** - an OpenID Connect ID Token containing the claims the user consented to be released.
+
+
+REVISE
+
+return only new claims?
+optional
+
 
     - **userinfo** - if the Client has not previously received an id_token from the DS for the User, then this object contains a dictionary of the identity claims the user consented to be released, if any. If the Client has previously received an ID Token from the DS for the User and an id_token was in this request, the userinfo object only contains the attribute "redundant" set to the value true. If the Client would like to request additional claims about the User, the Client can make a request containing the userinfo object, and not containing the id_token object.    
 
@@ -557,33 +538,206 @@ There is a claims object in the completion response if there was a claims object
     The verified claims the user consented to be released. \[Editor: details TBD]
 
 
-### Access Types {#TokenTypes}
+## Access Types {#TokenTypes}
 
 There are two types of access:
 
-+ **bearer** - the DS provides a bearer access token that the Client can use to access resources per {{Bearer}}.
++ **bearer** - the DS provides a bearer access token that the Client can use to access an RS per {{Bearer}}.
 
-+ **jose** - the DS provides an access handle that the Client uses to create a JWS to access resources per {{POP}}.
++ **pop** - the DS provides an access handle that the Client presents in a proof-of-possession RS access request.
 
-The string values of the access types are case insensitive. 
+The string values of the access types are case insensitive.
 
-### Response Signing
 
-The DS MAY sign the response with a JWS per {{RFC7515}} and the private key matching the public key the DS defined as its completion response signing key.
+# Discovery
 
-### Response Encryption
+The Client obtains the following metadata about the DS prior to initiating a request:
 
-The DS MAY encrypt the response using the public key provided by the Client, using JWE per {{RFC7516}}.
+**Endpoint** - the endpoint of the DS.
 
-### Error Responses
+**"ds"** - the unique string identifier for the DS. Used in "ds" parameters of JOSE tokens.
 
-+ **408** Request Timeout. The DS may return a 408 code if it wants to terminate the completion request. The Client SHOULD generate a fresh completion token and make a new completion request.
+**Algorithms** - the asymetric cryptographic algorithms supported by the DS. 
 
-# Resource Request {#Resource}
+**Authorizations** - the authorizations the Client may ask for, if any.
 
-Once the Client has an access token or handle, the Client can access protected resources.
+**Identity Claims** - the identity claims the Client may request, if any, and what public keys the claims will be signed with.
 
-## Bearer Token Access {#Bearer}
+The client may also obtain information about how the DS will sign and/or encrypt the completion response, as well as any other metadata required for extensions to this protocol, as defined in those extension specifications.
+
+# JOSE Client Authentication {#ClientAuthN}
+
+The default mechanism for the Client to authenticate to the DS and the RS is signing a JSON document with JWS per {{RFC7515}}. The resulting tokens always use compact serialization.
+
+The completion request JSON is JWS signed and passed as the body of the POST. 
+
+The completion, refresh, and access handles are JWS signed resulting in JOSE completion, refresh, and access tokens. These JOSE tokens are passed in the HTTP Authorization header with the JOSE parameter.
+
+
+---- revise
+
+
+All calls from the Client to the DS are authenticated with the same private key and JWS header. This Client authenticates by signing the initiation request, the completion token, and the refresh token.
+
+When accessing resources that require proof-of-possession, the Client uses the same private key, but the DS supplied jwk object. The DS supplied jwk object is a certificate or certificate chain with a public key the resource trusts, so that the resource can verify the authorized client, allowing Registered and Dynamic Clients to access proof-of-possession resources the same way. 
+
+Each instance of a Registered Client MAY have its own private key and then include a certificate or certificate chain, or reference to either, in the JWS header jwk object that binds its public key to the public key the DS has for the Registered Client.
+
+___ stop revise
+
+## JOSE Headers
+
+A non-normative example of a JOSE header for a Registered Client using a key id to identify the public key matching its private key:
+
+    {
+        "alg": "ES256",
+        "typ": "JOSE",
+        "kid": "1"
+    }
+
+A non-normative example of a JOSE header for a Dynamic Client including the public key matching its private key:
+
+    {
+        "alg": "ES256",
+        "typ": "JOSE",
+        "jwk": {
+            "kty":"EC",
+            "crv":"P-256",
+            "x":"Kgl5DJSgLyV-G32osmLhFKxJ97FoMW0dZVEqDG-Cwo4",
+            "y":"GsL4mOM4x2e6iON8BHvRDQ6AgXAPnw0m0SfdlREV7i4"
+        }
+    }
+
+A non-normative example of a JOSE Access Token JOSE header for a Client accessing an RS that requires proof-of-possession:
+
+    {
+        "alg": "ES256",
+        "typ": "JOSE",
+        "jwk": {
+            "x5u": "https://ds.example/jwk/VBUEOIQA82" 
+        }
+    }
+
+Note that the "jwk" object in a JOSE access token is provided by the DS. This enables the DS to create a certificate binding the public key of the Client to the access handle that is accessible to the RS. This enables the RS to verify a Dynamic Client's key, and for the Client public key binding to the Client for the RS be independent of how the Client binds its public key for the DS.
+
+All JOSE headers MUST have:
++ the "alg" attribute.
++ the "typ" attribute set to "jose".
++ either a "kid" or "jwk" attribute.
+
+\[Editor: should we use indicate the type of token (completion, refresh, access) using "typ" or "cty"?]
+
+## JOSE Completion Token {#JOSECompletionToken}
+
+A non-normative example of a payload follows:
+
+    {
+        "ds":  "https://ds.example",
+        "iat": "1579046092",
+        "jti": "f6d72254-4f23-417f-b55e-14ad323b1dc1",
+        "handle": "eyJhb958.example.completion.handle.9yf3szM"
+    }
+
+The payload of the completion token contains:
+
+**ds** - the unique string identifier for the DS.
+
+**iat** - the time the completion token was created.
+
+**jti** - a unique identifier for the completion token per {{RFC7519}} section 4.1.7.
+
+**handle** the completion handle the DS provided the Client in the initiation response {{InitiationResponseJSON}}.
+
+## JOSE Refresh Token {#JOSERefreshToken}
+
+A JOSE Refresh Token payload is the same as the JOSE Completion Token except the "handle" value is a refresh handle the DS provided the Client in the completion response {{CompletionResponseJSON}}.
+
+## JOSE Access Token {#JOSEAccessToken}
+
+A JOSE Access Token payload is the same as the JOSE Completion Token except the "handle" value is an access handle the DS provided the Client in the completion response {{CompletionResponseJSON}}, and there is no "ds" parameter. 
+
+The "jwk" object in a JOSE access token header MUST be set to the "jwk" value the DS provided for the access handle. 
+
+A non-normative example of a JOSE access token header and payload follows:
+
+    "header": {
+        "alg": "ES256",
+        "typ": "JOSE",
+        "jwk": {
+            "x5u": "https://ds.example/jwk/VBUEOIQA82" 
+        }
+    }
+
+    "payload": {
+        "iat": "1579046092",
+        "jti": "XXXXXX",
+        "handle": "eyJhb958.example.access.handle.9yf3szM"
+    }
+
+## JOSE HTTP Authorization Header {#JOSEHTTP}
+
+The Client authenticates requests by setting the HTTP Authorization header to include the "JOSE" parameter, followed by one or more space characters, followed by the appropriate JOSE token. 
+
+A non-normative example:
+
+    Authorization: JOSE eyJhb.example.completion.token.haDwskpFDBW
+
+The JOSE completion token, JOSE refresh token, and the JOSE access token are all passed in this manner.
+
+## JOSE Token Verification
+
+TBD
+
+## Initiation Request {#InitiationRequest}
+
+The Client creates a JSON document per {{InitiationRequestJSON}}, signs it using JWS {{RFC7515}}, and sends the JWS token to the DS end point using HTTP POST, with a content-type of application/jose.
+
++ **Payload Encryption**
+
+The DS may require the initiation request to be encrypted. If so, the JWS token is encrypted per JWE {{RFC7516}} using the public key and algorithm provided by the DS.
+
+## Initiation Response {#InitiationResponse}
+
+If no interaction is required the DS will return a completion response per {{CompletionResponse}}, otherwise the DS will return an initiation response per {{InitiationResponseJSON}}. 
+
+If the DS wants the Client to start the interaction, an interaction object will be returned in the response.
+
++ **Error Responses**
+
+TBD
+
+## Completion Request {#CompletionRequest}
+
+The Client makes an HTTP GET call to the completion uri, setting the HTTP Authorization header per {{JOSEHTTP}} with the JOSE completion token.
+
+A non-normative completion request example:
+
+    GET /completion/ey7snHGs HTTP/2
+    Host: ds.example
+    Authorization: JOSE eyJhb.example.completion.token.haDwskpFDBW
+
+## Completion Response {#CompletionResponse}
+
+The DS verifies the JOSE completion token, and then provides a response according to what the User and/or RO have authorized if required. If no signature or encryption was required, the DS will respond with a JSON document with content-type set to application/json.
+
++ **Response Signing**
+
+The DS MAY sign the response with a JWS per {{RFC7515}} and the private key matching the public key the DS defined as its completion response signing key. The DS will respond with the content-type set to application/jose.
+
++ **Response Encryption**
+
+The DS MAY encrypt the response using the public key provided by the Client, using JWE per {{RFC7516}}. The DS will respond with the content-type set to application/jose.
+
++ **Error Responses**
+
+The DS will then response with the completion response, which are the results of the initiation request unless there was an error or the connection timed out with an HTTP 408 response.
+
+\[EDitor: mix in transport layer status with DS status? 200 response?] 
+
+
++ **408** Request Timeout. The DS may return a 408 code if it wants to terminate the completion request. The Client MUST generate a fresh completion token to retry the new completion request.
+
+## Bearer Token Access to RS {#Bearer}
 
 If the token type in the completion response was "bearer", then the Client can access the resource per Section 2.1 of {{RFC6750}}
 
@@ -591,9 +745,13 @@ A non-normative example follows:
 
     Authorization: bearer eyJJ2D6.example.access.token.mZf9pTSpA
 
-## Proof of Possession Access {#POP}
++ **Error Responses**
 
-If the token type in the completion response was "jose", then the Client creates a JOSE access token for each API call, signing it with its private key, but setting the jwk object in the JWS header to be the jwk value returned in the completion response {{CompletionResponse}}. This allows the DS to provide the resource with a certificate binding the Client's private key to the authorization granted. A non-normative example of the header and payload of the JWS follows:
+TBD
+
+## Proof-of-possession Access to RS {#POP}
+
+If the token type in the completion response was "pop", then the Client creates a JOSE access token for each API call, signing it with its private key, but setting the jwk object in the JWS header to be the jwk value returned in the completion response {{CompletionResponse}}. This allows the DS to provide the resource with a certificate binding the Client's private key to the authorization granted. A non-normative example of the header and payload of the JWS follows:
 
     "header": {
         "alg": "ES256",
@@ -617,73 +775,79 @@ The payload contains the following attributes:
 
 **handle** the access handle the DS provided the Client in the completion response {{CompletionResponse}}.
 
-The Client then sets the HTTP Authorization header in the resource request to have the "jose" parameter, followed by the JOSE access token. A non-normative example follows:
+The Client then sets the HTTP Authorization header in the resource request to have the "jose" parameter, followed by one or more space characters, followed the JOSE access token. A non-normative example follows:
 
-    GET /calendar HTTP/1.3
+    GET /calendar HTTP/2
     Host: calendar.example
-    Authorization: JOSE eyJhbG.example.token.kwwQb958
+    Authorization: JOSE eyJhbG.example.JOSE.access.token.kwwQb958
 
-# Access Token or Handle Refresh {#Refresh}
++ **Error Responses**
 
-If the Client received a refresh handle and uri from the DS in the initiation response, and it wants a fresh access token or handle, it creates a refresh token using the refresh handle in the same manner that the Client creates a completion token {{CompletionToken}}.
+TBD
+
+## Access Refresh {#Refresh}
+
+If the Client received a refresh handle and uri from the DS in the initiation response, and it wants a fresh access token or handle, it creates a refresh token using the refresh handle in the same manner that the Client creates a completion token {{JOSECompletionToken}}.
 
 
-The Client then makes an HTTP GET call to the refresh uri, setting the HTTP Authorization header to have the JOSE parameter, followed by the refresh token.
-
+The Client then makes an HTTP GET call to the refresh uri, setting the HTTP Authorization header to have the JOSE parameter, followed by one or more space characters, followed by the refresh token. 
 The DS will then respond with a refresh response, that is of the same format of the object that contained the refresh handle and uri in the completion response {{CompletionResponse}}.
 
-A non-normative example of a refresh token header and payload:
-
-    "header": {
-        "alg": "ES256",
-        "typ": "JOSE",
-        "kid": "1"
-    }
-
-    "payload": {
-        "ds"        : "https://ds.example",
-        "iat"       : "1579046092",
-        "jti"       : "332c2348-f9ed-4278-98eb-7e39b20347ee",
-        "handle"    : "eyJhb.example.refresh.handle.9yf3szM",
-    }
 
 A non-normative example refresh request:
 
-    GET /refresh/eyJhb958 HTTP/1.3
+    GET /refresh/eyJhb958 HTTP/2
     Host: ds.example
     Authorization: JOSE eyJhbG.example.refresh.token.kwwQb958
 
-A non-normative example access handle refresh response:
+A non-normative example refresh response with an access handle:
 
     {
-        "scope"             : "read_calendar write_calendar",
-        "expires_in"        : "3600",
-        "type"              : "jose",
+        "scope"         : "read_calendar write_calendar",
+        "expires_in"    : "3600",
+        "type"          : "jose",
         "access": {
-            "handle"        : "ey.example.access.handle.9yf3iWszM",
+            "handle"    : "ey.example.access.handle.9yf3iWszM",
             "jwk": {
-                "x5u"       : "https://ds.example/jwk/VBUEOIQA82" 
+                "x5u"   : "https://ds.example/jwk/VBUEOIQA82" 
             }       
         },
         "refresh": {
-            "handle"        : "ey.example.refresh.handle.4SkjIi",
-            "uri"           : "https://ds.example/refresh/eyJl4FzM"
+            "handle"    : "ey.example.refresh.handle.4SkjIi",
+            "uri"       : "https://ds.example/refresh/eyJl4FzM"
         }
     }
 
-# Client Authentication {#ClientAuthN}
 
-All calls from the Client to the DS are authenticated with the same private key and JWS header. This Client authenticates by signing the initiation request, the completion token, and the refresh token.
+Elaborate on results
 
-When accessing resources that require proof of possession, the Client uses the same private key, but the DS supplied jwk object. The DS supplied jwk object is a certificate or certificate chain with a public key the resource trusts, so that the resource can verify the authorized client, allowing Registered and Unregistered Clients to access proof of possession resources the same way. 
+type
 
-Each instance of a Registered Client MAY have its own private key and then include a certificate or certificate chain, or reference to either, in the JWS header jwk object that binds its public key to the public key the DS has for the Registered Client.
+optional
+    scope
+    expires_in 
+    jwk
+    refresh
+    handle
+    uri
 
-# DS Initiated Authentication and Authorization
+If a new refresh handle and/or refresh uri is returned, the Client MUST use the new refresh handle and/or refresh uri
+
+\[Editor: are there other results relevant for {{RAR}}?]
+
++ **Error Responses**
+
+TBD
+
+
+# Error Messages {#ErrorMessages}
+
+
+# DS Initiated Sequence
 
 \[Editor: this is a straw man on how to support DS Initiated authentication, JIT provisioning, and authorization]
 
-There are a number of user experiences where the User starts at the DS, and then is redirected to the Client, which MUST be a Registered Client.
+There are a number of user experiences where the User starts at the DS, and then is redirected to the Client. The Client MUST be a Registered Client. , which MUST be a Registered Client.
 
 1. The User is at the DS and wants to use the Client.
 
@@ -691,49 +855,68 @@ There are a number of user experiences where the User starts at the DS, and then
 
 1. The DS redirects the User to a URL the Client has configured to accept DS initiated authentication, passing the completion handle and uri as query parameters "handle" and "uri" respectively. 
 
-1. The Client then creates a completion token and makes a completion request per {{CompletionRequest}}, and the DS responds per {{CompletionResponse}}.
+1. The Client then makes a completion request per {{CompletionRequest}}, and the DS responds with a completion response {{CompletionResponseJSON}} per {{CompletionResponse}}.
 
-The Client now has the identity claims for the User, and any authorizations. Client can perform just in time provisioning if it is a new User.
+The Client now has the identity claims for the User, and any authorizations. If Client policy permits, the Client can perform just in time provisioning if it is a new User to the Client.
+
+**DS Initiated Sequence Diagram**
+
+    +--------+                                           +-----------+
+    |        |              +-------------+              |           |
+    |        |              |             |--------(1)-->|           |
+    |        |              |    User     |              |           |
+    |        |<-------------|             |<-------(2)---|           |
+    |        |              +-------------+              | Delegated |
+    | Client |                                           |   Server  |
+    |        |--(3)------- Completion Request ---------->|           |
+    |        |                                           |           |
+    |        |<-(4)------- Completion Response ----------|           |
+    |        |                                           |           |
+    +--------+                                           +-----------+
 
 # Extensibility
 
 This standard can be extended in a number of areas:
 
-## Client Authentication Mechanisms
++ **Client Authentication Mechanisms**
 
-An extension could define other mechanisms for the Client to authenticate. For example COSE for constrained environments using COAP, MTLS, HTTP signing if and when a standard is adopted and deployed.
+An extension could define other mechanisms for the Client to authenticate and replace JOSE in {{ClientAuthN}} with MTLS #REF?? or HTTP Signing #REF??. Constrained environments could use CBOR instead of JSON, and COSE instead of JOSE, and COAP instead of HTTP.
 
-## Initiation Request
+-- add in non-normative references
+
++ **Initiation Request**
 
 An additional top level object could be added to the initiation request payload if the DS can handle delegations other than authorizations or claims.
 
-### "client" Object
++ **"client" Object**
 
 Other information about the Client that the DS would require related to an extension.
 
-### "user" Object
++ **"user" Object**
 
 Other information about the Client that the DS would require related to an extension.
 
-### "authorizations" Object
++ **"authorizations" Object**
 
 Additional types of authorizations in addition to OAuth 2.0 scopes and RAR.
 
-### "claims" Object
++ **"claims" Object**
 
 Additional types of identity claims in addition to OpenID Connect claims and Verified Credentials.
 
-## Interaction
++ **Interaction**
 
 Additional mechanisms for the Client to start an interaction with the User.
 
-## Access Token Types
++ **Access Token Types**
 
 Additional mechanisms for the Client to present authorization to a resource.
 
+\[Editor: do we specify access token / handle introspection in this document, or leave that to an extension?]
+
+\[Editor: do we specify access token / handle revocation in this document, or leave that to an extension?]
+
 # Rational
-
-
 
 1. **Why is there only one mechanism for the Client to authenticate with the DS? Why not support other mechanisms?**
 
@@ -741,7 +924,7 @@ Additional mechanisms for the Client to present authorization to a resource.
 
 1. **Why is the Client authentication JWS rather than MTLS?**
 
-    MTLS cannot be used by an Unregistered Client. MTLS requires access below the application layer, that is often not available on some platforms. JWS is done at the application layer. Many DS deployments will be an application behind a proxy performing TLS, and there are risks in the proxy passing on the results of MTLS.
+    MTLS cannot be used by an Dynamic Client. MTLS requires access below the application layer, that is often not available on some platforms. JWS is done at the application layer. Many DS deployments will be an application behind a proxy performing TLS, and there are risks in the proxy passing on the results of MTLS.
 
 1. **Why is the Client authentication JWS rather than HTTP signing?**
 
@@ -749,7 +932,7 @@ Additional mechanisms for the Client to present authorization to a resource.
 
 1. **What are the advantages of using JWS for the Client to authenticate to the DS and a resource?**
     
-    Both Registered Clients, and Unregistered Clients can have a private key, eliminating the public Client issues in OAuth 2.0, as an Unregistered Client can create an ephemeral key pair. Using asymetric cryptography also allows each instance of a Registered Client to have its own private key if it can obtain a certificate binding its public key to the public key the DS has for the Client. Signed tokens can be passed to downstream components in a DS or resource to enable independent verification of the Client.
+    Both Registered Clients, and Dynamic Clients can have a private key, eliminating the public Client issues in OAuth 2.0, as an Dynamic Client can create an ephemeral key pair. Using asymetric cryptography also allows each instance of a Registered Client to have its own private key if it can obtain a certificate binding its public key to the public key the DS has for the Client. Signed tokens can be passed to downstream components in a DS or resource to enable independent verification of the Client.
 
 1. **Why does the DS not return parameters to the Client in the redirect url?**
 
@@ -772,6 +955,8 @@ Additional mechanisms for the Client to present authorization to a resource.
 1. **Why do is there still a Client ID? Could we not use a fingerprint of the public key to identify the Client?**
 
     When supporting Clients, it is useful to be able to refer to a permanent identifier for a Registered Client. Using a fingerprint or public key to identify the Client has the Client identifier change every time the key is rotated. A DS logging Client activity will have a single identifier to track a Client. Having a Client ID eases a transition to this protocol from OAuth 2.0.
+
+1. **Why have both claims and authorizations?**
 
 # Acknowledgments
 
