@@ -2,7 +2,7 @@
 
 This is the working area for the individual Internet-Draft, "The XAuth Protocol".
 
-* [Editor's Copy](https://dickhardt.github.io/hardt-xauth-protocol/draft-hardt-DIDAP-protocol.html)
+* [Editor's Copy](https://dickhardt.github.io/hardt-xauth-protocol/draft-hardt-xauth-protocol.html)
 * [Individual Draft](https://tools.ietf.org/html/draft-hardt-xauth-protocol) -- NOT YET THERE!
 
 ## Building the Draft
@@ -20,7 +20,7 @@ This requires that you have the necessary software installed.  See
 ## Contributing
 
 See the
-[guidelines for contributions](https://github.com/dickhardt/hardt-DIDAP-protocol/blob/master/CONTRIBUTING.md).
+[guidelines for contributions](https://github.com/dickhardt/hardt-xauth-protocol/blob/master/CONTRIBUTING.md).
 
 ## auto reloading on Mac OS
 Notes so I remember how to do this! :)
