@@ -1,9 +1,9 @@
-# Digital IDentity and Authorization protocol
+# The XAuth Protocol
 
-This is the working area for the individual Internet-Draft, "Digital IDentity and Authorization protocol".
+This is the working area for the individual Internet-Draft, "The XAuth Protocol".
 
-* [Editor's Copy](https://dickhardt.github.io/hardt-DIDAP-protocol/draft-hardt-DIDAP-protocol.html)
-* [Individual Draft](https://tools.ietf.org/html/draft-hardt-DIDAP-protocol) -- NOT YET THERE!
+* [Editor's Copy](https://dickhardt.github.io/hardt-xauth-protocol/draft-hardt-DIDAP-protocol.html)
+* [Individual Draft](https://tools.ietf.org/html/draft-hardt-xauth-protocol) -- NOT YET THERE!
 
 ## Building the Draft
 
@@ -30,4 +30,4 @@ Notes so I remember how to do this! :)
 
     watchexec -c make
 
-    reload -b -s draft-hardt-DIDAP-protocol.html 
+    reload -b -s draft-hardt-xauth-protocol.html 
