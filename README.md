@@ -2,8 +2,8 @@
 
 This is the working area for the individual Internet-Draft, "Digital IDentity and Authorization protocol".
 
-* [Editor's Copy](https://dickhardt.github.io/hardt-DIDAP-protocol/draft-hardt-DIDAP-protocol.html)
-* [Individual Draft](https://tools.ietf.org/html/draft-hardt-DIDAP-protocol) -- NOT YET THERE!
+* [Editor's Copy](https://dickhardt.github.io/hardt-xAuth-protocol/draft-hardt-xAuth-protocol.html)
+* [Individual Draft](https://tools.ietf.org/html/draft-hardt-xAuth-protocol) -- NOT YET THERE!
 
 ## Building the Draft
 
@@ -20,7 +20,7 @@ This requires that you have the necessary software installed.  See
 ## Contributing
 
 See the
-[guidelines for contributions](https://github.com/dickhardt/hardt-DIDAP-protocol/blob/master/CONTRIBUTING.md).
+[guidelines for contributions](https://github.com/dickhardt/hardt-xAuth-protocol/blob/master/CONTRIBUTING.md).
 
 ## auto reloading on Mac OS
 Notes so I remember how to do this! :)
@@ -30,4 +30,4 @@ Notes so I remember how to do this! :)
 
     watchexec -c make
 
-    reload -b -s draft-hardt-DIDAP-protocol.html 
+    reload -b -s draft-hardt-xAuth-protocol.html 

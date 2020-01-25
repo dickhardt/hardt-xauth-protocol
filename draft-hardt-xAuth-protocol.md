@@ -1,5 +1,5 @@
 ---
-docname: draft-hardt-DIDAP-protocol-00
+docname: draft-hardt-xAuth-protocol-00
 title: Delegated Identity and Authorization protocol
 date: 2020-01-25
 
@@ -977,7 +977,7 @@ TBC
 
 # Document History
 
-## draft-hardt-DIDAP-protocol-00
+## draft-hardt-xAuth-protocol-00
 
 - Initial version
 
