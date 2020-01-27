@@ -27,6 +27,8 @@ Abstract
 
    [Editor: suggestions on how to improve this are welcome!]
 
+   [Editor: suggestions for other names than XAuth are welcome!]
+
 Note to Readers
 
    Source for this draft and an issue tracker can be found at
