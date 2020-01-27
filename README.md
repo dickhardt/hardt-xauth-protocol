@@ -3,7 +3,7 @@
 This is the working area for the individual Internet-Draft, "The XAuth Protocol".
 
 * [Editor's Copy](https://dickhardt.github.io/hardt-xauth-protocol/draft-hardt-xauth-protocol.html)
-* [Individual Draft](https://tools.ietf.org/html/draft-hardt-xauth-protocol) -- NOT YET THERE!
+* [Individual Draft](https://tools.ietf.org/html/draft-hardt-xauth-protocol)
 
 ## Building the Draft
 
