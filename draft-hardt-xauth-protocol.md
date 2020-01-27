@@ -340,9 +340,9 @@ The user object is optional.
 
 + **oidc** - is an object containing both the "iss" and "sub" attributes from an OpenID Connect ID Token per {{OIDC}} Section 2.
 
-The user and identifiers objects MAY be included to improve the user experience by the AS. The AS MUST authenticate the User independent of these values. Some AS deployments MAY allow the Client to provide the identifiers to discover if one or more of the identifers are linked to a  User at the AS.
+The user and identifiers objects MAY be included to improve the user experience by the AS. The AS MUST authenticate the User independent of these values.
 
-\[Editor: include full ID Token? multiple identifiers of the same type?]
+**discovery** - MUST contain the JSON true value. Indicates the Client requests the AS to return a "discovered" attribute in the initiation response if the AS has a User at the AS with one or more of the identifiers. This attribute is OPTIONAL. Supporting by the AS of the discovery attribute is OPTIONAL. The AS MAY return the TBD error if discovery is not supported, or ignore the request.
 
 ## "authorizations" Object
 
@@ -400,7 +400,7 @@ A non-normative example of an initiation response follows:
 
 ## "user" Object {#userObject}
 
-If identifiers were included in the initiation request, then the AS MAY return a "user" object with the "discovered" property set to the JSON true value if one or more of the identifiers provided in the initiation request identify a User at the AS, or the JSON false value if not. 
+If the initiation request included a discovery attribute, then the AS MAY return a "user" object with the "discovered" property set to the JSON value true if one or more of the identifiers provided in the initiation request identify a User at the AS, or the JSON value false if not. 
 
 \[Editor: reference a security consideration for this functionality.]
 
@@ -444,7 +444,6 @@ If the Client made a completion request when starting the interaction, the AS MA
 
 ## "qrcode" Type
 The Client will create a {{QR Code}} of the uri attribute of the interaction object and display the resulting graphic and the message attribute of the interaction object as a text string.
-
 
 # Completion Response JSON {#CompletionResponseJSON}
 
@@ -577,9 +576,9 @@ The default mechanism for the Client to authenticate to the AS and the RS is sig
 
 It is expected that extensions to this protocol that specify a different mechanism for the Client to authenticate, would over ride this section.
 
-The completion request JSON is JWS signed and passed as the body of the POST. 
+The completion request JSON is signed with JWS and passed as the body of the POST. 
 
-The completion, refresh, and access handles are JWS signed resulting in JOSE completion, refresh, and access tokens respectively. These JOSE tokens are passed in the HTTP Authorization header with the "JOSE" parameter per {{JOSEHTTP}}.
+The completion, refresh, and access handles are signed with JWS resulting in JOSE completion, refresh, and access tokens respectively. These JOSE tokens are passed in the HTTP Authorization header with the "JOSE" parameter per {{JOSEHTTP}}.
 
 The Client will use the same private key to create all tokens. 
 
@@ -899,24 +898,25 @@ The AS MAY respond with one of the following errors defined in {{ErrorMessages}}
 
     TBD
 
-# AS Initiated Sequence
+# AS Initiated Sequence {#ASInitiatedSequence}
 
-\[Editor: this is a straw man on how to support AS initiated: authentication; just-in-time (JIT) provisioning; and authorization]
+\[Editor: AS initiated flows have been challenging to implement as OAuth 2.0 did not directly support them, so deployments bounced back and forth between the Client and AS to create a Client initiated flow. Here is a proposal to support AS initiated: authentication; just-in-time (JIT) provisioning; and authorization]
 
-There are a number of use cases where the User starts at the AS, and then based on User input, the AS redirects to a Client, and the User would like to then utilize the Client.
+In this sequence the User starts at the AS, and then based on User input, the AS redirects the User to a Client, passing an initiation token {{InitiationToken}}, and then the Client retrieves authorizations and/or identity claims about the User. The Client MUST be a Registered Client. The sequence follows:
 
+1. The User is interacting at the AS and wants to use the Client, and provide the Client identity claims and/or authorizations from the AS that the Client has pre-configured.
 
-1. The User is at the AS and wants to use the Client.
+2. The AS creates a completion handle and uri representing the identity claims and authorizations to be provided to the Client. The AS creates an initiation token containing the AS identifier, the completion handle, and the completion uri.
 
-1. The AS creates a completion handle and uri representing the User, any identity claims the User has consented to be shared with the Client, any authorizations the User or RO have consented to be shared with the Client, and the Client. 
+3. The AS redirects the User to a URI the Client has configured to accept initiation tokens, passing the initiation token as a query parameters with the name "token".
 
-1. The AS redirects the User to a URL the Client has configured to accept AS initiated authentication, passing the completion handle and uri as query parameters "handle" and "uri" respectively. 
+4. The Client verifies the initiation token.
 
-1. The Client then makes a completion request per {{CompletionRequest}}, and the AS responds with a completion response {{CompletionResponseJSON}} per {{CompletionResponse}}.
+5. The Client makes a completion request per {{CompletionRequest}}.
 
-Note the Client MUST be a Registered Client.
+6. The AS responds with a completion response JSON document {{CompletionResponseJSON}} per {{CompletionResponse}}.
 
-The Client now has the identity claims for the User and any authorizations. If Client policy permits, the Client can perform JIT provisioning if it is a new User to the Client.
+The Client now has the User identity claims and/or authorizations. If Client policy permits, the Client can perform JIT provisioning if the User is new to the Client.
 
 **AS Initiated Sequence Diagram**
 
@@ -924,16 +924,40 @@ The Client now has the identity claims for the User and any authorizations. If C
     |        |              |             |             |               |
     |        |              |    User     |-------(1)-->|               |
     |        |              |             |             |               |
-    | Client |              +-------------+             | Authorization |
-    |        |                 /\                       |               |
-    |        |<---------------/  \-- Completion --(2)---|     Server    |
-    |        |                       URI and Handle     |               |
+    |        |              +-------------+             |  (2)          |
+    |        |                    /\                    |               |
+    | Client |<--- initiation ---/  \-------------(3)---| Authorization |
+    |        |         token                            |    Server     |
+    |    (4) |                                          |               |
     |        |                                          |               |
-    |        |--(3)------- Completion Request --------->|               |
+    |        |--(5)------- Completion Request --------->|               |
     |        |                                          |               |
-    |        |<-(4)------- Completion Response ---------|               |
+    |        |<-(6)------- Completion Response ---------|               |
     |        |                                          |               | 
     +--------+                                          +---------------+
+
+## Initiation Token {#InitiationToken}
+
+A non-normative example of an initiation token payload follows:
+
+    {
+        "as": "https://as.example",
+        "completion": {
+            "handle" : "eyJhb958.example.completion.handle.9yf3szM",
+            "uri"    : "https://as.example/completion/ey7snHGs"
+        }
+    }
+
+
++ **as** - the "as" identifier for the AS. This attribute is REQUIRED.
+
++ **completion** - the completion object has the following attributes:
+
+    + **handle** - the completion handle. This attribute is REQUIRED.
+
+    + **uri** - the completion URI. This attribute is REQUIRED.
+
+The initiation token is signed with JWS and uses the compact serialization. 
 
 # Extensibility
 
@@ -991,7 +1015,7 @@ Additional mechanisms for the Client to present authorization to a resource.
 
 1. **What are the advantages of using JOSE for the Client to authenticate to the AS and a resource?**
     
-    Both Registered Clients and Dynamic Clients can have a private key, eliminating the public Client issues in OAuth 2.0, as a Dynamic Client can create an ephemeral key pair. Using asymetric cryptography also allows each instance of a Registered Client to have its own private key if it can obtain a certificate binding its public key to the public key the AS has for the Client. Signed tokens can be passed to downstream components in a AS or RS to enable independent verification of the Client and its request.
+    Both Registered Clients and Dynamic Clients can have a private key, eliminating the public Client issues in OAuth 2.0, as a Dynamic Client can create an ephemeral key pair. Using asymetric cryptography also allows each instance of a Registered Client to have its own private key if it can obtain a certificate binding its public key to the public key the AS has for the Client. Signed tokens can be passed to downstream components in a AS or RS to enable independent verification of the Client and its request. The AS Initiated Sequence {{ASInitiatedSequence}} requires a URL safe parameter, and JOSE is URL safe.
 
 1. **Why does the AS not return parameters to the Client in the redirect url?**
 
