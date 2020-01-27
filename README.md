@@ -1,6 +1,6 @@
-# Digital IDentity and Authorization protocol
+# The XAuth Protocol
 
-This is the working area for the individual Internet-Draft, "Digital IDentity and Authorization protocol".
+This is the working area for the individual Internet-Draft, "The XAuth Protocol".
 
 * [Editor's Copy](https://dickhardt.github.io/hardt-xauth-protocol/draft-hardt-xauth-protocol.html)
 * [Individual Draft](https://tools.ietf.org/html/draft-hardt-xauth-protocol) -- NOT YET THERE!
