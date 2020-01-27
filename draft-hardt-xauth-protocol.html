@@ -1039,10 +1039,10 @@ table.left {
                 <p id="section-boilerplate.3-1.8.2.11.1"><a href="#section-8.11" class="xref">8.11</a>.  <a href="#name-completion-response" class="xref">Completion Response</a><a href="#section-boilerplate.3-1.8.2.11.1" class="pilcrow">¶</a></p>
 </li>
               <li class="toc ulEmpty" id="section-boilerplate.3-1.8.2.12">
-                <p id="section-boilerplate.3-1.8.2.12.1"><a href="#section-8.12" class="xref">8.12</a>.  <a href="#name-bearer-token-access-to-rs" class="xref">Bearer Token Access to RS</a><a href="#section-boilerplate.3-1.8.2.12.1" class="pilcrow">¶</a></p>
+                <p id="section-boilerplate.3-1.8.2.12.1"><a href="#section-8.12" class="xref">8.12</a>.  <a href="#name-bearer-token-rs-access" class="xref">Bearer Token RS Access</a><a href="#section-boilerplate.3-1.8.2.12.1" class="pilcrow">¶</a></p>
 </li>
               <li class="toc ulEmpty" id="section-boilerplate.3-1.8.2.13">
-                <p id="section-boilerplate.3-1.8.2.13.1"><a href="#section-8.13" class="xref">8.13</a>.  <a href="#name-proof-of-possession-access-" class="xref">Proof-of-possession Access to RS</a><a href="#section-boilerplate.3-1.8.2.13.1" class="pilcrow">¶</a></p>
+                <p id="section-boilerplate.3-1.8.2.13.1"><a href="#section-8.13" class="xref">8.13</a>.  <a href="#name-proof-of-possession-rs-acce" class="xref">Proof-of-possession RS Access</a><a href="#section-boilerplate.3-1.8.2.13.1" class="pilcrow">¶</a></p>
 </li>
               <li class="toc ulEmpty" id="section-boilerplate.3-1.8.2.14">
                 <p id="section-boilerplate.3-1.8.2.14.1"><a href="#section-8.14" class="xref">8.14</a>.  <a href="#name-access-refresh" class="xref">Access Refresh</a><a href="#section-boilerplate.3-1.8.2.14.1" class="pilcrow">¶</a></p>
@@ -2104,8 +2104,8 @@ TBD
 </div>
 <div id="Bearer">
 <section id="section-8.12">
-        <h3 id="name-bearer-token-access-to-rs">
-<a href="#section-8.12" class="section-number selfRef">8.12. </a><a href="#name-bearer-token-access-to-rs" class="section-name selfRef">Bearer Token Access to RS</a>
+        <h3 id="name-bearer-token-rs-access">
+<a href="#section-8.12" class="section-number selfRef">8.12. </a><a href="#name-bearer-token-rs-access" class="section-name selfRef">Bearer Token RS Access</a>
         </h3>
 <p id="section-8.12-1">If the access method in the completion response authorizations object <a href="#AuthorizationsObject" class="xref">Section 6.2</a> was "bearer", then the Client accesses the RS per Section 2.1 of <span>[<a href="#RFC6750" class="xref">RFC6750</a>]</span><a href="#section-8.12-1" class="pilcrow">¶</a></p>
 <p id="section-8.12-2">A non-normative example of the HTTP request headers follows:<a href="#section-8.12-2" class="pilcrow">¶</a></p>
@@ -2127,8 +2127,8 @@ Authorization: bearer eyJJ2D6.example.access.token.mZf9pTSpA
 </div>
 <div id="POP">
 <section id="section-8.13">
-        <h3 id="name-proof-of-possession-access-">
-<a href="#section-8.13" class="section-number selfRef">8.13. </a><a href="#name-proof-of-possession-access-" class="section-name selfRef">Proof-of-possession Access to RS</a>
+        <h3 id="name-proof-of-possession-rs-acce">
+<a href="#section-8.13" class="section-number selfRef">8.13. </a><a href="#name-proof-of-possession-rs-acce" class="section-name selfRef">Proof-of-possession RS Access</a>
         </h3>
 <p id="section-8.13-1">If the access method in the completion response authorizations object <a href="#AuthorizationsObject" class="xref">Section 6.2</a> was "pop", then the Client creates a JOSE access token per <a href="#JOSEAccessToken" class="xref">Section 8.4</a> for each call to the RS, setting the HTTP Authorization header per <a href="#JOSEHTTP" class="xref">Section 8.5</a> with the JOSE access token.<a href="#section-8.13-1" class="pilcrow">¶</a></p>
 <p id="section-8.13-2">A non-normative example of the HTTP request headers follows:<a href="#section-8.13-2" class="pilcrow">¶</a></p>

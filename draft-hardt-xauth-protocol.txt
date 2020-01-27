@@ -107,8 +107,8 @@ Table of Contents
        8.9.  Deletion Request
        8.10.  Completion Request
        8.11.  Completion Response
-       8.12.  Bearer Token Access to RS
-       8.13.  Proof-of-possession Access to RS
+       8.12.  Bearer Token RS Access
+       8.13.  Proof-of-possession RS Access
        8.14.  Access Refresh
    9.  Error Messages
    10.  AS Initiated Sequence
@@ -1098,7 +1098,7 @@ Table of Contents
 
    TBD
 
-8.12.  Bearer Token Access to RS
+8.12.  Bearer Token RS Access
 
    If the access method in the completion response authorizations object
    Section 6.2 was "bearer", then the Client accesses the RS per
@@ -1114,7 +1114,7 @@ Table of Contents
 
    TBD
 
-8.13.  Proof-of-possession Access to RS
+8.13.  Proof-of-possession RS Access
 
    If the access method in the completion response authorizations object
    Section 6.2 was "pop", then the Client creates a JOSE access token
