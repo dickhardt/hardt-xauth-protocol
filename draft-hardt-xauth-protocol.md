@@ -107,6 +107,8 @@ Client software often desires resources or identity claims that are managed inde
 
 \[Editor: suggestions on how to improve this are welcome!]
 
+\[Editor: suggestions for other names than XAuth are welcome!]
+
 --- middle
 
 # Introduction
