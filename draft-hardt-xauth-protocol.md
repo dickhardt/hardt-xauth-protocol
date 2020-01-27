@@ -1,7 +1,7 @@
 ---
 docname: draft-hardt-xauth-protocol-00
 title: The XAuth Protocol
-date: 2020-01-26
+date: 2020-01-27
 
 category: std
 ipr: trust200902
