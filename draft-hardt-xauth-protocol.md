@@ -826,7 +826,7 @@ The AS MAY respond with one of the following errors defined in {{ErrorMessages}}
     TBD
 
 
-## Bearer Token Access to RS {#Bearer}
+## Bearer Token RS Access {#Bearer}
 
 If the access method in the completion response authorizations object {{AuthorizationsObject}} was "bearer", then the Client accesses the RS per Section 2.1 of {{RFC6750}}
 
@@ -840,7 +840,7 @@ A non-normative example of the HTTP request headers follows:
 
 TBD
 
-## Proof-of-possession Access to RS {#POP}
+## Proof-of-possession RS Access {#POP}
 
 If the access method in the completion response authorizations object {{AuthorizationsObject}} was "pop", then the Client creates a JOSE access token per {{JOSEAccessToken}} for each call to the RS, setting the HTTP Authorization header per {{JOSEHTTP}} with the JOSE access token.
 
