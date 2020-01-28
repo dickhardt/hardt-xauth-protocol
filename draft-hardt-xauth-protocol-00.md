@@ -1,7 +1,8 @@
 ---
 docname: draft-hardt-xauth-protocol-00
 title: The XAuth Protocol
-date: 2020-01-28
+date: 2020-01-27
+
 category: std
 ipr: trust200902
 area: Security
@@ -368,9 +369,7 @@ The optional claims object contains one or more identity claims being requested.
 
 The contents of the userinfo and id_token objects are Claims as defined in {{OIDC}} Section 5. 
 
-+ **oidc2** - \[Editor: placeholder for an extended version of OIDC claims. Could be a different name]
-
-+ **vc** - \[Editor: define how W3C Verifiable Credentials {{W3C VC}} can be requested.]
+* vc - \[Editor: define how W3C Verifiable Credentials {{W3C VC}} can be requested.]
 
 ## Authorization Types {#AuthorizationTypes}
 
@@ -514,7 +513,7 @@ There is an authorizations object in the completion response if there was an aut
 
 + **authorization_details** - the authorization details granted. Only returned for "oauth_rich" and "oauth_rich_list".
 
-+ **method** - the access method: "bearer", "pop", or "jws". See {{AccessMethod}} for details.
++ **method** - the access method: "bearer" or "pop". See {{AccessMethod}} for details.
 
 + **token** - an access token for accessing the resource(s). Included if the access method is "bearer".
 
@@ -543,21 +542,17 @@ There is a claims object in the completion response if there was a claims object
 
     Claims are defined in {{OIDC}} Section 5.
 
-+ **oidc2** - \[Editor: placeholder for an extended version of OIDC claims. Could be a different name]
-
 + **vc**
 
     The verified claims the user consented to be released. \[Editor: details TBD]
 
-## Access Methods {#AccessMethod}
+## Access Types {#AccessMethod}
 
-The  are three methods the  of access to an RS:
+There are two types of access to an RS:
 
 + **bearer** - the AS provides a bearer access token that the Client can use to access an RS per {{Bearer}}.
 
 + **pop** - the AS provides an access handle that the Client presents in a proof-of-possession RS access request per {{POP}}.
-
-+ **jws** - the Client signs the JSON payload sent to the RS including in the payload an access handle provided by the AS per \[TBD]
 
 # Discovery
 
@@ -750,8 +745,6 @@ The payload of the JOSE access token contains:
 **jti** - a unique identifier for the JOSE access token.
 
 **handle** the access handle the AS provided the Client in the completion response {{CompletionResponseJSON}} or access refresh response {{Refresh}}.
-
-\[Editor: should we include the called URI in the token?]
 
 ## HTTP Authorization JOSE Header {#JOSEHTTP}
 
@@ -1077,13 +1070,6 @@ TBD
 ## draft-hardt-xauth-protocol-00
 
 - Initial version
-
-## draft-hardt-xauth-protocol-01
-
-- text clean up
-- added placeholder for extended OIDC claims
-- added "jws" method for accessing a resource.
-
 
 # Comparison with OAuth 2.0 and OpenID Connect
 
