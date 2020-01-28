@@ -222,7 +222,7 @@ Following is a non-normative JSON {{RFC8259}} document example where the Client 
 
     { 
         "as"    :"https://as.example",
-        "iat"   :"1579046092",
+        "iat"   :1579046092,
         "nonce" :"f6a60810-3d07-41ac-81e7-b958c0dd21e4",
         "client": {
             "display": {
@@ -258,7 +258,7 @@ Following is a non-normative example where the Client has previously authenticat
 
     { 
        "as"     :"https://as.example",
-        "iat"   :"1579046092",
+        "iat"   :1579046092,
         "nonce" :"0d1998d8-fbfa-4879-b942-85a88bff1f3b",
         "client": {
             "id"        : "di3872h34dkJW",
@@ -450,7 +450,7 @@ The Client will create a {{QR Code}} of the uri attribute of the interaction obj
 Example non-normative completion response JSON document for Example 1 in {{InitiationRequestJSON}}:
 
     { 
-        "iat":"15790460234",
+        "iat":15790460234,
         "nonce":"f6a60810-3d07-41ac-81e7-b958c0dd21e4",
         "authorizations": {
             "type"          : "oauth_scope",
@@ -473,7 +473,7 @@ Example non-normative completion response JSON document for Example 1 in {{Initi
 Example non-normative completion response JSON document for Example 2 in {{InitiationRequestJSON}}:
 
     {
-        "iat"   :"15790460234",
+        "iat"   :15790460234,
         "nonce" :"0d1998d8-fbfa-4879-b942-85a88bff1f3b",
         "authorizations": {
             "type"          : "oauth_scope",
@@ -682,7 +682,7 @@ A non-normative example of a payload follows:
     {
         "as"    :"https://as.example",
         "type"  :"completion",
-        "iat"   :"1579046092",
+        "iat"   :1579046092,
         "jti"   :"f6d72254-4f23-417f-b55e-14ad323b1dc1",
         "handle":"eyJhb958.example.completion.handle.9yf3szM"
     }
@@ -706,7 +706,7 @@ A non-normative example of a payload follows:
     {
         "as"    :"https://as.example",
         "type"  :"refresh",
-        "iat"   :"1579049876",
+        "iat"   :1579049876,
         "jti"   :"4342046d-83c4-4725-8c72-e9a49245f791",
         "handle":"eyJhb958.example.refresh.handle.9yf3szM"
     }
@@ -731,7 +731,7 @@ A non-normative example of a payload follows:
 
     {
         "type"  :"access",
-        "iat"   :"1579046092",
+        "iat"   :1579046092,
         "jti"   :"5ef47057-08f9-4763-be8d-162824d43dfb",
         "handle":"eyJhb958.example.access.handle.9yf3szM"
     }
