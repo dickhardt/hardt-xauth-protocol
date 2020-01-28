@@ -4,8 +4,8 @@
 
 Network Working Group                                      D. Hardt, Ed.
 Internet-Draft                                                SignIn.Org
-Intended status: Standards Track                         27 January 2020
-Expires: 30 July 2020
+Intended status: Standards Track                         28 January 2020
+Expires: 31 July 2020
 
 
                            The XAuth Protocol
@@ -50,7 +50,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 30 July 2020.
+   This Internet-Draft will expire on 31 July 2020.
 
 Copyright Notice
 
@@ -93,7 +93,7 @@ Table of Contents
        6.1.  Top Level Attributes
        6.2.  "authorizations" Object
        6.3.  "claims" Object
-       6.4.  Access Types
+       6.4.  Access Methods
    7.  Discovery
    8.  JOSE Client Authentication
        8.1.  JOSE Headers
@@ -123,6 +123,7 @@ Table of Contents
        16.2.  Informative References
    Appendix A.  Document History
        A.1.  draft-hardt-xauth-protocol-00
+       A.2.  draft-hardt-xauth-protocol-01
    Appendix B.  Comparison with OAuth 2.0 and OpenID Connect
    Author's Address
 
@@ -523,7 +524,10 @@ Table of Contents
    The contents of the userinfo and id_token objects are Claims as
    defined in [OIDC] Section 5.
 
-   *  vc - [Editor: define how W3C Verifiable Credentials [W3C_VC] can
+   *  *oidc2* - [Editor: placeholder for an extended version of OIDC
+      claims.  Could be a different name]
+
+   *  *vc* - [Editor: define how W3C Verifiable Credentials [W3C_VC] can
       be requested.]
 
 3.6.  Authorization Types
@@ -712,8 +716,8 @@ Table of Contents
    *  *authorization_details* - the authorization details granted.  Only
       returned for "oauth_rich" and "oauth_rich_list".
 
-   *  *method* - the access method: "bearer" or "pop".  See Section 6.4
-      for details.
+   *  *method* - the access method: "bearer", "pop", or "jws".  See
+      Section 6.4 for details.
 
    *  *token* - an access token for accessing the resource(s).  Included
       if the access method is "bearer".
@@ -752,20 +756,26 @@ Table of Contents
 
       Claims are defined in [OIDC] Section 5.
 
+   *  *oidc2* - [Editor: placeholder for an extended version of OIDC
+      claims.  Could be a different name]
+
    *  *vc*
 
       The verified claims the user consented to be released.  [Editor:
       details TBD]
 
-6.4.  Access Types
+6.4.  Access Methods
 
-   There are two types of access to an RS:
+   The are three methods the of access to an RS:
 
    *  *bearer* - the AS provides a bearer access token that the Client
       can use to access an RS per Section 8.12.
 
    *  *pop* - the AS provides an access handle that the Client presents
       in a proof-of-possession RS access request per Section 8.13.
+
+   *  *jws* - the Client signs the JSON payload sent to the RS including
+      in the payload an access handle provided by the AS per [TBD]
 
 7.  Discovery
 
@@ -995,6 +1005,8 @@ Table of Contents
    *handle* the access handle the AS provided the Client in the
    completion response Section 6 or access refresh response
    Section 8.14.
+
+   [Editor: should we include the called URI in the token?]
 
 8.5.  HTTP Authorization JOSE Header
 
@@ -1558,6 +1570,14 @@ Appendix A.  Document History
 A.1.  draft-hardt-xauth-protocol-00
 
    *  Initial version
+
+A.2.  draft-hardt-xauth-protocol-01
+
+   *  text clean up
+
+   *  added placeholder for extended OIDC claims
+
+   *  added "jws" method for accessing a resource.
 
 Appendix B.  Comparison with OAuth 2.0 and OpenID Connect
 
