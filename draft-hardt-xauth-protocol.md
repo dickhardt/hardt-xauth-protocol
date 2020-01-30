@@ -45,6 +45,18 @@ normative:
       -
         ins: C. Mortimore
 
+  OIDC4IA:
+    title: OpenID Connect for Identity Assurance 1.0
+    target: https://openid.net/specs/openid-connect-4-identity-assurance-1_0.html
+    date: October 15, 2019
+    author:
+      -
+        ins: T. Lodderstedt
+      -
+        ins: D. Fett
+
+
+
 informative:
 
   RFC7049:
@@ -98,7 +110,19 @@ informative:
     date: December 13, 2019
     author:
       -
-        ins: J.Richer
+        ins: J. Richer
+
+  UTM: 
+    title: UAS Service Supplier Framework for Authentication and Authorization
+    target: https://utm.arc.nasa.gov/docs/2019-UTM_Framework-NASA-TM220364.pdf
+    date: September, 2019
+    author:
+      -
+        ins: J. Rios
+      -
+        ins: I. Smith
+      -
+        ins: P. Venkatesen
 
 --- abstract 
 
@@ -119,6 +143,8 @@ The technology landscape has changed since OAuth 2.0 was initially drafted. More
 Additional use cases are now being served with extensions to OAuth 2.0: OpenID Connect added support for authentication and releasing identity claims; {{RFC8252}} added support for native apps; {{RFC8628}} added support for smart devices; and support for {{browser based apps}} is being worked on. There are numerous efforts on adding proof-of-possession to resource access.
 
 This protocol simplifies the overall architectural model, takes advantage of today's technology landscape, provides support for all the widely deployed use cases, and offers numerous extension points. 
+
+The 
 
 While this protocol is not backwards compatible with OAuth 2.0, it strives to minimize the migration effort.
 
@@ -142,9 +168,11 @@ While this protocol is not backwards compatible with OAuth 2.0, it strives to mi
 
 ## Handles
 
-Handles are strings issued by the AS to the Client, that are opaque to the Client.
+Handles are strings issued by the AS to the Client that are opaque to the Client.
 
-- **completion handle** - represents the client request. Presented back to the AS in a completion request.
+- **authorization handle** - represents the client request. Presented back to the AS in an Authorization Request.
+
+- **authentication handle** - represents the client request for authentication first. Presented back to the AS in an Authentication Request, or in the subsequent AS Request.
 
 - **access handle** - represents the access the AS has granted the Client to the RS. The Client proves possession of its key when presenting an access handle to access an RS. The RS is able to understand the authorizations represented by the access handle directly, or through an introspection call. The RS is able to verify the access handle was issued to the Client that presented it.
 
@@ -162,58 +190,80 @@ When presenting any of the above handles, the Client always proves possession of
 
 - **ID Token** - an ID Token as defined in {{OIDC}} Section 2.
 
-- **Claims** - Claims as defined in {{OIDC}} Section 5.
-
 - **NumericDate** - a NumericDate as defined in {{RFC7519}} Section 2.
 
 ## Sequence {#Sequence}
 
-1. **AS Discovery** The Client discovers the AS end point, keys, supported claims and authorizations, and other capabilities.  Some, or all of this information could be manually preconfigured, or dynamically obtained. Dynamic AS discovery is out of scope of this document.
+1. **AS Discovery** ({{Discovery}}) The Client discovers the AS end point, keys, supported claims and authorizations, and other capabilities.  Some, or all of this information could be manually preconfigured, or dynamically obtained. Dynamic AS discovery is out of scope of this document.
  
-2. **Initiation Request** ({{InitiationRequest}}) The Client creates an initiation request ({{InitiationRequestJSON}}) for authorization to API resources and/or identity claims about the User and sends it with an HTTP POST to the AS endpoint. 
+2. **AS Request** ({{ASRequest}}) The Client creates an AS Request ({{ASRequestJSON}}) for authorization to API resources and/or identity claims about the User and sends it with an HTTP POST to the AS endpoint. The Client includes requests authentication first if the Client wants the AS to authenticate the User prior to requesting additional claims and authorizations.
 
-3. **Initiation Response**  ({{InitiationResponse}}) The AS processes the request and determines if it needs to interact with the RO or User. If interaction is not required, the AS returns a completion response ({{CompletionResponseJSON}}). If interaction is required the AS returns an initiation response ({{InitiationResponseJSON}}) that includes completion handle and uri, and interaction instructions if the AS wants the Client to start the interaction.
+3. **AS Request Evaluation**   The AS processes the request and determines if it needs to interact with the RO or User. If interaction is required, the AS returns an Interaction Response ({{InteractionResponseJSON}}), if no interaction is required it returns an AS Response ({{ASResponseJSON}}). 
 
-4. **Interaction** ({{Interaction}}) If the AS sent interaction instructions to the Client, the Client executes them. The AS then interacts with the User and/or RO to obtain authorization. The AS interaction with an RO may be asynchronous, and take time to complete.
+4. **Interaction Response**  ({{InteractionResponse}}) The AS will send an authentication object unless the Client sent authentication first, in which case the AS will send an authentication object. If the AS wants the Client to initiate the User interaction, it will include an interaction object. If authentication first, the Client will next send (6) Authentication Request, otherwise an Authorization Request. 
 
-5. **Completion Request** ({{CompletionRequest}}) The Client sends the completion handle to the completion uri. The Client may make the completion request while waiting for the interaction to complete. 
+5. **Authorization Request** ({{AuthorizationRequest}}) The Client creates an authorization request token {{AuthorizationRequestToken}} and does a GET of the authorization uri, after waiting for any authorization wait time. The Client then listens for (13) AS Response. 
 
-6. **Completion Response** ({{CompletionResponse}}) When any required interaction has been completed, the AS responds to the Client with a completion response ({{CompletionResponseJSON}}) containing authorized RS access tokens and User identity claims. The AS may provide refresh handles and uris for each access token if they are authorized. If proof-of-possession is required for accessing the RS, the AS will provide access handles instead of access tokens. If the AS has not completed the interaction, it will return a retry response for the Client to make a new completion request.
+6. **Authentication Request** ({{AuthenticationRequest}}) The Client creates an authentication request token and does a GET of the authentication uri. The Client then listens for (9) Authentication Response. 
 
-7. **Resource Request** ({{Bearer}} & {{POP}}) The Client uses an access token with the RS, or the access handle if proof-of-possession is required for access. 
+7. **Interaction** If the AS sent interaction instructions to the Client, the Client executes them.
 
-8. **Access Refresh** ({{Refresh}}) If the Client received a refresh handle and uri, it sends the refresh handle to the refresh uri, and receives a fresh access token or handle.
+8. **User Authentication** The AS authenticates the User. If Client requested authentication first, the AS responds to the Authentication Request with an (9) Authentication Response, otherwise the AS performs any needed authorizations per step (10).
+
+9. **Authentication Response** ({{AuthenticationResponse}}) The AS sends an AS Response containing the identity claims the Client requested.
+
+10. **AS Request 2**  The Client uses the returned identity claims to look up the User in its internal database and determines what, if any, claims and/or authorizations it would like to request and includes them in a new AS Request, as well as the authentication handle. If Client wants not additional claims and/or authorizations, the Client sets the claims object to the JSON null value. The Client then listens for (13) AS Response.
+
+11. **Authorization** If required, the AS interacts with the User and/or RO to determine which of any of the authorizations and identity claims requests made by the Client are to be granted.
+
+12. **Redirect** If the Client did a full browser redirect to the AS, the AS redirects the User back to the redirect_uri supplied by the Client, otherwise the AS closes its popup window, or informs the User the interaction is complete.
+
+13. **AS Response** ({{ASResponse}}) The AS responds to the Client with a AS Response ({{ASResponseJSON}}) containing authorized RS access tokens and User identity claims. The AS may provide refresh handles and uris for each access token if they are authorized. If proof-of-possession is required for accessing the RS, the AS will provide access handles instead of access tokens. If the AS has not completed the interaction, it will instead return a retry response for the Client to make a new Authorization Request.
+
+14. **Resource Request** ({{Bearer}}, {{POP}}, & {{POPbody}}) The Client access the RS using a bearer token, a proof-of-possession token, or a signed request. 
+
+15. **Access Refresh** ({{Refresh}}) If the Client received a refresh handle and uri, it sends the refresh handle to the refresh uri, and receives a fresh access token or handle.
 
 **Sequence Diagram**
 
     +--------+                                           +---------------+
-    |        |<-(1)------- Discovery ------------------->|               |
+    |        |<-(1)------- Discovery ------------------->| Authorization |
+    |        |                                           |    Server     |
+    |        |--(2)------- AS Request ------------------>|               |
+    |        |                                           | (3) Request   |
+    |        |                                           |    Evaluation |
+    |        |<-(4)------- Interaction Response ---------|               |
     |        |                                           |               |
-    |        |--(2)------- Initiation Request ---------->|               |
+    |        |--(5)------- Authorization Request ------->| -------+      |
+    |        |               or                          |        |      |
+    |        |--(6)------- Authentication Request ------>| ---+   |      |
+    |        |                                           |    |   |      |
+    |        |               +--------+                  |    |   |      |
+    |        |--(7)--------->|  User  |<------------(8)--|    |   |      |
+    |        |  Interaction  +--------+  Authentication  |    |   |      |
+    | Client |                                           |    |   |      |
+    |        |                                           |    |   |      |
+    |        |<-(9)------- Authentication Response ------|<---+   |      |
+    |        |                                           |        |      |
+    |        |--(10)------ AS Request 2 ---------------->| -------+      |
+    |        |                                           |        |      |
+    |        |               +--------+                  |        |      |
+    |        |<-(12)---------|  User  |<-----------(11)--|        |      |
+    |        |  Redirect     |  / RO  |   Authorization  |        |      |
+    |        |               +--------+                  |        |      |
+    |        |                                           |        |      |
+    |        |<-(13)------ AS Response ------------------|<-------+      |
     |        |                                           |               |
-    |        |<-(3)------- Initiation Response-----------|               |
+    |        |                             +----------+  |               |
+    |        |--(14)-- Resource Request -->| Resource |  |               |
+    |        |<------ Resource Response ---|  Server  |  |               |
+    |        |                             +----------+  |               |
     |        |                                           |               |
-    |        |              +-Interaction-+              |               |
-    |        |--(4)-------->|    User     |<-------------|               |
-    |        |              |  and/or RO  |<-------------|               |
-    |        |              +-------------+              | Authorization |
-    | Client |                                           |    Server     |
-    |        |--(5)------- Completion Request ---------->|               |
-    |        |                                           |               |
-    |        |<-(6)------- Completion Response ----------|               |
-    |        |                                           |               |
-    |        |                            +----------+   |               |
-    |        |--(7)-- Resource Request -->| Resource |   |               |
-    |        |                            |  Server  |   |               |
-    |        |<------ Resource Response --|          |   |               |
-    |        |                            +----------+   |               |
-    |        |                                           |               |
-    |        |--(8)------- Refresh Request ------------->|               |
-    |        |                                           |               |
+    |        |--(15)------- Refresh Request ------------>|               |
     |        |<----------- Refresh Response -------------|               |
     +--------+                                           +---------------+
 
-# Initiation Request JSON {#InitiationRequestJSON}
+# AS Request JSON {#ASRequestJSON}
 
 Following is a non-normative JSON {{RFC8259}} document example where the Client wants to interact with the User with a popup and is requesting identity claims about the User and read access to the User's contacts:
 
@@ -256,7 +306,7 @@ Following is a non-normative example where the Client has previously authenticat
     Example 2
 
     { 
-       "as"     :"https://as.example",
+        "as"    :"https://as.example",
         "iat"   :"1579046092",
         "nonce" :"0d1998d8-fbfa-4879-b942-85a88bff1f3b",
         "client": {
@@ -280,6 +330,49 @@ Following is a non-normative example where the Client has previously authenticat
         }
     }
 
+Following is a non-normative example where the Client is requesting authorization first:
+
+    Example 3
+
+    { 
+        "as"    :"https://as.example",
+        "iat"   :"1579046092",
+        "nonce" :"5c9360a5-9065-4f7b-a330-5713909e06c6",
+        "client": {
+            "id"        : "di3872h34dkJW",
+            "interaction": {
+                "type"  : "redirect",
+                "uri"   : "https://web.example/return"
+            }
+        },
+        "authentication": {
+            "first": true
+        },
+        "claims": { "oidc": { "id_token" : {} } }
+    }
+
+Following is a non-normative example where the Client previously requested authorization first (Example 3), the response was a new User, and now makes the following AS Request:
+
+    Example 4
+
+    { 
+        "as"    :"https://as.example",
+        "iat"   :"1579046092",
+        "nonce" :"0a74f51f-514a-4821-b71f-01c252223f2f",
+        "authentication": {
+            "handle": "eyJhb958.example.authentication.handle.9yf3szM"
+        },
+        "claims": {
+            "oidc": {
+                "userinfo" : {
+                    "email"          : { "essential" : true },
+                    "phone_number"   : { "essential" : true },
+                    "name"           : { "essential" : true },
+                    "picture"        : null
+                }
+            }
+        }
+    }
 
 ## Top Level Attributes
 
@@ -287,10 +380,10 @@ Following is a non-normative example where the Client has previously authenticat
 
 **iat** - the time of the request as a NumericDate.
 
-**nonce** - a unique identifier for this request. This attribute is REQUIRED. Note the completion response MUST contain a matching nonce attribute.
+**nonce** - a unique identifier for this request. This attribute is REQUIRED. Note the AS Response MUST contain a matching nonce attribute.
 
 ## "client" Object
-The client object MUST contain either the client_id attribute for Registered Clients, or the display object for Dynamic Clients. If the Client can interact with the User, then an interaction object MUST be included.
+The client object MUST contain either the client_id attribute for Registered Clients, or the display object for Dynamic Clients. If the Client can interact with the User, then an interaction object MUST be included. If there is an authentication handle, then the client object MUST not be included.
 
 **client_id** - the identifier the AS has for the Registered Client.
 
@@ -302,19 +395,13 @@ The client object MUST contain either the client_id attribute for Registered Cli
 
 + **uri** - a URI representing the Dynamic Client 
 
-\[Editor: a max length for the name?]
+\[Editor: a max length for the URI?]
 
 The name and uri will be displayed by the AS when prompting for authorization.
 
 **interaction** - the interaction object contains the type of interaction the Client will provide the User. Other attributes are dependent on the interaction type value.
 
-+ **type** - contains one of the following values. Types are listed from highest to lowest fidelity. The interaction URI is the value returned by the AS in the initiation response interaction object {{interactionObject}}, if a User interaction is required by the AS.
-
-    + **popup** - the Client will load the interaction URI in a modal popup window. The AS will close the window when the interaction is complete.
-
-    + **redirect** - the Client will redirect the user agent to the interaction URI provided by the AS. The AS will redirect to the redirect_uri when the interaction is completed.
-
-    + **qrcode** - the Client will convert the interaction URI to a QR Code per {{QR Code}} and display it to the User, along with a text message. The User will scan the QR Code and/or follow the message instructions.
++ **type** - contains one of the following values: "popup", "redirect", or "qrcode". Details in {{InteractionType}}. 
 
 + **redirect_uri** - this attribute is included if the type is "redirect". It is the URI that the Client requests the AS to redirect the User to after the AS has completed interacting with the User. If the Client manages session state in URIs, then the redirect_uri should contain that state.
 
@@ -326,7 +413,7 @@ The name and uri will be displayed by the AS when prompting for authorization.
 
 \[Editor: we may need to include interaction types for iOS and Android as the mobile OS APIs evolve.]
 
-\[Editor: does the Client include parameters if it wants the completion response signed and/or encrypted?]
+\[Editor: does the Client include parameters if it wants the AS Response signed and/or encrypted?]
 
 ## "user" Object
 The user object is optional. 
@@ -339,9 +426,17 @@ The user object is optional.
 
 + **oidc** - is an object containing both the "iss" and "sub" attributes from an OpenID Connect ID Token per {{OIDC}} Section 2.
 
-The user and identifiers objects MAY be included to improve the user experience by the AS. The AS MUST authenticate the User independent of these values.
+The user and identifiers objects MAY be included to improve the user experience by the AS. The AS MUST authenticate the User independent of these values. The user object MUST not be included if there is an authentication handle.
 
-**discovery** - MUST contain the JSON true value. Indicates the Client requests the AS to return a "discovered" attribute in the initiation response if the AS has a User at the AS with one or more of the identifiers. This attribute is OPTIONAL. Supporting by the AS of the discovery attribute is OPTIONAL. The AS MAY return the TBD error if discovery is not supported, or ignore the request.
+**discovery** - MUST contain the JSON true value. Indicates the Client requests the AS to return a "discovered" attribute in the Interaction Response if the AS has a User at the AS with one or more of the identifiers. This attribute is OPTIONAL. Support of the discovery attribute by the AS is OPTIONAL. The AS MAY return the \[TBD] error if discovery is not supported, or ignore the request.
+
+## "authentication" Object
+
+This OPTIONAL object MUST contain one of the following attributes:
+
++ **first** - Must have the JSON value true. Indicates the Client is requesting authentication first, and an authentication object in the Interaction Response. If present, the AS will ignore the authorizations object. \[Editor: any use case where the Client needs an authorization at Authentication?] The Client SHOULD limit the claims requested to only those needed to identify the User at the Client. \[Editor: this works if it is only a directed identifier, but consent would be required to return a verified phone or email. Hmmm.]
+
++ **handle** - the authentication handle. MUST be included in the AS Request following an Authentication Response.
 
 ## "authorizations" Object
 
@@ -368,7 +463,8 @@ The optional claims object contains one or more identity claims being requested.
 
 The contents of the userinfo and id_token objects are Claims as defined in {{OIDC}} Section 5. 
 
-+ **oidc2** - \[Editor: placeholder for an extended version of OIDC claims. Could be a different name]
+
++ **oidc4ia** - OpenID Connect for Identity Assurance claims request per {{OIDC4IA}}.
 
 + **vc** - \[Editor: define how W3C Verifiable Credentials {{W3C VC}} can be requested.]
 
@@ -380,9 +476,9 @@ The contents of the userinfo and id_token objects are Claims as defined in {{OID
 
 - **oauth_rich_list** - a list of rich authorization requests
 
-# Initiation Response JSON {#InitiationResponseJSON}
+# Interaction Response JSON {#InteractionResponseJSON}
 
-A non-normative example of an initiation response follows:
+A non-normative example of an Interaction Response follows:
 
     {
         "user": {
@@ -392,24 +488,26 @@ A non-normative example of an initiation response follows:
             "type"   : "popup",
             "uri"    : "https://as.example/endpoint/ey5gs32..."
         },
-        "completion": {
-            "handle" : "eyJhb958.example.completion.handle.9yf3szM",
-            "uri"    : "https://as.example/completion/ey7snHGs",
+        "authorization": {
+            "handle" : "eyJhb958.example.authorization.handle.9yf3szM",
+            "uri"    : "https://as.example/authorization/ey7snHGs",
             "wait"   : "10"
         }
     }
 
 ## "user" Object {#userObject}
 
-If the initiation request included a discovery attribute, then the AS MAY return a "user" object with the "discovered" property set to the JSON value true if one or more of the identifiers provided in the initiation request identify a User at the AS, or the JSON value false if not. 
+MUST contain one of "authorization" object, or "authentication" object.
+
++ **discovery** - if the AS Request included a discovery attribute, then the AS MAY return a "user" object with the "discovered" property set to the JSON value true if one or more of the identifiers provided in the AS Request identify a User at the AS, or the JSON value false if not. If the Client received a false return, it may
 
 \[Editor: reference a security consideration for this functionality.]
 
 ## "interaction" Object {#interactionObject}
 
-If the AS wants the Client to start the interaction, the AS MUST select one of the interaction mechanisms provided by the Client in the initiation request, and include the matching attribute in the interaction object: 
+If the AS wants the Client to start the interaction, the AS MUST select one of the interaction mechanisms provided by the Client in the AS Request, and include the matching attribute in the interaction object: 
 
-+ **type** - this MUST match the type provided by the Client in the initiation request client.interaction object.
++ **type** - this MUST match the type provided by the Client in the AS Request client.interaction object.
 
 + **uri** - the URI to interact with the User per the type. This may be a temporary short URL if the type is qrcode so that it is easy to scan. 
 
@@ -417,17 +515,25 @@ If the AS wants the Client to start the interaction, the AS MUST select one of t
 
 \[Editor: do we specify a maximum length for the uri and message so that a device knows the maximum it needs to support? A smart device may have limited screen real estate.]
 
-## "completion" Object
+## "authorization" Object
 
-The completion object has the following attributes:
+The authorization object has the following attributes:
 
-+ **handle** - the completion handle. This attribute is REQUIRED.
++ **handle** - the authorization handle. This attribute is REQUIRED.
 
-+ **uri** - the completion URI. This attribute is REQUIRED.
++ **uri** - the authorization URI. This attribute is REQUIRED.
 
-+ **wait** - the amount of time in integer seconds the Client MUST wait before making the completion request. This attribute is OPTIONAL.
++ **wait** - the amount of time in integer seconds the Client MUST wait before making the Authorization Request. This attribute is OPTIONAL.
 
-# Interaction Types {#Interaction}
+## "authentication" Object
+
+Returned if the Client requested authentication first. The authentication object has the following attributes:
+
++ **handle** - the authentication handle. This attribute is REQUIRED.
+
++ **uri** - the authentication URI. This attribute is REQUIRED.
+
+# Interaction Types {#InteractionType}
 If the AS wants the Client to initiate the interaction with the User, then the AS will return an interaction object {{interactionObject}} so that the Client can can hand off interactions with the User to the AS. The Client will initiate the interaction with the User in one of the following ways: 
 
 ## "popup" Type
@@ -436,19 +542,19 @@ The Client will create a new popup child browser window containing the value of 
 
 The AS will close the window when the interactions with the User are complete. \[Editor: confirm AS can do this still on all browsers, or does Client need to close] 
 
-The AS MAY respond to an outstanding completion request {{CompletionRequest}} before the popup window has been closed.
+The AS MAY respond to an outstanding Authorization Request {{AuthorizationRequest}} before the popup window has been closed.
 
 ## "redirect" Type
-The Client will redirect the User to the value of the uri attribute of the interaction object. When the AS interactions with the User are complete, the AS will redirect the User to the redirect_uri the Client provided in the initiation request.
+The Client will redirect the User to the value of the uri attribute of the interaction object. When the AS interactions with the User are complete, the AS will redirect the User to the redirect_uri the Client provided in the AS Request.
 
-If the Client made a completion request when starting the interaction, the AS MAY respond to the completion request {{CompletionRequest}} before the User has been redirected back to the Client. 
+If the Client made a Authorization Request when starting the interaction, the AS MAY respond to the Authorization Request {{AuthorizationRequest}} before the User has been redirected back to the Client. 
 
 ## "qrcode" Type
 The Client will create a {{QR Code}} of the uri attribute of the interaction object and display the resulting graphic and the message attribute of the interaction object as a text string.
 
-# Completion Response JSON {#CompletionResponseJSON}
+# AS Response JSON {#ASResponseJSON}
 
-Example non-normative completion response JSON document for Example 1 in {{InitiationRequestJSON}}:
+Example non-normative AS Response JSON document for Example 1 in {{ASRequestJSON}}:
 
     { 
         "iat":"15790460234",
@@ -471,7 +577,7 @@ Example non-normative completion response JSON document for Example 1 in {{Initi
         }
     }
 
-Example non-normative completion response JSON document for Example 2 in {{InitiationRequestJSON}}:
+Example non-normative AS Response JSON document for Example 2 in {{ASRequestJSON}}:
 
     {
         "iat"   :"15790460234",
@@ -500,11 +606,11 @@ Details of the JSON document:
 
 **iat** - the time of the response as a NumericDate.
 
-**nonce** - the nonce that was included in the initiation request JSON {{InitiationRequestJSON}}.
+**nonce** - the nonce that was included in the AS Request JSON {{ASRequestJSON}}.
 
 ## "authorizations" Object {#AuthorizationsObject}
 
-There is an authorizations object in the completion response if there was an authorizations object in the initiation request. 
+There is an authorizations object in the AS Response if there was an authorizations object in the AS Request. 
 
 + **type** - the type of claim request: "oauth_scope", "oauth_rich", or "oauth_rich_list". See {{AuthorizationTypes}} for details. 
 
@@ -534,7 +640,7 @@ There is an authorizations object in the completion response if there was an aut
 
 ## "claims" Object
 
-There is a claims object in the completion response if there was a claims object in the initiation request. 
+There is a claims object in the AS Response if there was a claims object in the AS Request. 
 
 + **oidc**
 
@@ -543,7 +649,7 @@ There is a claims object in the completion response if there was a claims object
 
     Claims are defined in {{OIDC}} Section 5.
 
-+ **oidc2** - \[Editor: placeholder for an extended version of OIDC claims. Could be a different name]
++ **oidc4ia** - OpenID Connect for Identity Assurance claims response per {{OIDC4IA}}.
 
 + **vc**
 
@@ -551,15 +657,17 @@ There is a claims object in the completion response if there was a claims object
 
 ## Access Methods {#AccessMethod}
 
-The  are three methods the  of access to an RS:
+The are three different methods for the Client to access an RS:
 
 + **bearer** - the AS provides a bearer access token that the Client can use to access an RS per {{Bearer}}.
 
 + **pop** - the AS provides an access handle that the Client presents in a proof-of-possession RS access request per {{POP}}.
 
-+ **jws** - the Client signs the JSON payload sent to the RS including in the payload an access handle provided by the AS per \[TBD]
++ **pop_body** - the Client signs the JSON payload sent to the RS per {{POPbody}}.
 
-# Discovery
+In the AS Response, the AS will return the method the Client MUST use when accessing the RS.
+
+# Discovery {#Discovery}
 
 The Client obtains the following metadata about the AS prior to initiating a request:
 
@@ -573,7 +681,7 @@ The Client obtains the following metadata about the AS prior to initiating a req
 
 **Identity Claims** - the identity claims the Client may request, if any, and what public keys the claims will be signed with.
 
-The client may also obtain information about how the AS will sign and/or encrypt the completion response, as well as any other metadata required for extensions to this protocol, as defined in those extension specifications.
+The client may also obtain information about how the AS will sign and/or encrypt the AS Response, as well as any other metadata required for extensions to this protocol, as defined in those extension specifications.
 
 # JOSE Client Authentication {#ClientAuthN}
 
@@ -581,9 +689,9 @@ The default mechanism for the Client to authenticate to the AS and the RS is sig
 
 It is expected that extensions to this protocol that specify a different mechanism for the Client to authenticate, would over ride this section.
 
-The completion request JSON is signed with JWS and passed as the body of the POST. 
+The Authorization Request JSON is signed with JWS and passed as the body of the POST. 
 
-The completion, refresh, and access handles are signed with JWS resulting in JOSE completion, refresh, and access tokens respectively. These JOSE tokens are passed in the HTTP Authorization header with the "JOSE" parameter per {{JOSEHTTP}}.
+The authorization, refresh, and access handles are signed with JWS resulting in authorization request, refresh, and access tokens respectively. These JOSE tokens are passed in the HTTP Authorization header with the "JOSE" parameter per {{JOSEHTTP}}.
 
 The Client will use the same private key to create all tokens. 
 
@@ -657,7 +765,7 @@ A non-normative example of a JOSE header for a Dynamic Client including the publ
         }
     }
 
-A non-normative example of a JOSE Access Token JOSE header for a Client accessing an RS that requires proof-of-possession:
+A non-normative example of a JOSE header for a JOSE access token for a Client accessing an RS that requires proof-of-possession:
 
     {
         "alg":"ES256",
@@ -678,33 +786,57 @@ All JOSE headers MUST have:
 + the "typ" attribute set to "jose".
 + either a "kid" or "jwk" attribute.
 
-\[Editor: should we use indicate the type of token (completion, refresh, access) using "typ" or "cty"?]
+\[Editor: should we use indicate the type of token (authorization, refresh, access) using "typ" or "cty"?]
 
-## JOSE Completion Token {#JOSECompletionToken}
+## Authentication Request Token {#AuthenticationRequestToken}
 
 A non-normative example of a payload follows:
 
     {
         "as"    :"https://as.example",
-        "type"  :"completion",
+        "type"  :"authentication",
         "iat"   :"1579046092",
         "jti"   :"f6d72254-4f23-417f-b55e-14ad323b1dc1",
-        "handle":"eyJhb958.example.completion.handle.9yf3szM"
+        "handle":"eyJhb958.example.authentication.handle.9yf3szM"
     }
 
-The payload of the completion token contains:
+The payload of the authentication token contains:
 
 **as** - the unique string identifier for the AS.
 
-**type** - the string "completion", indicating the type of token.
+**type** - the string "authentication", indicating the type of token.
 
-**iat** - the time the completion token was created as a NumericDate.
+**iat** - the time the authentication token was created as a NumericDate.
 
-**jti** - a unique identifier for the completion token per {{RFC7519}} section 4.1.7.
+**jti** - a unique identifier for the authentication token per {{RFC7519}} section 4.1.7.
 
-**handle** the completion handle the AS provided the Client in the initiation response {{InitiationResponseJSON}}.
+**handle** the authentication handle the AS provided the Client in the Interaction Response {{InteractionResponseJSON}}.
 
-## JOSE Refresh Token {#JOSERefreshToken}
+## Authorization Request Token {#AuthorizationRequestToken}
+
+A non-normative example of a payload follows:
+
+    {
+        "as"    :"https://as.example",
+        "type"  :"authorization",
+        "iat"   :"1579046092",
+        "jti"   :"f6d72254-4f23-417f-b55e-14ad323b1dc1",
+        "handle":"eyJhb958.example.authorization.handle.9yf3szM"
+    }
+
+The payload of the authorization token contains:
+
+**as** - the unique string identifier for the AS.
+
+**type** - the string "authorization", indicating the type of token.
+
+**iat** - the time the authorization token was created as a NumericDate.
+
+**jti** - a unique identifier for the authorization token per {{RFC7519}} section 4.1.7.
+
+**handle** the authorization handle the AS provided the Client in the Interaction Response {{InteractionResponseJSON}}.
+
+## Refresh Token {#RefreshRequestToken}
 
 A non-normative example of a payload follows:
 
@@ -716,17 +848,17 @@ A non-normative example of a payload follows:
         "handle":"eyJhb958.example.refresh.handle.9yf3szM"
     }
 
-The payload of the completion token contains:
+The payload of the authorization token contains:
 
 **as** - the unique string identifier for the AS.
 
 **type** - the string "refresh", indicating the type of token.
 
-**iat** - the time the JOSE refresh token was created as a NumericDate.
+**iat** - the time the refresh request token was created as a NumericDate.
 
-**jti** - a unique identifier for the JOSE refresh token.
+**jti** - a unique identifier for the refresh request token.
 
-**handle** the refresh handle the AS provided the Client in the completion response {{CompletionResponseJSON}} or access refresh response {{Refresh}}.
+**handle** the refresh handle the AS provided the Client in the AS Response {{ASResponseJSON}} or access refresh response {{Refresh}}.
 
 ## JOSE Access Token {#JOSEAccessToken}
 
@@ -749,7 +881,7 @@ The payload of the JOSE access token contains:
 
 **jti** - a unique identifier for the JOSE access token.
 
-**handle** the access handle the AS provided the Client in the completion response {{CompletionResponseJSON}} or access refresh response {{Refresh}}.
+**handle** the access handle the AS provided the Client in the AS Response {{ASResponseJSON}} or access refresh response {{Refresh}}.
 
 \[Editor: should we include the called URI in the token?]
 
@@ -759,25 +891,27 @@ The Client authenticates requests by setting the HTTP Authorization header to in
 
 A non-normative example:
 
-    Authorization: JOSE eyJhb.example.completion.token.haDwskpFDBW
+    Authorization: JOSE eyJhb.example.authorization.token.haDwskpFDBW
 
-The JOSE completion token, JOSE refresh token, and the JOSE access token are all passed in this manner.
+The authorization request token, refresh request token, and the JOSE access token are all passed in this manner.
 
 ## JOSE Token Verification
 
 TBD
 
-## Initiation Request {#InitiationRequest}
+## AS Request {#ASRequest}
 
-The Client creates a JSON document per {{InitiationRequestJSON}}, signs it using JWS {{RFC7515}}, and sends the JWS token to the AS end point using HTTP POST, with a content-type of application/jose.
+The Client creates a JSON document per {{ASRequestJSON}}, signs it using JWS {{RFC7515}}, and sends the JWS token to the AS end point using HTTP POST, with a content-type of application/jose.
 
 + **Payload Encryption**
 
-The AS may require the initiation request to be encrypted. If so, the JWS token is encrypted per JWE {{RFC7516}} using the public key and algorithm specified by the AS.
+The AS may require the AS Request to be encrypted. If so, the JWS token is encrypted per JWE {{RFC7516}} using the public key and algorithm specified by the AS.
 
-## Initiation Response {#InitiationResponse}
 
-If no interaction is required the AS will return a completion response per {{CompletionResponse}}, otherwise the AS will return an initiation response per {{InitiationResponseJSON}}. 
+## Interaction Response {#InteractionResponse} 
+If the Client set the authenticate_first flag, the response includes an authentication object, otherwise it includes an authorization object. If the AS wants the Client to initiate the User interaction, it sends an interaction object.
+
+If no interaction is required the AS will return an AS Response per {{ASResponse}}, otherwise the AS will return an Interaction Response per {{InteractionResponseJSON}}. 
 
 If the AS wants the Client to start the interaction, an interaction object will be returned in the response.
 
@@ -789,13 +923,13 @@ The AS MAY respond with one of the following errors defined in {{ErrorMessages}}
 
 ## Deletion Request {#DeletionRequest}
 
-The Client MAY delete an outstanding request using the completion token by making an HTTP DELETE call to the completion uri, setting the HTTP Authorization header per {{JOSEHTTP}} with the JOSE completion token. 
+The Client MAY delete an outstanding request using the authorization token by making an HTTP DELETE call to the authorization uri, setting the HTTP Authorization header per {{JOSEHTTP}} with the authorization request token. 
 
 A non-normative deletion request example:
 
-    DELETE /completion/ey7snHGs HTTP/2
+    DELETE /authorization/ey7snHGs HTTP/2
     Host: as.example
-    Authorization: JOSE eyJhb.example.completion.token.haDwskpFDBW
+    Authorization: JOSE eyJhb.example.authorization.token.haDwskpFDBW
 
 + **Error Responses**
 
@@ -803,23 +937,31 @@ The AS MAY respond with one of the following errors defined in {{ErrorMessages}}
 
     TBD
 
-## Completion Request {#CompletionRequest}
+## Authentication Request {#AuthenticationRequest}
 
-The Client makes an HTTP GET call to the completion uri, setting the HTTP Authorization header per {{JOSEHTTP}} with the JOSE completion token.
+{{AuthenticationRequestToken}}
 
-A non-normative completion request example:
+## Authentication Response {#AuthenticationResponse}
 
-    GET /completion/ey7snHGs HTTP/2
+
+## Authorization Request {#AuthorizationRequest}
+
+The Client makes an HTTP GET call to the authorization uri, setting the HTTP Authorization header per {{JOSEHTTP}} with the authorization request token.
+
+A non-normative Authorization Request example:
+
+    GET /authorization/ey7snHGs HTTP/2
     Host: as.example
-    Authorization: JOSE eyJhb.example.completion.token.haDwskpFDBW
+    Authorization: JOSE eyJhb.example.authorization.token.haDwskpFDBW
 
-## Completion Response {#CompletionResponse}
 
-The AS verifies the JOSE completion token, and then provides a response according to what the User and/or RO have authorized if required. If no signature or encryption was required, the AS will respond with a JSON document with content-type set to application/json.
+## AS Response {#ASResponse}
+
+The AS verifies the authorization request token, and then provides a response according to what the User and/or RO have authorized if required. If no signature or encryption was required, the AS will respond with a JSON document with content-type set to application/json.
 
 + **Response Signing**
 
-The AS MAY sign the response with a JWS per {{RFC7515}} and the private key matching the public key the AS defined as its completion response signing key. The AS will respond with the content-type set to application/jose.
+The AS MAY sign the response with a JWS per {{RFC7515}} and the private key matching the public key the AS defined as its AS Response signing key. The AS will respond with the content-type set to application/jose.
 
 + **Response Encryption**
 
@@ -834,7 +976,7 @@ The AS MAY respond with one of the following errors defined in {{ErrorMessages}}
 
 ## Bearer Token RS Access {#Bearer}
 
-If the access method in the completion response authorizations object {{AuthorizationsObject}} was "bearer", then the Client accesses the RS per Section 2.1 of {{RFC6750}}
+If the access method in the AS Response authorizations object {{AuthorizationsObject}} was "bearer", then the Client accesses the RS per Section 2.1 of {{RFC6750}}
 
 A non-normative example of the HTTP request headers follows:
 
@@ -848,7 +990,7 @@ TBD
 
 ## Proof-of-possession RS Access {#POP}
 
-If the access method in the completion response authorizations object {{AuthorizationsObject}} was "pop", then the Client creates a JOSE access token per {{JOSEAccessToken}} for each call to the RS, setting the HTTP Authorization header per {{JOSEHTTP}} with the JOSE access token.
+If the access method in the AS Response authorizations object {{AuthorizationsObject}} was "pop", then the Client creates a JOSE access token per {{JOSEAccessToken}} for each call to the RS, setting the HTTP Authorization header per {{JOSEHTTP}} with the JOSE access token.
 
 A non-normative example of the HTTP request headers follows:
 
@@ -860,9 +1002,17 @@ A non-normative example of the HTTP request headers follows:
 
 TBD
 
+## JOSE Body RS Access {#POPbody}
+
+If the access method in the AS Response authorizations object {{AuthorizationsObject}} was "pop_body", then the Client creates a JOSE access token per {{JOSEAccessToken}} for each call to the RS, setting the HTTP Authorization header per {{JOSEHTTP}} with the JOSE access token.
+
+The Client creates a JSON document per the RS requirements. The document MUST include the access handle. The CLient then signs the document using JWS [RFC7515], and sends the resulting compact notation JWS token to the RS end point using HTTP POST, with a content-type of application/jose. Note this is similar to the AS Request {{ASRequest}}.
+
+\[Editor: any isues here? Anything missing that MUST be in the payload? Would an HTTP Authorization header make sense?]
+
 ## Access Refresh {#Refresh}
 
-If the Client received a refresh handle and uri from the AS in the initiation response, and it wants a fresh access token or handle, it creates a JOSE refresh token per {{JOSERefreshToken}}.  setting the HTTP Authorization header per {{JOSEHTTP}} with the JOSE refresh token. The AS will then respond with a refresh response.
+If the Client received a refresh handle and uri from the AS in the Interaction Response, and it wants a fresh access token or handle, it creates a refresh request token per {{RefreshRequestToken}}.  setting the HTTP Authorization header per {{JOSEHTTP}} with the refresh request token. The AS will then respond with a refresh response.
 
 + **Refresh Response**
 
@@ -885,7 +1035,7 @@ A non-normative example refresh response with an access handle:
         }
     }
 
-The refresh response is the same as the authorizations object {{AuthorizationsObject}} in the completion response. 
+The refresh response is the same as the authorizations object {{AuthorizationsObject}} in the AS Response. 
 
 If a new refresh handle and/or refresh uri is returned, the Client MUST use the new refresh handle and/or refresh uri
 
@@ -899,9 +1049,9 @@ The AS MAY respond with one of the following errors defined in {{ErrorMessages}}
 
 # Error Messages {#ErrorMessages}
 
-    \[Editor: return "wait" time in completion response when AS wants Client to wait before retying a completion request.
-    The Client MUST generate a fresh completion token when retrying the completion request.
-    ] 
+\[Editor: return "wait" time in AS Response when AS wants Client to wait before retying a Authorization Request.
+The Client MUST generate a fresh authorization token when retrying the Authorization Request.
+] 
 
     TBD
 
@@ -913,15 +1063,15 @@ In this sequence the User starts at the AS, and then based on User input, the AS
 
 1. The User is interacting at the AS and wants to use the Client, and provide the Client identity claims and/or authorizations from the AS that the Client has pre-configured.
 
-2. The AS creates a completion handle and uri representing the identity claims and authorizations to be provided to the Client. The AS creates an initiation token containing the AS identifier, the completion handle, and the completion uri.
+2. The AS creates a authorization handle and uri representing the identity claims and authorizations to be provided to the Client. The AS creates an initiation token containing the AS identifier, the authorization handle, and the authorization uri.
 
 3. The AS redirects the User to a URI the Client has configured to accept initiation tokens, passing the initiation token as a query parameters with the name "token".
 
 4. The Client verifies the initiation token.
 
-5. The Client makes a completion request per {{CompletionRequest}}.
+5. The Client makes an Authorization Request per {{AuthorizationRequest}}.
 
-6. The AS responds with a completion response JSON document {{CompletionResponseJSON}} per {{CompletionResponse}}.
+6. The AS responds with an AS Response JSON document {{ASResponseJSON}} per {{ASResponse}}.
 
 The Client now has the User identity claims and/or authorizations. If Client policy permits, the Client can perform JIT provisioning if the User is new to the Client.
 
@@ -937,9 +1087,9 @@ The Client now has the User identity claims and/or authorizations. If Client pol
     |        |         token                            |    Server     |
     |    (4) |                                          |               |
     |        |                                          |               |
-    |        |--(5)------- Completion Request --------->|               |
+    |        |--(5)------- Authorization Request ------>|               |
     |        |                                          |               |
-    |        |<-(6)------- Completion Response ---------|               |
+    |        |<-(6)------- AS Response -----------------|               |
     |        |                                          |               | 
     +--------+                                          +---------------+
 
@@ -949,20 +1099,20 @@ A non-normative example of an initiation token payload follows:
 
     {
         "as": "https://as.example",
-        "completion": {
-            "handle" : "eyJhb958.example.completion.handle.9yf3szM",
-            "uri"    : "https://as.example/completion/ey7snHGs"
+        "authorization": {
+            "handle" : "eyJhb958.example.authorization.handle.9yf3szM",
+            "uri"    : "https://as.example/authorization/ey7snHGs"
         }
     }
 
 
 + **as** - the "as" identifier for the AS. This attribute is REQUIRED.
 
-+ **completion** - the completion object has the following attributes:
++ **authorization** - the authorization object has the following attributes:
 
-    + **handle** - the completion handle. This attribute is REQUIRED.
+    + **handle** - the authorization handle. This attribute is REQUIRED.
 
-    + **uri** - the completion URI. This attribute is REQUIRED.
+    + **uri** - the authorization URI. This attribute is REQUIRED.
 
 The initiation token is signed with JWS and uses the compact serialization. 
 
@@ -974,9 +1124,9 @@ This standard can be extended in a number of areas:
 
 An extension could define other mechanisms for the Client to authenticate and replace JOSE in {{ClientAuthN}} with Mutual TLS or HTTP Signing. Constrained environments could use CBOR {{RFC7049}} instead of JSON, and COSE {{RFC8152}} instead of JOSE, and CoAP {{RFC8323}} instead of HTTP/2.
 
-+ **Initiation Request**
++ **AS Request**
 
-An additional top level object could be added to the initiation request payload if the AS can manage delegations other than authorizations or claims, or some other functionality.
+An additional top level object could be added to the AS Request payload if the AS can manage delegations other than authorizations or claims, or some other functionality.
 
 + **"client" Object**
 
@@ -1001,6 +1151,11 @@ Additional mechanisms for the Client to start an interaction with the User.
 + **Access Methods**
 
 Additional mechanisms for the Client to present authorization to a resource.
+
+
++ **Continuous Authentication**
+
+An extension could define a new handle for the Client to use to regularly provide continuous authentication signals and receive responses.
 
 \[Editor: do we specify access token / handle introspection in this document, or leave that to an extension?]
 
@@ -1030,7 +1185,7 @@ Additional mechanisms for the Client to present authorization to a resource.
 
 1. **Why is there not a UserInfo endpoint as there is with OpenID Connect?**
 
-    In OpenID Connect, obtaining claims over the redirect or the Token Endpoint are problematic. The redirect is limited in size, and is not secure. The Token Endpoint is intended to return tokens, and is limited by the "application/x-www-form-urlencoded" format. A UserInfo endpoint returns "application/json", and can return rich claims, just as the completion uri in this protocol.
+    In OpenID Connect, obtaining claims over the redirect or the Token Endpoint are problematic. The redirect is limited in size, and is not secure. The Token Endpoint is intended to return tokens, and is limited by the "application/x-www-form-urlencoded" format. A UserInfo endpoint returns "application/json", and can return rich claims, just as the authorization uri in this protocol.
 
     \[Editor: is there some other reason to have the UserInfo endpoint? What are industry best practices now? ]
     
@@ -1046,13 +1201,22 @@ Additional mechanisms for the Client to present authorization to a resource.
 
     Knowing the AS supports HTTP/2 enables a Client to set up a connection faster. HTTP/2 will be more efficient when Clients have large numbers of access tokens and are frequently refreshing them at the AS as there will be less network traffic. Mandating TLS 1.3 similarly improves the performance and security of Clients and AS when setting up a TLS connection.
 
-1. **Why do some of the JSON objects only have one child, such as the identifiers object in the user object in the initiation request?**
+1. **Why do some of the JSON objects only have one child, such as the identifiers object in the user object in the AS Request?**
 
     It is difficult to forecast future use cases. Having more resolution may mean the difference between a simple extension, and a convoluted extension.
 
 1. **Why is the "iss" included in the "oidc" identifier object? Would the "sub" not be enough for the AS to identify the User?**
 
     The AS may use another AS to authenticate Users. The "iss" and "sub" combination is required to uniquely identify the User for any AS. 
+
+1. **Why complicate the sequence with authentication first?**
+
+    A common pattern is to use an AS to authenticate the User at the Client. The Client does not know a priori if the User is a new User, or a returning User. Asking a returning User to consent releasing identity claims and/or authorizations they have already provided is a poor User experience, as is sending the User back to the AS. The Client requesting identity first enables the Client to get a response from the AS while the AS is still interacting with the User, so that the Client can request any identity claims/or authorizations required or desired.
+
+1. **Why is there a JOSE Body access {{POPbody}} method for the Client?** 
+
+    There are numerous use cases where the RS wants non-repudiation and providence of API calls. For example, the UAS Service Supplier Framework for Authentication and Authorization {{UTM}}.
+
 
 # Acknowledgments
 
@@ -1081,9 +1245,14 @@ TBD
 ## draft-hardt-xauth-protocol-01
 
 - text clean up
-- added placeholder for extended OIDC claims
+- added OIDC4IA claims
 - added "jws" method for accessing a resource.
-
+- renamed Initiation Request -> AS Request
+- renamed Initiation Response -> Interaction Response
+- renamed Completion Request -> Authorization Request
+- renamed Completion Response -> AS Request
+- renamed completion handle -> authorization handle
+- added Authentication Request, Authentication Response, authentication handle
 
 # Comparison with OAuth 2.0 and OpenID Connect
 
