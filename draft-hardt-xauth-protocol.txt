@@ -4,12 +4,12 @@
 
 Network Working Group                                      D. Hardt, Ed.
 Internet-Draft                                                SignIn.Org
-Intended status: Standards Track                         28 January 2020
-Expires: 31 July 2020
+Intended status: Standards Track                         29 January 2020
+Expires: 1 August 2020
 
 
                            The XAuth Protocol
-                     draft-hardt-xauth-protocol-00
+                     draft-hardt-xauth-protocol-01
 
 Abstract
 
@@ -50,7 +50,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 31 July 2020.
+   This Internet-Draft will expire on 1 August 2020.
 
 Copyright Notice
 
