@@ -1,7 +1,7 @@
 ---
-docname: draft-hardt-xauth-protocol-01
+docname: draft-hardt-xauth-protocol-02
 title: The XAuth Protocol
-date: 2020-01-29
+date: 2020-02-05
 category: std
 ipr: trust200902
 area: Security
@@ -105,7 +105,7 @@ informative:
     date: February 1, 2015
 
   TxAuth:
-    title: Transactional Authorization
+    title: Transactional AuthN
     target: https://tools.ietf.org/html/draft-richer-transactional-authz-04
     date: December 13, 2019
     author:
@@ -113,8 +113,8 @@ informative:
         ins: J. Richer
 
   UTM: 
-    title: UAS Service Supplier Framework for Authentication and Authorization
-    target: https://utm.arc.nasa.gov/docs/2019-UTM_Framework-NASA-TM220364.pdf
+    title: UGS Service Supplier Framework for Authentication and AuthN
+    target: https://utm.arc.nasa.gov/docs/2019-UTM_Framework-NGSA-TM220364.pdf
     date: September, 2019
     author:
       -
@@ -126,17 +126,13 @@ informative:
 
 --- abstract 
 
-Client software often desires resources or identity claims that are managed independent of the client. This protocol allows a user and/or resource owner to delegate resource authorization and/or release of identity claims to an authorization server. Client software can then request access to resources and/or identity claims by calling the authorization server. The authorization server acquires consent and authorization from the user and/or resource owner if required, and then returns the authorization and identity claims that were approved. This protocol can be extended to support alternative client authentication mechanisms, authorizations, claims, and interactions.
-
-\[Editor: suggestions on how to improve this are welcome!]
-
-\[Editor: suggestions for other names than XAuth are welcome!]
+Client software often desires resources or identity claims that are managed independent of the client. This protocol allows a user and/or resource owner to delegate resource authorization and/or release of identity claims to an authorization server. Client software can then request access to resources and/or identity claims by calling the authorization server. The authorization server acquires consent and authorization from the user and/or resource owner if required, and then returns the authorization and identity claims that were approved. This protocol can be extended to support alternative authorizations, claims, interactions, and client authentication mechanisms.
 
 --- middle
 
 # Introduction
 
-This protocol supports the widely deployed use cases supported by OAuth 2.0 {{RFC6749}} & {{RFC6750}}, and OpenID Connect {{OIDC}}, an extension of OAuth 2.0, as well as other extensions, and other use cases that are not supported, such as requesting multiple authorizations in one request. This protocol also addresses many of the security issues in OAuth 2.0 by having parameters securely sent directly between parties, rather than via a browser redirection. 
+This protocol supports the widely deployed use cases supported by OAuth 2.0 {{RFC6749}} & {{RFC6750}}, and OpenID Connect {{OIDC}}, an extension of OAuth 2.0, as well as other extensions, and other use cases that are not supported, such Grant Requesting multiple authorizations in one request. This protocol also addresses many of the security issues in OAuth 2.0 by having parameters securely sent directly between parties, rather than via a browser redirection. 
 
 The technology landscape has changed since OAuth 2.0 was initially drafted. More interactions happen on mobile devices than PCs. Modern browsers now directly support asymetric cryptographic functions. Standards have emerged for signing and encrypting tokens with rich payloads (JOSE) that are widely deployed.
 
@@ -144,41 +140,51 @@ Additional use cases are now being served with extensions to OAuth 2.0: OpenID C
 
 This protocol simplifies the overall architectural model, takes advantage of today's technology landscape, provides support for all the widely deployed use cases, and offers numerous extension points. 
 
-The 
-
 While this protocol is not backwards compatible with OAuth 2.0, it strives to minimize the migration effort.
 
-# Protocol
+This protocol centers around a Grant, a representation of the user identity claims and/or resource authorizations the GS has granted the Client. The Grant is represented by the Grant URI. The Client can create, retrieve, update, and delete a Grant. 
+
+\[Editor: suggestions on how to improve this are welcome!]
+
+\[Editor: suggestions for other names than XAuth are welcome!]
+
+
+# Terminology
 
 ## Parties
 
-- **Authorization Server** (AS) - manages Client authorization to API resources and release of identity claims about the User. The AS may require explicit consent from the RO or User to provide these to the Client. 
+The parties and their relationships to each other:
 
-- **Client** - requests authorization to API resources, and/or identity claims about the User. There are two types of Clients: Registered Clients and Dynamic Clients. An AS may support only one or both types. All Clients have a key to authenticate with the AS.
+    +--------+                           +------------+
+    |  User  |                           |  Resource  |
+    |        |                           | Owner (RO) |
+    +--------+                           +------------+
+        |      \                       /      |
+        |       \                     /       |
+        |        \                   /        |
+        |         \                 /         |
+    +--------+     +---------------+     +------------+
+    | Client |---->|     Grant     | _ _ |  Resource  |
+    |        |<----|  Server (GS)  |     |   Server   |
+    |        |     +---------------+     |    (RS)    |
+    |        |-------------------------->|            |
+    |        |<--------------------------|            |
+    +--------+                           +------------+
 
-- **Registered Client** - a Client that has registered with the AS and has a Client ID to identify itself, and can prove it possesses a key that is linked to the Client ID. The AS may have different policies for what different Registered Clients can request. The Client MAY be interacting  with a User.
 
-- **Dynamic Client** - a Client that has not been registered with the AS, and each instance will generate it's own key pair so it can prove it is the same instance of the Client on subsequent requests. A single-page application with no server is an example of a Dynamic Client. The Client MUST be interacting with a User.
+- **User** - the person interacting with the Client who has delegated access to identity claims about themselves to the Grant Server (GS), and can authenticate at the GS.
 
-- **User** - the person who has delegated making identity claims about themselves to the AS, and is interacting with the Client.
+- **Client** - requests a Grant from the GS to access one or more Resource Servers (RSs), and/or identity claims about the User. The Client can create, retrieve, update, and delete a Grant. When a Grant is created, the Client receives from the GS the granted access token(s) for the RS(s), and identity claims about the User. The Client uses an access token to access the RS.  There are two types of Clients: Registered Clients and Dynamic Clients. All Clients have a key to authenticate with the Grant Server. 
 
-- **Resource Server** (RS) - has API resources that require an access token from the AS for access.
+- **Registered Client** - a Client that has registered with the GS and has a Client ID to identify itself, and can prove it possesses a key that is linked to the Client ID. The GS may have different policies for what different Registered Clients can request. A Registered Client MAY be interacting with a User.
 
-- **Resource Owner** (RO) - owns the RS, and has delegated RS access token creation to the AS. The RO may be the same entity as the User, or may be a different entity that the AS interacts with independent of the Client.
+- **Dynamic Client** - a Client that has not been registered with the GS, and each instance will generate it's own key pair so it can prove it is the same instance of the Client on subsequent requests. A single-page application with no server is an example of a Dynamic Client. A Dynamic Client MUST be interacting with a User.
 
-## Handles
+- **Grant Server** (GS) - manages Grants for access to APIs at RSs and release of identity claims about the User. The GS may require explicit consent from the RO or User to provide these to the Client. An GS may support Registered Clients and/or Dynamic Clients. The GS is a combination of the Authorization Server (AS) in OAuth 2.0, and the OpenID Provider (OP) in OpenID Connect.
 
-Handles are strings issued by the AS to the Client that are opaque to the Client.
+- **Resource Server** (RS) - has API resources that require an access token from the GS. Owned by the Resource Owner.
 
-- **authorization handle** - represents the client request. Presented back to the AS in an Authorization Request.
-
-- **authentication handle** - represents the client request for authentication first. Presented back to the AS in an Authentication Request, or in the subsequent AS Request.
-
-- **access handle** - represents the access the AS has granted the Client to the RS. The Client proves possession of its key when presenting an access handle to access an RS. The RS is able to understand the authorizations represented by the access handle directly, or through an introspection call. The RS is able to verify the access handle was issued to the Client that presented it.
-
-- **refresh handle** - represents the access the AS has granted the Client to a RS. Presented back to the AS when the Client wants a fresh access token or access handle.
-
-When presenting any of the above handles, the Client always proves possession of its key.
+- **Resource Owner** (RO) - owns the RS, and has delegated RS access management to the GS. The RO may be the same entity as the User, or may be a different entity that the GS interacts with independently.
 
 ## Reused Terms
 
@@ -186,105 +192,460 @@ When presenting any of the above handles, the Client always proves possession of
 
 - **Claims** - Claims as defined in {{OIDC}} Section 5.
 
-- **Client ID** - an AS unique identifier for a Registered Client as defined in {{RFC6749}} Section 2.2.
+- **Client ID** - a GS unique identifier for a Registered Client as defined in {{RFC6749}} Section 2.2.
 
 - **ID Token** - an ID Token as defined in {{OIDC}} Section 2.
 
 - **NumericDate** - a NumericDate as defined in {{RFC7519}} Section 2.
 
-## Sequence {#Sequence}
+- **authN** - short for authentication.
 
-1. **AS Discovery** ({{Discovery}}) The Client discovers the AS end point, keys, supported claims and authorizations, and other capabilities.  Some, or all of this information could be manually preconfigured, or dynamically obtained. Dynamic AS discovery is out of scope of this document.
+- **authZ** - short for authorization.
+
+## New Terms
+
+- **GS URI** - the endpoint at the GS the Client calls to create a Grant. The unique identifier for the GS.
+
+- **Grant** - the user identity claims and/or RS authorizations the GS has granted to the Client.
+
+- **Grant URI**  - the URI that represents the Grant. The Grant URI MUST start with the GS URI.
+
+- **Authorization** - the access granted by the RO to the Client. Contains an access token.
+
+- **AuthZ URI** - the URI that represents the Authorization the Client was granted by the RO. The AuthZ URI MUST start with the GS URI. The AuthZ URI is used to refresh, update, and delete an access token.
+
+- **interaction** - \[Editor: what do we really mean by this term?]
+
+
+
+# Sequences
+
+Before any sequence, the Client needs to be manually or programmatically configured for the GS. See GS Options {{GSoptions}} for details.
+
+\[Editor: the plethora of sequences are included to illustrate all the different actions. Many of these could potentially be moved to a use case document in the future.]
+
+## Create Grant {#CreateGrantSeq}
+
+The Client requests a Grant from the GS that requires User interaction:
+
+    +--------+                                  +-------+
+    | Client |                                  |  GS   |
+    |        |--(1)--- Create Grant ----------->|       |
+    |        |                                  |  (2)  |
+    |        |<--- Interaction Response ---(3)--|  eval |
+    |        |                                  |       |
+    |        |--(4)--- Read Grant ------------->|       |         +------+
+    |        |                                  |       |         | User |
+    |        |--(5)--- Interaction Transfer --- | - - - | ------->|      |
+    |        |                                  |       |<--(6)-->|      |
+    |        |                                  |       |  authN  |      |
+    |        |                                  |       |<--(7)-->|      |
+    |        |                                  |       |  authZ  |      |
+    |        |<--- Interaction Transfer ---(8)- | - - - | --------|      |
+    |        |                                  |       |         |      |
+    |        |<--------- Grant Response ---(9)--|       |         +------+
+    |        |                                  |       |
+    +--------+                                  +-------+
  
-2. **AS Request** ({{ASRequest}}) The Client creates an AS Request ({{ASRequestJSON}}) for authorization to API resources and/or identity claims about the User and sends it with an HTTP POST to the AS endpoint. The Client includes requests authentication first if the Client wants the AS to authenticate the User prior to requesting additional claims and authorizations.
+1. **Create Grant** The Client creates a Grant Request ({{CreateGrant}}) and sends it with an HTTP POST to the GS GS URI.
 
-3. **AS Request Evaluation**   The AS processes the request and determines if it needs to interact with the RO or User. If interaction is required, the AS returns an Interaction Response ({{InteractionResponseJSON}}), if no interaction is required it returns an AS Response ({{ASResponseJSON}}). 
+2. **Grant Request Evaluation**  The GS processes the request to determine if it will send a Interaction Response, Wait Response, or a Grant Response. The GS determines that interaction with the User is required and sends an Interaction Response. (For readability, this step is not described in the following sequences)
 
-4. **Interaction Response**  ({{InteractionResponse}}) The AS will send an authentication object unless the Client sent authentication first, in which case the AS will send an authentication object. If the AS wants the Client to initiate the User interaction, it will include an interaction object. If authentication first, the Client will next send (6) Authentication Request, otherwise an Authorization Request. 
+3. **Interaction Response**  The GS sends an Interaction Response ({{InteractionResponse}}) containing the Grant URI and an interaction object.
 
-5. **Authorization Request** ({{AuthorizationRequest}}) The Client creates an authorization request token {{AuthorizationRequestToken}} and does a GET of the authorization uri, after waiting for any authorization wait time. The Client then listens for (13) AS Response. 
+4. **Read Grant** The Client does an HTTP GET of the Grant URI ({{ReadGrant}}).
 
-6. **Authentication Request** ({{AuthenticationRequest}}) The Client creates an authentication request token and does a GET of the authentication uri. The Client then listens for (9) Authentication Response. 
+5. **Interaction Transfer** The Client transfers User interaction to the GS.
 
-7. **Interaction** If the AS sent interaction instructions to the Client, the Client executes them.
+6. **User Authentication** The GS authenticates the User.
 
-8. **User Authentication** The AS authenticates the User. If Client requested authentication first, the AS responds to the Authentication Request with an (9) Authentication Response, otherwise the AS performs any needed authorizations per step (10).
+7. **User Authorization** If required, the GS interacts with the User to determine which identity claims and/or authorizations in the Grant Request are to be granted.
 
-9. **Authentication Response** ({{AuthenticationResponse}}) The AS sends an AS Response containing the identity claims the Client requested.
+8. **Interaction Transfer** The GS transfers User interaction to the Client.
 
-10. **AS Request 2**  The Client uses the returned identity claims to look up the User in its internal database and determines what, if any, claims and/or authorizations it would like to request and includes them in a new AS Request, as well as the authentication handle. If Client wants not additional claims and/or authorizations, the Client sets the claims object to the JSON null value. The Client then listens for (13) AS Response.
+9. **Grant Response** The GS responds with a Grant Response ({{GrantResponse}}).
 
-11. **Authorization** If required, the AS interacts with the User and/or RO to determine which of any of the authorizations and identity claims requests made by the Client are to be granted.
 
-12. **Redirect** If the Client did a full browser redirect to the AS, the AS redirects the User back to the redirect_uri supplied by the Client, otherwise the AS closes its popup window, or informs the User the interaction is complete.
 
-13. **AS Response** ({{ASResponse}}) The AS responds to the Client with a AS Response ({{ASResponseJSON}}) containing authorized RS access tokens and User identity claims. The AS may provide refresh handles and uris for each access token if they are authorized. If proof-of-possession is required for accessing the RS, the AS will provide access handles instead of access tokens. If the AS has not completed the interaction, it will instead return a retry response for the Client to make a new Authorization Request.
+## Reciprocal Grant
 
-14. **Resource Request** ({{Bearer}}, {{POP}}, & {{POPbody}}) The Client access the RS using a bearer token, a proof-of-possession token, or a signed request. 
+Party A and Party B are both a Client and a GS, and each Client would like a Grant for the other GS. Party A starts off being the Client per Create Grant {{CreateGrantSeq}}. Party B then includes a Reciprocal Request in its Grant Response. Party A then gets authorization from the User and returns a Grant URI to Party B. Party A and B swap roles, and Party B's Client obtains the Grant from Party A's GS.
 
-15. **Access Refresh** ({{Refresh}}) If the Client received a refresh handle and uri, it sends the refresh handle to the refresh uri, and receives a fresh access token or handle.
 
-**Sequence Diagram**
+                    Party A                                    Party B
+                   +--------+                                 +--------+
+                   | Client |                                 |   GS   |
+                   ~ ~ ~ ~ ~ ~     Same as steps 1 - 8 of    ~ ~ ~ ~ ~ ~
+    +------+       |        |        Create Grant above       |        |
+    | User |       |        |                                 |        |
+    |      |<----- | - - -  | -- Interaction Transfer ------- |        |
+    |      |       |        |                                 |        |
+    |      |       |        |<------- Grant Response ---(1)---|        |
+    |      |       |        |      Reciprocal Grant Request   |        |
+    |      |<-(2)->|        |                                 |        |
+    |      | AuthZ |        |---(3)--- Update Grant --------->|        |
+    +------+       |        |   Reciprocal Grant Response     |        |
+                   |        |                                 |        |
+                   |        |<-- Empty Grant Response ---(4)--|        |
+                   |        |                                 |        |
+                   +--------+       (5) Swap Roles            +--------+
+                   |   GS   |                                 | Client |
+                   |        |<------------ Read Grant ---(6)--|        |
+                   |        |                                 |        |
+                   |        |--(7)--- Grant Response -------->|        |
+                   |        |                                 |        |
+                   +--------+                                 +--------+
 
-    +--------+                                           +---------------+
-    |        |<-(1)------- Discovery ------------------->| Authorization |
-    |        |                                           |    Server     |
-    |        |--(2)------- AS Request ------------------>|               |
-    |        |                                           | (3) Request   |
-    |        |                                           |    Evaluation |
-    |        |<-(4)------- Interaction Response ---------|               |
-    |        |                                           |               |
-    |        |--(5)------- Authorization Request ------->| -------+      |
-    |        |               or                          |        |      |
-    |        |--(6)------- Authentication Request ------>| ---+   |      |
-    |        |                                           |    |   |      |
-    |        |               +--------+                  |    |   |      |
-    |        |--(7)--------->|  User  |<------------(8)--|    |   |      |
-    |        |  Interaction  +--------+  Authentication  |    |   |      |
-    | Client |                                           |    |   |      |
-    |        |                                           |    |   |      |
-    |        |<-(9)------- Authentication Response ------|<---+   |      |
-    |        |                                           |        |      |
-    |        |--(10)------ AS Request 2 ---------------->| -------+      |
-    |        |                                           |        |      |
-    |        |               +--------+                  |        |      |
-    |        |<-(12)---------|  User  |<-----------(11)--|        |      |
-    |        |  Redirect     |  / RO  |   Authorization  |        |      |
-    |        |               +--------+                  |        |      |
-    |        |                                           |        |      |
-    |        |<-(13)------ AS Response ------------------|<-------+      |
-    |        |                                           |               |
-    |        |                             +----------+  |               |
-    |        |--(14)-- Resource Request -->| Resource |  |               |
-    |        |<------ Resource Response ---|  Server  |  |               |
-    |        |                             +----------+  |               |
-    |        |                                           |               |
-    |        |--(15)------- Refresh Request ------------>|               |
-    |        |<----------- Refresh Response -------------|               |
-    +--------+                                           +---------------+
 
-# AS Request JSON {#ASRequestJSON}
 
-Following is a non-normative JSON {{RFC8259}} document example where the Client wants to interact with the User with a popup and is requesting identity claims about the User and read access to the User's contacts:
+1. **Grant Response** Party B responds with a Grant Response including a Reciprocal Object {{ReciprocalRequest}} requesting its own Grant.
+
+2. **User Authorization** If required, Party A interacts with the User to determine which identity claims and/or authorizations in the Grant Request are to be granted to Party B.
+
+3. **Update Grant** Party A sends an Update Grant request containing the Grant URI in the Reciprocal object {{ReciprocalResponse}}. 
+
+4. **Grant Response** Party B responds with an Empty Grant Response as there were no other requests in the Update Grant.
+
+5. **Swap Roles** Party A now acts as a GS, Party B as a Client.
+
+4. **Read Grant** Party B does an HTTP GET of the Grant URI ({{ReadGrant}}).
+
+9. **Grant Response** Party A responds with a Grant Response ({{GrantResponse}}).
+
+
+## GS Initiated Grant {#GSInitiatedGrantSeq}
+
+The User is at the GS, and wants to interact with a Registered Client. The GS can redirect the User to the Client:
+
+    +--------+                                  +-------+         +------+
+    | Client |                                  |  GS   |         | User |
+    |        |                                  |       |<--(1)-->|      |
+    |        |                                  |       |         |      |
+    |        |<----- GS Initiation Redirect --- | - - - | --(2)---|      |
+    |   (3)  |                                  |       |         |      |
+    | verify |--(4)--- Read Grant ------------->|       |         +------+
+    |        |                                  |       |
+    |        |<--------- Grant Response --(5)---|       |
+    |        |                                  |       |
+    +--------+                                  +-------+
+
+
+1. **User Interaction** The GS interacts with the User to determine the Client and what identity claims and authorizations to provide. The GS creates a Grant and corresponding Grant URI.
+
+2. **GS Initiated Redirect** The GS redirects the User to the Client's interaction_uri, adding a query parameter with the name "Grant URI" and the value being the URL encoded Grant URI.
+
+3. **Client Verification** The Client verifies the Grant URI is from an GS the Client trusts, and starts with the GS GS URI.
+
+4. **Read Grant** The Client does an HTTP GET of the Grant URI ({{ReadGrant}}).
+
+5. **Grant Response** The GS responds with a Grant Response ({{GrantResponse}}).
+
+See {{GSInitiatedGrant}} for more details.
+
+## Create and Update
+
+The Client requests an identity claim to determine who the User is. Once the Client learns who the User is, and the Client updates the Grant for additional identity claims which the GS prompts the User for and returns to the Client. Once those are received, the Client updates the Grant with the remaining identity claims required.
+
+    +--------+                                  +-------+
+    | Client |                                  |  GS   |
+    |        |--(1)--- Create Grant ----------->|       |
+    |        |  "interaction"."keep":true       |       |
+    |        |                                  |       |
+    |        |<--- Interaction Response ---(2)--|       |
+    |        |                                  |       |
+    |        |--(3)--- Read Grant ------------->|       |         +------+
+    |        |                                  |       |         | User |
+    |        |--(4)--- Interaction Transfer --- | - - - | ------->|      |
+    |        |                                  |       |         |      |
+    |        |                                  |       |<--(5)-->|      |
+    |        |                                  |       |  authN  |      |
+    |        |<--------- Grant Response ---(6)--|       |         |      |
+    |  (7)   |                                  |       |         |      |
+    |  eval  |--(8)--- Update Grant ----------->|       |         |      |
+    |        |  "interaction"."keep":true       |       |<--(9)-->|      |
+    |        |                                  |       |  authZ  |      |
+    |        |<--------- Grant Response --(10)--|       |         |      |
+    |  (11)  |                                  |       |         |      |
+    |  eval  |--(12)-- Update Grant ----------->|       |         |      |
+    |        |  "interaction"."keep":false      |       |<--(13)->|      |
+    |        |                                  |       |  authZ  |      |
+    |        |                                  |       |         |      |
+    |        |<--- Interaction Transfer --(14)- | - - - | --------|      |
+    |        |                                  |       |         |      |
+    |        |<--------- Grant Response --(15)--|       |         +------+
+    |        |                                  |       |
+    +--------+                                  +-------+
+
+1. **Create Grant** The Client creates a Grant Request ({{CreateGrant}}) including an identity claim and "interaction"."keep":true, and sends it with an HTTP POST to the GS GS URI.
+
+2. **Interaction Response**  The GS sends an Interaction Response ({{InteractionResponse}}) containing the Grant URI, an interaction object, and "interaction"."keep":true.
+
+3. **Read Grant** The Client does an HTTP GET of the Grant URI ({{ReadGrant}}).
+
+4. **Interaction Transfer** The Client transfers User interaction to the GS.
+
+5. **User Authentication** The GS authenticates the User.
+
+6. **Grant Response** The GS responds with a Grant Response ({{GrantResponse}}) including the identity claim from User authentication and "interaction"."keep":true.
+
+7. **Grant Evaluation** The Client queries its User database and does not find a User record matching the identity claim. 
+
+8. **Update Grant** The Client creates an Update Grant Request ({{UpdateGrant}}) including the initial identity claims required and "interaction"."keep":true, and sends it with an HTTP PUT to the Grant URI.
+
+9. **User AuthN** The GS interacts with the User to determine which identity claims in the Update Grant Request are to be granted.
+
+10. **Grant Response** The GS responds with a Grant Response ({{GrantResponse}}) including the identity claims released by the User and "interaction"."keep":true.
+
+11. **Grant Evaluation** The Client evaluates the identity claims in the Grant Response and determines the remaining User identity claim required. 
+
+12. **Update Grant** The Client creates an Update Grant Request ({{UpdateGrant}}) including the remaining required identity claims and "interaction"."keep":false, and sends it with an HTTP PUT to the Grant URI.
+
+13. **User AuthZ** The GS interacts with the User to determine which identity claims in the Update Grant Request are to be granted.
+
+14. **Interaction Transfer** The GS transfers User interaction to the Client.
+
+15. **Grant Response** The GS responds with a Grant Response ({{GrantResponse}}) including the identity claims released by the User.
+
+
+## Create and Delete
+
+The Client requests an identity claim to determine who the User is. Once the Client learns who the User is, and the Client has all the identity claims and authorizations needed, the Client deletes the Grant which prompts the GS to transfer the interaction back to the Client.
+
+    +--------+                                  +-------+
+    | Client |                                  |  GS   |
+    |        |--(1)--- Create Grant ----------->|       |
+    |        |  "interaction"."keep":true       |       |
+    |        |                                  |       |
+    |        |<--- Interaction Response ---(2)--|       |
+    |        |                                  |       |
+    |        |--(3)--- Read Grant ------------->|       |         +------+
+    |        |                                  |       |         | User |
+    |        |--(4)--- Interaction Transfer --- | - - - | ------->|      |
+    |        |                                  |       |         |      |
+    |        |                                  |       |<--(5)-->|      |
+    |        |                                  |       |  authN  |      |
+    |        |<--------- Grant Response ---(6)--|       |         |      |
+    |  (7)   |                                  |       |         |      |
+    |  eval  |--(8)--- Delete Grant ----------->|       |         |      |
+    |        |<------- Delete Response ---------|       |         |      |
+    |        |                                  |       |         |      |
+    |        |<--- Interaction Transfer ---(9)- | - - - | --------|      |
+    |        |                                  |       |         |      |
+    +--------+                                  +-------+         +------+
+
+1. **Create Grant** The Client creates a Grant Request ({{CreateGrant}}) including an identity claim and "interaction"."keep":true, and sends it with an HTTP POST to the GS GS URI.
+
+2. **Interaction Response**  The GS sends an Interaction Response ({{InteractionResponse}}) containing the Grant URI, an interaction object, and "interaction"."keep":true.
+
+3. **Read Grant** The Client does an HTTP GET of the Grant URI ({{ReadGrant}}).
+
+4. **Interaction Transfer** The Client transfers User interaction to the GS.
+
+5. **User Authentication** The GS authenticates the User.
+
+6. **Grant Response** The GS responds with a Grant Response ({{GrantResponse}}) including the identity claim from User authentication and "interaction"."keep":true.
+
+7. **Grant Evaluation** The Client queries its User database and finds the User record matching the identity claim, and that no additional claims or authorizations are required. 
+
+8. **Delete Grant** The Client no longer needs the Grant and decides to Delete Grant ({{DeleteGrant}}) by sending an HTTP DELETE to the Grant URI. If the GS responds with success the Grant no longer exists.
+
+## Create, Discover, and Delete
+
+The Client wants to discover if the GS has a User with a given identifier. If not, it will not transfer interaction to the GS.
+
+    +--------+                                  +-------+
+    | Client |                                  |  GS   |
+    |        |--(1)--- Create Grant ----------->|       |
+    |        |  "user"."exists":true            |       |
+    |        |                                  |       |
+    |        |<--- Interaction Response ---(2)--|       |
+    |        |     "user"."exists":false        |       |
+    |        |                                  |       |
+    |        |--(3)--- Delete Grant ----------->|       |
+    |        |<------- Delete Response ---------|       |
+    |        |                                  |       |
+    +--------+                                  +-------+
+
+1. **Create Grant** The Client creates a Grant Request ({{CreateGrant}}) including an identity claim request, a User identifier, and "user"."exists":true. The Client sends it with an HTTP POST to the GS GS URI.
+
+2. **Interaction Response**  The GS sends an Interaction Response ({{InteractionResponse}}) containing the Grant URI, an interaction object, and "user"."exists":false.
+
+3. **Delete Grant** The Client determines the GS cannot fulfil its Grant Request, and decides to Delete Grant ({{DeleteGrant}}) by sending an HTTP DELETE to the Grant URI. If the GS responds with success the Grant no longer exists.
+
+
+
+## Create and Wait
+
+The Client wants access to resources that require the GS to interact with the RO, which may not happen immediately, so the GS instructs the Client to wait and check back later.
+
+    +--------+                                  +-------+
+    | Client |                                  |  GS   |        
+    |        |--(1)--- Create Grant ----------->|       |       
+    |        |                                  |       |
+    |        |<---------- Wait Response ---(2)--|       |         +------+
+    |  (3)   |                                  |       |         |  RO  |
+    |  Wait  |                                  |       |<--(4)-->|      |
+    |        |                                  |       |  authZ  |      |
+    |        |--(5)--- Read Grant ------------->|       |         +------+
+    |        |                                  |       |
+    |        |<--------- Grant Response --(6)---|       |
+    |        |                                  |       |
+    +--------+                                  +-------+
+
+1. **Create Grant** The Client creates a Grant Request ({{CreateGrant}}) and sends it with an HTTP POST to the GS GS URI.
+
+2. **Wait Response**  The GS sends an Interaction Response ({{WaitResponse}}) containing the Grant URI and wait time.
+
+3. **Client Waits** The Client waits the wait time.
+
+4. **RO AuthZ** The GS interacts with the RO to determine which identity claims in the Grant Request are to be granted. 
+
+5. **Read Grant** The Client does an HTTP GET of the Grant URI ({{ReadGrant}}).
+
+6. **Grant Response** The GS responds with a Grant Response ({{GrantResponse}}).
+
+
+## Read Grant
+
+The Client wants to acquire fresh identity claims and authorizations in the Grant. No User or RO interaction is required as no new consent or authorization is required.
+
+    +--------+                                  +-------+
+    | Client |                                  |  GS   |
+    |        |--(1)--- Read Grant ------------->|       |
+    |        |                                  |       |
+    |        |<--------- Grant Response --(2)---|       |
+    |        |                                  |       |
+    +--------+                                  +-------+
+
+1. **Read Grant** The Client does an HTTP GET of the Grant URI ({{ReadGrant}}).
+
+2. **Grant Response** The GS responds with a Grant Response ({{GrantResponse}}) containing updated identity claims and authorizations.
+
+## Access Resource & AuthZ Refresh
+
+The Client has an access token and uses it to access resources at an RS. The access token expires, and the Client acquires a fresh access token from the GS.
+
+    +--------+                             +----------+ 
+    | Client |                             | Resource | 
+    |        |--(1)--- Access Resource --->|  Server  | 
+    |        |<------- Resource Response --|   (RS)   | 
+    |        |                             |          | 
+    |        |--(2)--- Access Resource --->|          | 
+    |        |<------- Error Response -----|          | 
+    |        |                             |          | 
+    |        |                             +----------+  +-------+
+    |        |                                           |  GS   |
+    |        |--(3)--- Refresh AuthZ ------------------->|       |
+    |        |<------- AuthZ Response -------------------|       |
+    |        |                                           |       |
+    +--------+                                           +-------+
+
+
+
+1. **Resource Request** The Client accesses the RS with the access token per {{RSAccess}} and receives a response from the RS.
+
+2. **Resource Request** The Client attempts to access the RS, but receives an error indicating the access token has expired. 
+
+3. **Refresh AuthZ** If the Client received an AuthZ URI in the Response JSON "authorization" object ({{ResponseAuthorizationObject}}), the Client can Refresh AuthZ ({{RefreshAuthZ}}) with an HTTP GET to the AuthZ URI and receive an Response JSON "authorization" object" ({{ResponseAuthorizationObject}}) with a fresh access token.
+
+
+## GS API Table
+
+| request            | http verb | uri          | response     
+|:---                |---        |:---          |:--- 
+| Create Grant       | POST      | GS URI       | interaction, wait, or grant 
+| Read Grant         | GET       | Grant URI    | wait, or grant 
+| Update Grant       | PUT       | Grant URI    | interaction, wait, or grant 
+| Delete Grant       | DELETE    | Grant URI    | success 
+| Refresh AuthZ      | GET       | AuthZ URI    | authorization 
+| Update AuthZ       | PUT       | AuthZ URI    | authorization 
+| Delete AuthZ       | DELETE    | AuthZ URI    | success 
+| GS Options         | OPTIONS   | GS URI       | metadata 
+| Grant Options      | OPTIONS   | Grant URI    | metadata 
+| AuthZ Options      | OPTIONS   | AuthZ URI    | metadata  
+
+
+\[ Editor: is there value in an API for listing a Client's Grants? eg:]
+
+    List Grants     GET     GS URI    JSON array of Grant URIs
+
+
+# Grant and AuthZ Life Cycle
+
+
+**Grant life Cycle**
+
+The Client can create, read, update, and delete Grants. Grants persist until deleted, or another Grant is created for the same GS, Client, and User tuple.
+
+At any point in time, there can only be one Grant for the GS, Client, and User tuple. When a Client creates a Grant at the same GS for the same User, the GS MUST invalidate a previous Grant for the Client at that GS for that User.
+
+**AuthZ Life Cycle**
+
+\[Editor: what is the life cycle of a granted access token and AuthZ URI relative to a Grant? Issued claims will live past the Grant life cycle.]
+
+\[Editor: ]
+
+
+\[Editor: confirm we can only have one Grant outstanding at a time.]
+
+\[Editor: confirm the GS cannot expire a Grant.]
+
+# GS APIs
+
+**Client Authentication**
+
+All APIs except for GS Options require the Client to authenticate. 
+
+This protocol enables different mechanisms for how the Client authenticates to the GS. See {{ClientAuthN}} for using JOSE client authentication. Extensions may define other mechanisms. \[Editor: reference other documents if they are known]
+
+
+
+
+## Create Grant {#CreateGrant}
+
+The Client creates a Grant by doing an HTTP POST of a JSON {{RFC8259}} document to the GS URI.
+
+The JSON document MUST include the following from the Request JSON {{RequestJSON}}:
+
++ iat
++ nonce
++ uri set to the GS URI
++ client
+
+and MAY include the following from Request JSON {{RequestJSON}}
+
++ user
++ interaction
++ authorization or authorizations
++ claims
++ reciprocal
+
+The GS MUST respond with one of Grant Response {{GrantResponse}}, Interaction Response {{InteractionResponse}}, Wait Response {{WaitResponse}}, or one of the following errors:
+
+    TBD
+
+from Error Responses {{ErrorResponses}}.
+
+Following is a non-normative example where the Client wants to interact with the User with a popup and is requesting identity claims about the User and read access to the User's contacts:
 
     Example 1
 
     { 
-        "as"    :"https://as.example",
-        "iat"   :"1579046092",
-        "nonce" :"f6a60810-3d07-41ac-81e7-b958c0dd21e4",
+        "iat"       : 15790460234,
+        "uri"       : "https://as.example/endpoint",
+        "nonce"     : "f6a60810-3d07-41ac-81e7-b958c0dd21e4",
         "client": {
             "display": {
-                "name"  :"SPA Display Name",
-                "uri"   :"https://spa.example/about"
-            },
-            "interaction": {
-                "type"  :"popup"
+                "name"  : "SPA Display Name",
+                "uri"   : "https://spa.example/about"
             }
         },
-        "authorizations": {
-            "type"      :"oauth_scope",
-            "scope"     :"read_contacts"
+        "interaction": {
+            "type"      : "popup"
+        },
+        "authorization": {
+            "type"      : "oauth_scope",
+            "scope"     : "read_contacts"
         },
         "claims": {
             "oidc": {
@@ -301,72 +662,76 @@ Following is a non-normative JSON {{RFC8259}} document example where the Client 
     }
 
 
-Following is a non-normative example where the Client has previously authenticated the User, and is requesting additional authorization:
+Following is a non-normative example where the Client is requesting the GS to keep the interaction with the User after returning the ID Token so the Client can update the Grant, and also asking if the user exists:
 
     Example 2
 
     { 
-        "as"    :"https://as.example",
-        "iat"   :"1579046092",
-        "nonce" :"0d1998d8-fbfa-4879-b942-85a88bff1f3b",
+        "iat"       : 15790460234,
+        "uri"       :"https://as.example/endpoint",
+        "nonce"     :"5c9360a5-9065-4f7b-a330-5713909e06c6",
         "client": {
-            "id"        : "di3872h34dkJW",
-            "interaction": {
-                "type"  : "redirect",
-                "uri"   : "https://web.example/return"
-            }
+            "id"        : "di3872h34dkJW"
+        },
+        "interaction": {
+            "keep"      : true,
+            "type"      : "redirect",
+            "uri"       : "https://web.example/return"
         },
         "user": {
             "identifiers": {
-                "oidc": {
-                    "iss"   :"https://as.example",
-                    "sub"   :"123456789"
-                }
-            }
+                "email" : "jane.doe@example.com"
+            },
+            "exists"    : true
         },
-        "authorizations": {
-            "type"  :"oauth_scope",
-            "scope" :"read_calendar write_calendar"
-        }
+        "claims"    : { "oidc": { "id_token" : {} } }
     }
 
-Following is a non-normative example where the Client is requesting authorization first:
+
+## Read Grant {#ReadGrant}
+
+The Client reads a Grant by doing an HTTP GET of the corresponding Grant URI.
+
+The GS MUST respond with one of Grant Response {{GrantResponse}}, Interaction Response {{InteractionResponse}}, Wait Response {{WaitResponse}}, or one of the following errors:
+
+    TBD
+
+from Error Responses {{ErrorResponses}}.
+
+## Update Grant {#UpdateGrant}
+
+The Client updates a Grant by doing an HTTP PUT of a JSON document to the corresponding Grant URI.
+
+The JSON document MUST include the following from the Request JSON {{RequestJSON}}
+
++ iat
++ uri set to the Grant URI
+
+and MAY include the following from Request JSON {{RequestJSON}}
+
++ user
++ interaction
++ authorization or authorizations
++ claims
++ reciprocal
+
+The GS MUST respond with one of Grant Response {{GrantResponse}}, Interaction Response {{InteractionResponse}}, Wait Response {{WaitResponse}}, or one of the following errors:
+
+    TBD
+
+from Error Responses {{ErrorResponses}}.
+
+Following is a non-normative example where the Client made an 'interaction'.'keep:true request, and now wants to update the request with additional claims:
 
     Example 3
 
     { 
-        "as"    :"https://as.example",
-        "iat"   :"1579046092",
-        "nonce" :"5c9360a5-9065-4f7b-a330-5713909e06c6",
-        "client": {
-            "id"        : "di3872h34dkJW",
-            "interaction": {
-                "type"  : "redirect",
-                "uri"   : "https://web.example/return"
-            }
-        },
-        "authentication": {
-            "first": true
-        },
-        "claims": { "oidc": { "id_token" : {} } }
-    }
-
-Following is a non-normative example where the Client previously requested authorization first (Example 3), the response was a new User, and now makes the following AS Request:
-
-    Example 4
-
-    { 
-        "as"    :"https://as.example",
-        "iat"   :"1579046092",
-        "nonce" :"0a74f51f-514a-4821-b71f-01c252223f2f",
-        "authentication": {
-            "handle": "eyJhb958.example.authentication.handle.9yf3szM"
-        },
+        "iat"       : 15790460234,
+        "uri"       : "https://as.example/endpoint/example.grant",
         "claims": {
             "oidc": {
                 "userinfo" : {
                     "email"          : { "essential" : true },
-                    "phone_number"   : { "essential" : true },
                     "name"           : { "essential" : true },
                     "picture"        : null
                 }
@@ -374,86 +739,97 @@ Following is a non-normative example where the Client previously requested autho
         }
     }
 
-## Top Level Attributes
 
-**as** - the unique string identifier for the AS. This attribute is REQUIRED.
+## Delete Grant {#DeleteGrant}
 
-**iat** - the time of the request as a NumericDate.
 
-**nonce** - a unique identifier for this request. This attribute is REQUIRED. Note the AS Response MUST contain a matching nonce attribute.
+The Client deletes a Grant by doing an HTTP DELETE of the corresponding Grant URI.
 
-## "client" Object
-The client object MUST contain either the client_id attribute for Registered Clients, or the display object for Dynamic Clients. If the Client can interact with the User, then an interaction object MUST be included. If there is an authentication handle, then the client object MUST not be included.
+The GS MUST respond with OK 200, or one of the following errors:
 
-**client_id** - the identifier the AS has for the Registered Client.
+    TBD
 
-**display** - the display object contains the following attributes:
+from Error Responses {{ErrorResponses}}.
 
-+ **name** - a string that represents the Dynamic Client
+## Request JSON {#RequestJSON}
+
+
+\[Editor: do we want to reuse the JWT claims "iat","jti", etc.]
+
++ **iat** - the time of the request as a NumericDate.
+
++ **nonce** - a unique identifier for this request. Note the Grant Response MUST contain a matching nonce attribute value.
+
++ **uri** - the GS URI if in a Create Grant {{CreateGrant}}, or the Grant URI if in an Update Grant {{UpdateGrant}}.
+
+
+### "client" Object
+The client object MUST contain either the id attribute for Registered Clients, or the display object for Dynamic Clients.
+
++ **id** - the Client ID the GS has for the Registered Client.
+
++ **display** - the display object contains the following attributes:
+
+    + **name** - a string that represents the Dynamic Client
+
+    + **uri** - a URI representing the Dynamic Client 
 
 \[Editor: a max length for the name?]
-
-+ **uri** - a URI representing the Dynamic Client 
-
 \[Editor: a max length for the URI?]
 
-The name and uri will be displayed by the AS when prompting for authorization.
+The name and uri will be displayed by the GS when prompting for authorization.
 
-**interaction** - the interaction object contains the type of interaction the Client will provide the User. Other attributes are dependent on the interaction type value.
+### "interaction" Object
+The interaction object contains the type of interaction the Client will provide the User. Other attributes 
 
-+ **type** - contains one of the following values: "popup", "redirect", or "qrcode". Details in {{InteractionType}}. 
++ **keep** - a JSON boolean. If set to the JSON value true, the GS will not transfer the User interaction back to the Client after processing the Grant request. The JSON value false is equivalent to the attribute not being present, and the GS will transfer the User interaction back to the Client after processing the request. This attribute is OPTIONAL
 
-+ **redirect_uri** - this attribute is included if the type is "redirect". It is the URI that the Client requests the AS to redirect the User to after the AS has completed interacting with the User. If the Client manages session state in URIs, then the redirect_uri should contain that state.
 
-+ **ui_locales** - End-User's preferred languages and scripts for the user interface, represented as a space-separated list of {{RFC5646}} language tag values, ordered by preference.
+    + **type** - contains one of the following values: "popup", "redirect", or "qrcode". Details in {{InteractionType}}. This attribute is REQUIRED.
 
-\[Editor: do we need max pixels or max chars for qrcode interaction? Either passed to AS, or max specified values here?]
+    + **redirect_uri** - this attribute is REQUIRED if the type is "redirect". It is the URI that the Client requests the GS to redirect the User to after the GS has completed interacting with the User. If the Client manages session state in URIs, then the redirect_uri SHOULD contain that state.
+
+    + **ui_locales** - End-User's preferred languages and scripts for the user interface, represented as a space-separated list of {{RFC5646}} language tag values, ordered by preference. This attribute is OPTIONAL.
+
+\[Editor: do we need max pixels or max chars for qrcode interaction? Either passed to GS, or max specified values here?]
 
 \[Editor: other possible interaction models could be a "webview", where the Client can display a web page, or just a "message", where the client can only display a text message]
 
 \[Editor: we may need to include interaction types for iOS and Android as the mobile OS APIs evolve.]
 
-\[Editor: does the Client include parameters if it wants the AS Response signed and/or encrypted?]
 
-## "user" Object
-The user object is optional. 
+### "user" Object {#RequestUserObject}
 
-**identifiers** - the identifiers object contains one or more of the following identifiers for the User:
++ **exists** - MUST contain the JSON true value. Indicates the Client requests the GS to return a "user"."exists" value in an Interaction Response {{InteractionResponse}}. This attribute is OPTIONAL, and MAY be ignored by the GS.
 
-+ **phone_number** - contains a phone number per Section 5 of {{RFC3966}}.
++ **identifiers** - REQUIRED if the exists attribute is present. The values MAY be used by the GS to improve the User experience. Contains one or more of the following identifiers for the User:
 
-+ **email** - contains an email address per {{RFC5322}}.
+    + **phone_number** - contains a phone number per Section 5 of {{RFC3966}}.
 
-+ **oidc** - is an object containing both the "iss" and "sub" attributes from an OpenID Connect ID Token per {{OIDC}} Section 2.
+    + **email** - contains an email address per {{RFC5322}}.
 
-The user and identifiers objects MAY be included to improve the user experience by the AS. The AS MUST authenticate the User independent of these values. The user object MUST not be included if there is an authentication handle.
+    + **oidc** - is an object containing both the "iss" and "sub" attributes from an OpenID Connect ID Token per {{OIDC}} Section 2.
 
-**discovery** - MUST contain the JSON true value. Indicates the Client requests the AS to return a "discovered" attribute in the Interaction Response if the AS has a User at the AS with one or more of the identifiers. This attribute is OPTIONAL. Support of the discovery attribute by the AS is OPTIONAL. The AS MAY return the \[TBD] error if discovery is not supported, or ignore the request.
 
-## "authentication" Object
+### "authorization" Object {#AuthorizationObject}
 
-This OPTIONAL object MUST contain one of the following attributes:
++ **type** - one of the following values: "oauth_scope" or "oauth_rich". This attribute is REQUIRED.
 
-+ **first** - Must have the JSON value true. Indicates the Client is requesting authentication first, and an authentication object in the Interaction Response. If present, the AS will ignore the authorizations object. \[Editor: any use case where the Client needs an authorization at Authentication?] The Client SHOULD limit the claims requested to only those needed to identify the User at the Client. \[Editor: this works if it is only a directed identifier, but consent would be required to return a verified phone or email. Hmmm.]
++ **scope** - a string containing the OAuth 2.0 scope per {{RFC6749}} section 3.3. MUST be included if type is "oauth_scope" or "oauth_rich". 
 
-+ **handle** - the authentication handle. MUST be included in the AS Request following an Authentication Response.
-
-## "authorizations" Object
-
-The optional authorizations object contains a dictionary of resource objects the Client is requesting authorization to access. The authorizations object may contain one or more of:
-
-+ **type** - one of the following values: "oauth_scope", "oauth_rich", or "oauth_rich_list". See {{AuthorizationTypes}} for details.
-
-+ **scope** - a string containing the OAuth 2.0 scope per {{RFC6749}} section 3.3. Present if type is "oauth_scope" or "oauth_rich". 
-
-+ **authorization_details** - an authorization_details object per {{RAR}}. Present if type is "oauth_rich".
-
-+ **list** - an array of objects containing "scope" and "authorization_details". Present if type is "oauth_rich_list". Used when requesting multiple access tokens and/or handles.
++ **authorization_details** - an authorization_details object per {{RAR}}. MUST be included if type is "oauth_rich".
 
 \[Editor: details may change as the {{RAR}} document evolves]
 
-## "claims" Object
-The optional claims object contains one or more identity claims being requested. The claims may contain:
+### "authorizations" Object 
+
+A JSON array of "authorization" objects. Only one of "authorization" or "authorizations" may be in the Request JSON. 
+
+\[Editor: instead of an array, we could have a Client defined dictionary of "authorization" objects]
+
+### "claims" Object {#ClaimsObject}
+
+Includes one or more of the following:
 
 + **oidc** - an object that contains one or both of the following objects:
 
@@ -463,106 +839,197 @@ The optional claims object contains one or more identity claims being requested.
 
 The contents of the userinfo and id_token objects are Claims as defined in {{OIDC}} Section 5. 
 
-
 + **oidc4ia** - OpenID Connect for Identity Assurance claims request per {{OIDC4IA}}.
 
 + **vc** - \[Editor: define how W3C Verifiable Credentials {{W3C VC}} can be requested.]
 
-## Authorization Types {#AuthorizationTypes}
+### "reciprocal" Object {#ReciprocalResponse}
 
-- **oauth_scope** - an OAuth 2.0 authorization request per {{RFC6749}} section 3.3
++ **uri** - the Grant URI for the Reciprocal Grant. This attribute is REQUIRED.
 
-- **oauth_rich** - a rich authorization request per {{RAR}}
++ **client** - the client object must contain the "id" attribute with the Client ID the Grant was issued to. This attribute is REQUIRED.
 
-- **oauth_rich_list** - a list of rich authorization requests
++ **authorization** - an authorization object per {{ResponseAuthorizationObject}} in the Response JSON.
 
-# Interaction Response JSON {#InteractionResponseJSON}
++ **authorizations** - an authorizations object per {{ResponseAuthorizationsObject}} in the Response JSON.
 
-A non-normative example of an Interaction Response follows:
++ **claims** - a claims object per {{ResponseClaimsObject}} in the Response JSON.
 
-    {
-        "user": {
-            "discovered": true
-        },
-        "interaction": {
-            "type"   : "popup",
-            "uri"    : "https://as.example/endpoint/ey5gs32..."
-        },
-        "authorization": {
-            "handle" : "eyJhb958.example.authorization.handle.9yf3szM",
-            "uri"    : "https://as.example/authorization/ey7snHGs",
-            "wait"   : "10"
-        }
-    }
 
-## "user" Object {#userObject}
+\[Editor: parameters for the Client to request it wants the Grant Response signed and/or encrypted?]
 
-MUST contain one of "authorization" object, or "authentication" object.
 
-+ **discovery** - if the AS Request included a discovery attribute, then the AS MAY return a "user" object with the "discovered" property set to the JSON value true if one or more of the identifiers provided in the AS Request identify a User at the AS, or the JSON value false if not. If the Client received a false return, it may
 
-\[Editor: reference a security consideration for this functionality.]
 
-## "interaction" Object {#interactionObject}
 
-If the AS wants the Client to start the interaction, the AS MUST select one of the interaction mechanisms provided by the Client in the AS Request, and include the matching attribute in the interaction object: 
+## Refresh Authorization {#RefreshAuthZ}
 
-+ **type** - this MUST match the type provided by the Client in the AS Request client.interaction object.
+The Client updates an Authorization by doing an HTTP GET to the corresponding AuthZ URI.
 
-+ **uri** - the URI to interact with the User per the type. This may be a temporary short URL if the type is qrcode so that it is easy to scan. 
+The GS MUST respond with an Response JSON "authorization" object {{ResponseAuthorizationObject}}, or one of the following errors:
 
-+ **message** - a text string to display to the User if type is qrcode.
+    TBD
 
-\[Editor: do we specify a maximum length for the uri and message so that a device knows the maximum it needs to support? A smart device may have limited screen real estate.]
+from Error Responses {{ErrorResponses}}.
 
-## "authorization" Object
+## Update Authorization {#UpdateAuthZ}
 
-The authorization object has the following attributes:
+The Client updates an Authorization by doing an HTTP PUT to the corresponding AuthZ URI of the following JSON. All of the following MUST be included.
 
-+ **handle** - the authorization handle. This attribute is REQUIRED.
++ **iat** - the time of the response as a NumericDate.
 
-+ **uri** - the authorization URI. This attribute is REQUIRED.
++ **uri** - the AuthZ URI.
 
-+ **wait** - the amount of time in integer seconds the Client MUST wait before making the Authorization Request. This attribute is OPTIONAL.
++ **authorization** - the new authorization requested per the Request JSON "authorization" object {{AuthorizationObject}}.
 
-## "authentication" Object
+The GS MUST respond with an Response JSON "authorization" object {{ResponseAuthorizationObject}}, or one of the following errors:
 
-Returned if the Client requested authentication first. The authentication object has the following attributes:
+    TBD
 
-+ **handle** - the authentication handle. This attribute is REQUIRED.
+from Error Responses {{ErrorResponses}}.
 
-+ **uri** - the authentication URI. This attribute is REQUIRED.
+## Delete Authorization
 
-# Interaction Types {#InteractionType}
-If the AS wants the Client to initiate the interaction with the User, then the AS will return an interaction object {{interactionObject}} so that the Client can can hand off interactions with the User to the AS. The Client will initiate the interaction with the User in one of the following ways: 
+The Client deletes an Authorization by doing an HTTP DELETE to the corresponding AuthZ URI.
 
-## "popup" Type
-The Client will create a new popup child browser window containing the value of the uri attribute of the interaction object. 
-\[Editor: more details on how to do this]
+The GS MUST respond with OK 200, or one of the following errors:
 
-The AS will close the window when the interactions with the User are complete. \[Editor: confirm AS can do this still on all browsers, or does Client need to close] 
+    TBD
 
-The AS MAY respond to an outstanding Authorization Request {{AuthorizationRequest}} before the popup window has been closed.
+from Error Responses {{ErrorResponses}}.
 
-## "redirect" Type
-The Client will redirect the User to the value of the uri attribute of the interaction object. When the AS interactions with the User are complete, the AS will redirect the User to the redirect_uri the Client provided in the AS Request.
 
-If the Client made a Authorization Request when starting the interaction, the AS MAY respond to the Authorization Request {{AuthorizationRequest}} before the User has been redirected back to the Client. 
+## GS Options {#GSoptions}
 
-## "qrcode" Type
-The Client will create a {{QR Code}} of the uri attribute of the interaction object and display the resulting graphic and the message attribute of the interaction object as a text string.
 
-# AS Response JSON {#ASResponseJSON}
+\[Editor: this section is a work in progress]
 
-Example non-normative AS Response JSON document for Example 1 in {{ASRequestJSON}}:
+The Client may be configured manually by reviewing the GS documentation, or some configuration may occur dynamically using a programmatic discovery mechanism. In addition to GS documentation, the GS MAY provide a metadata document located at:
+
+    <as_uri> + "/.well-known/xauth-configuration"
+
+\[Editor: alternatively, the HTTP OPTIONS method on the GS URI could return all the options. This has the advantage that the Client can authenticate the same way it authenticates for all other GS APIs, and the GS can return Client specific results.]
+
+
+
+
+The Client can get the metadata for the GS by doing an HTTP OPTIONS of the corresponding GS URI.
+
+The GS MUST respond with the the following JSON document:
+
+
++ **uri** - the GS URI.
+
+
++ **client_authentication** - an array of the Client Authentication mechanisms supported by the GS
+
++ **interactions** - an array of the interaction types supported by the GS.
+
++ **authorization** - an object containing the authorizations the Client may request from the GS, if any.
+
+Details TBD
+
++ **claims** - an object containing the identity claims the Client may request from the GS, if any, and what public keys the claims will be signed with.
+
+Details TBD
+
++ **algorithms** - a list of the cryptographic algorithms supported by the GS. 
+
++ **user_exists** - boolean indicating if "user"."exists" is supported.
+
++ **authentication_list** - boolean indicating if "authorizations" is supported.
+
+or one of the following errors:
+
+    TBD
+
+from Error Responses {{ErrorResponses}}.
+
+##  Grant Options {#GrantOptions}
+
+
+The Client can get the metadata for the Grant by doing an HTTP OPTIONS of the corresponding  Grant URI.
+
+The GS MUST respond with the the following JSON document:
+
++ **verbs** - an array of the HTTP verbs supported at the GS URI.
+
+
+
+
+Details TBD
+
+\[Editor: keys used to sign and/or encrypt responses, or decrypt requests]
+\[Editor: metadata for extensions]
+
+or one of the following errors:
+
+    TBD
+
+from Error Responses {{ErrorResponses}}.
+
+## AuthZ Options {#AuthZOptions}
+
+
+The Client can get the metadata for the AuthZ by doing an HTTP OPTIONS of the corresponding AuthZ URI.
+
+The GS MUST respond with the the following JSON document:
+
++ **verbs** - an array of the HTTP verbs supported at the GS URI.
+
+
+or one of the following errors:
+
+    TBD
+
+from Error Responses {{ErrorResponses}}.
+
+# GS Initiated Grant {#GSInitiatedGrant}
+
+\[Editor: In OAuth 2.0, all flows are initiated at the Client. If the AS wanted to initiate a flow, it redirected to the Client, that redirected back to the AS to initiate a flow.
+
+Here is a proposal to support GS initiated: authentication; just-in-time (JIT) provisioning; and authorization]
+
+**initiation_uri** A URI at the Client that contains no query or fragment. How the GS learns the Client initiation_uri is out of scope. 
+
+
+The GS creates a Grant and Grant URI, and redirects the User to the initiation_uri with the query parameter "grant" and the value of Grant URI.
+
+See {{GSInitiatedGrantSeq}} for the sequence diagram.
+
+
+# GS API Responses
+
+
+
+
+
+## Grant Response {#GrantResponse}
+
+The Grant Response MUST include the following from the Response JSON {{ResponseJSON}}
+
++ iat
++ nonce
++ uri
++ expires_in
+
+and MAY include the following from Response JSON {{ResponseJSON}}
+
++ authorization or authorizations
++ claims
++ reciprocal
+
+Example non-normative Grant Response JSON document for Example 1 in {{CreateGrantSeq}}:
 
     { 
-        "iat":"15790460234",
-        "nonce":"f6a60810-3d07-41ac-81e7-b958c0dd21e4",
-        "authorizations": {
+        "iat"           : 15790460234,
+        "nonce"         : "f6a60810-3d07-41ac-81e7-b958c0dd21e4",
+        "uri"           : "https://as.example/endpoint/ey7snHGs",
+        "expires_in"    : 300
+        "authorization": {
             "type"          : "oauth_scope",
             "scope"         : "read_contacts",
-            "expires_in"    : "3600",
+            "expires_in"    : 3600,
             "method"        : "bearer",
             "token"         : "eyJJ2D6.example.access.token.mZf9p"
         },
@@ -577,70 +1044,134 @@ Example non-normative AS Response JSON document for Example 1 in {{ASRequestJSON
         }
     }
 
-Example non-normative AS Response JSON document for Example 2 in {{ASRequestJSON}}:
+Example non-normative Grant Response JSON document for Example 2 in {{CreateGrantSeq}}:
 
     {
-        "iat"   :"15790460234",
-        "nonce" :"0d1998d8-fbfa-4879-b942-85a88bff1f3b",
-        "authorizations": {
+        "iat"   : 15790460234,
+        "nonce" : "0d1998d8-fbfa-4879-b942-85a88bff1f3b",
+        "uri"   : "https://as.example/endpoint/ey7snHGs",
+        "authorization": {
             "type"          : "oauth_scope",
             "scope"         : "read_calendar write_calendar",
-            "expires_in"    : "3600",
+            "expires_in"    : 3600,
             "method"        : "pop",
-            "access": {
-                "handle"    : "ey.example.access.handle.9yf3szM",
-                "jwk": {
-                    "x5u"   : "https://as.example/jwk/VBUEOIQA82" 
-                }       
+            "token"         : "eyJJ2D6.example.access.token.mZf9p"
+            "jwk": {
+                "x5u"   : "https://as.example/jwk/VBUEOIQA82" 
             },
-            "refresh": {
-                "handle"    : "ey.example.refresh.handle.Jl4FzM",
-                "uri"       : "https://as.example/refresh/eyj34"
-            }
+            "uri"       : "https://as.example/endpoint/authz/example"
         }
     }
 
+
+## Interaction Response {#InteractionResponse}
+
+The Interaction Response MUST include the following from the Response JSON {{ResponseJSON}}
+
++ iat
++ nonce
++ uri
++ interaction
+
+and MAY include the following from Response JSON {{ResponseJSON}}
+
++ user
++ wait
+
+A non-normative example of an Interaction Response follows:
+
+    {
+        "iat"       : 15790460234,
+        "nonce"     : "0d1998d8-fbfa-4879-b942-85a88bff1f3b",
+        "uri"       : "https://as.example/endpoint/grant/",
+        "interaction" : {
+            "type"      : "popup",
+            "uri"       : "https://as.example/popup/eyskdjaksjk"
+        },
+        "user": {
+            "exists" : true
+        }
+    }
+
+
+## Wait Response {#WaitResponse}
+
+The Wait Response MUST include the following from the Response JSON {{ResponseJSON}}
+
++ iat
++ nonce
++ uri
++ wait
+
+A non-normative example of an Interaction Response follows:
+
+    {
+        "iat"       : 15790460234,
+        "nonce"     : "0d1998d8-fbfa-4879-b942-85a88bff1f3b",
+        "uri"       : "https://as.example/endpoint/grant/",
+        "wait"      : 300
+    }
+
+## Response JSON {#ResponseJSON}
+
 Details of the JSON document: 
 
-## Top Level Attributes
++ **iat** - the time of the response as a NumericDate.
 
-**iat** - the time of the response as a NumericDate.
++ **nonce** - the nonce that was included in the Request JSON {{RequestJSON}}.
 
-**nonce** - the nonce that was included in the AS Request JSON {{ASRequestJSON}}.
++ **uri** -
 
-## "authorizations" Object {#AuthorizationsObject}
++ **wait** -
 
-There is an authorizations object in the AS Response if there was an authorizations object in the AS Request. 
++ **expires_in** - a numeric value specifying how many seconds until the Grant expires. This attribute is OPTIONAL.
 
-+ **type** - the type of claim request: "oauth_scope", "oauth_rich", or "oauth_rich_list". See {{AuthorizationTypes}} for details. 
+### "interaction" Object {#interactionObject}
 
-+ **list** - an array of objects if the type was "oauth_rich_list". The objects have the following attributes just as if the type was "oauth_rich"
+If the GS wants the Client to start the interaction, the GS MUST select one of the interaction mechanisms provided by the Client in the Grant Request, and include the matching attribute in the interaction object: 
 
-+ **scope** - the scopes the Client was granted authorization for. This will be all, or a subset, of what was requested.
++ **type** - this MUST match the type provided by the Client in the Grant Request client.interaction object.
 
-+ **authorization_details** - the authorization details granted. Only returned for "oauth_rich" and "oauth_rich_list".
++ **uri** - the URI to interact with the User per the type. This may be a temporary short URL if the type is qrcode so that it is easy to scan. 
 
-+ **method** - the access method: "bearer", "pop", or "jws". See {{AccessMethod}} for details.
++ **message** - a text string to display to the User if type is qrcode.
 
-+ **token** - an access token for accessing the resource(s). Included if the access method is "bearer".
+\[Editor: do we specify a maximum length for the uri and message so that a device knows the maximum it needs to support? A smart device may have limited screen real estate.]
 
-+ **expires_in** - an optional value specifying how many seconds until the access token or handle expire. 
 
-+ **refresh** - an optional object containing parameters required to refresh an access token or handle. See refresh request {{Refresh}}.
+### "user" Object
 
-    + **handle** - an refresh handle used to create the JSON refresh token. 
++ **exists** - a boolean value indicating if the GS has a user with one or more of the provided identifiers in the Request "user"."identifiers" object {{RequestUserObject}}
 
-    + **uri** - the refresh uri the Client will use to refresh.
 
-+ **access** - an object containing the parameters needed to access resources requiring proof-of-possession. Included if the access method is "pop".
-    
-    + **handle** - the access handle.
 
-    + **jwk** - the jwk object to use.
+### "authorization" Object {#ResponseAuthorizationObject}
 
-## "claims" Object
+The "authorization" object is a response to the Request "authorization" object {{AuthorizationObject}}, the Refresh Authorization {{RefreshAuthZ}}, or the Update Authorization {{UpdateAuthZ}}.
 
-There is a claims object in the AS Response if there was a claims object in the AS Request. 
++ **type** - the type of claim request: "oauth_scope" or "oauth_rich". See the "type" object in {{AuthorizationObject}} for details. 
+
++ **scope** - the scopes the Client was granted authorization for. This will be all, or a subset, of what was requested. This attribute is OPTIONAL.
+
++ **authorization_details** - the authorization details granted per {{RAR}}. Included if type is "oauth_rich".
+
++ **method** - one of the access mechanisms: "bearer", "jose", or "jose+body". See {{RSAccess}} for details.
+
++ **token** - the access token for accessing an RS.  This attribute is REQUIRED.
+
++ **expires_in** - a numeric value specifying how many seconds until the access token expires. This attribute is OPTIONAL.
+
++ **jwk** - the jwk object to use in a proof-of-possession access method.
+
++ **uri** - the AuthZ URI. Used to refresh, update, and delete the authorization. This attribute is OPTIONAL. 
+
+### "authorizations" Object {#ResponseAuthorizationsObject}
+
+A JSON array of authorization objects. Support for the authorizations object is OPTIONAL.
+
+### "claims" Object {#ResponseClaimsObject}
+
+The claims object is a response to the Request "claims" object {{AuthorizationObject}}.
 
 + **oidc**
 
@@ -655,51 +1186,124 @@ There is a claims object in the AS Response if there was a claims object in the 
 
     The verified claims the user consented to be released. \[Editor: details TBD]
 
-## Access Methods {#AccessMethod}
+### "reciprocal" Object {#ReciprocalRequest}
 
-The are three different methods for the Client to access an RS:
+The following MUST be included
 
-+ **bearer** - the AS provides a bearer access token that the Client can use to access an RS per {{Bearer}}.
++ **nonce** - a unique identifier for this request. Note the Grant Response MUST contain a matching nonce attribute value.
 
-+ **pop** - the AS provides an access handle that the Client presents in a proof-of-possession RS access request per {{POP}}.
++ **client**
+    + **id** - the Client ID making the request
 
-+ **pop_body** - the Client signs the JSON payload sent to the RS per {{POPbody}}.
+One or more of the following objects from the Request JSON {{RequestJSON}} are included:
 
-In the AS Response, the AS will return the method the Client MUST use when accessing the RS.
++ **authorization** {{ResponseAuthorizationObject}}
 
-# Discovery {#Discovery}
++ **authorizations** {{ResponseAuthorizationsObject}}
 
-The Client obtains the following metadata about the AS prior to initiating a request:
++ **claims** {{ResponseClaimsObject}}
 
-**Endpoint** - the endpoint of the AS.
+### Interaction Types {#InteractionType}
 
-**"as"** - the unique string identifier for the AS.
+If the GS wants the Client to initiate the interaction with the User, then the GS will return an Interaction Response. The Client will initiate the interaction with the User in one of the following ways: 
 
-**Algorithms** - the asymetric cryptographic algorithms supported by the AS. 
++ **popup**
+The Client will create a new popup child browser window containing the "interaction"."uri" attribute. 
+\[Editor: more details on how to do this]
 
-**Authorizations** - the authorizations the Client may request, if any.
+The GS will close the popup window when the interactions with the User are complete. 
+\[Editor: confirm GS can do this still on all browsers, or does Client need to close] 
 
-**Identity Claims** - the identity claims the Client may request, if any, and what public keys the claims will be signed with.
++ **redirect**
+The Client will redirect the User to the "interaction"."uri" attribute. When the GS interactions with the User are complete, the GS will redirect the User to the "interaction"."redirect_uri" attribute the Client provided in the Grant Request.
 
-The client may also obtain information about how the AS will sign and/or encrypt the AS Response, as well as any other metadata required for extensions to this protocol, as defined in those extension specifications.
+
++ **qrcode**
+The Client will create a {{QR Code}} of the "interaction"."uri" attribute  and display the resulting graphic and the "interaction"."message" attribute as a character string.
+
+An GS MUST support the "popup", "redirect", and "qrcode" interaction types.
+
+
+### Signing and Encryption
+
+
+\[Editor: TBD - how response is signed and/or encrypted by the GS]
+
+
+# RS Access {#RSAccess}
+
+
+
+## Access Mechanisms {#AccessMethod}
+
+The are three different mechanisms for the Client to access an RS:
+
++ **bearer** - the GS provides an access token that the Client presents to access an RS per {{BearerToken}}.
+
++ **jose** - the GS provides an access handle that the Client presents in a proof-of-possession RS access request per -----.
+
++ **jose+body** - the Client signs the JSON payload sent to the RS per **POPBody**.
+
+In the Grant Response, the GS will return the method the Client MUST use when accessing the RS.
+
+## Bearer Token {#BearerToken}
+
+## Proof-of-possession
+
+# Error Responses {#ErrorResponses}
+
+    TBD
 
 # JOSE Client Authentication {#ClientAuthN}
 
-The default mechanism for the Client to authenticate to the AS and the RS is signing a JSON document with JWS per {{RFC7515}}. The resulting tokens always use compact serialization.
+How the Client authenticates to the GS and RS are independent of each other. One mechanism can be used to authenticate to the GS, and a different mechanism to authenticate to the RS.
+
+Q: method or mechanism???   
+
+
+The default mechanism for the Client to authenticate to the GS and the RS is signing a JSON document with JWS per {{RFC7515}}. The resulting tokens always use compact serialization.
 
 It is expected that extensions to this protocol that specify a different mechanism for the Client to authenticate, would over ride this section.
 
 The Authorization Request JSON is signed with JWS and passed as the body of the POST. 
 
-The authorization, refresh, and access handles are signed with JWS resulting in authorization request, refresh, and access tokens respectively. These JOSE tokens are passed in the HTTP Authorization header with the "JOSE" parameter per {{JOSEHTTP}}.
+The authorization, refresh, and access handles are signed with JWS resulting in authorization request, refresh, and access tokens respectively. These JOSE tokens are passed in the HTTP Authorization header with the "JOSE" parameter per 
 
 The Client will use the same private key to create all tokens. 
 
-The Client and the AS MUST both use HTTP/2 ({{RFC7540}}) or later, and TLS 1.3 ({{RFC8446}}) or later, when communicating with each other.
+The Client and the GS MUST both use HTTP/2 ({{RFC7540}}) or later, and TLS 1.3 ({{RFC8446}}) or later, when communicating with each other.
 
 \[Editor: too aggressive to mandate HTTP/2 and TLS 1.3?]
 
-## JOSE Headers {#JOSEHeaders}
+## GS Access
+
+## RS Access
+
+## Grant Token
+
+## Grant JSON
+
+## Refresh Token
+
+## Client Public Key Discovery
+
+## JOSE Access Token {#JOSEAccessToken}
+
+## JOSE Request Body
+
+
+## Request Encryption
+
+## Response Signing and Encryption
+
+
+
+
+
+
+** JOSE Tokens
+
+**  JOSE Headers {#JOSEHeaders}
 
 A non-normative example of a JOSE header for a Registered Client using a key id to identify the Client's public key:
 
@@ -732,12 +1336,12 @@ A non-normative example of a JOSE header for a Registered Client using a certifi
             wYmVsbDAeFw0xMzAyMjEyMzI5MTVaFw0xODA4MTQyMjI5MTVaMGIxCzAJBg
             NVBAYTAlVTMQswCQYDVQQIEwJDTzEPMA0GA1UEBxMGRGVudmVyMRwwGgYDV
             QQKExNQaW5nIElkZW50aXR5IENvcnAuMRcwFQYDVQQDEw5CcmlhbiBDYW1w
-            YmVsbDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL64zn8/QnH
+            YmVsbDCCGSIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL64zn8/QnH
             YMeZ0LncoXaEde1fiLm1jHjmQsF/449IYALM9if6amFtPDy2yvz3YlRij66
             s5gyLCyO7ANuVRJx1NbgizcAblIgjtdf/u3WG7K+IiZhtELto/A7Fck9Ws6
             SQvzRvOE8uSirYbgmj6He4iO8NCyvaK0jIQRMMGQwsU1quGmFgHIXPLfnpn
             fajr1rVTAwtgV5LEZ4Iel+W1GC8ugMhyr4/p1MtcIM42EA8BzE6ZQqC7VPq
-            PvEjZ2dbZkaBhPbiZAS3YeYBRDWm1p1OZtWamT3cEvqqPpnjL1XyW+oyVVk
+            PvEjZ2dbZkaBhPbiZGS3YeYBRDWm1p1OZtWamT3cEvqqPpnjL1XyW+oyVVk
             aZdklLQp2Btgt9qr21m42f4wTw+Xrp6rCKNb0CAwEAATANBgkqhkiG9w0BA
             QUFAAOCAQEAh8zGlfSlcI0o3rYDPBB07aXNswb4ECNIKG0CETTUxmXl9KUL
             +9gGlqCz5iWLOgWsnrcKcY0vXPG9J1r9AqBNTqNgHq2G03X09266X5CpOe1
@@ -750,7 +1354,7 @@ A non-normative example of a JOSE header for a Registered Client using a certifi
 
 \[Editor: the jwk above was copy and pasted from the JWK example. Replace? ]
 
-The certificate could be signed by the AS, allowing the AS to verify the signature using the AS public key, or the certificate could be signed by a private key the AS has bound to the Registered Client, allowing each instance of the Registered Client to have its own asymetric key pair.
+The certificate could be signed by the GS, allowing the GS to verify the signature using the GS public key, or the certificate could be signed by a private key the GS has bound to the Registered Client, allowing each instance of the Registered Client to have its own asymetric key pair.
 
 A non-normative example of a JOSE header for a Dynamic Client including the public key generated by the Client that matches its its private key:
 
@@ -775,119 +1379,91 @@ A non-normative example of a JOSE header for a JOSE access token for a Client ac
         }
     }
 
-The "jwk" object in a JOSE access token {{JOSEAccessToken}} MUST be the AS jwk object the AS provided with the access handle. 
+The "jwk" object in a JOSE access token {{JOSEAccessToken}} MUST be the GS jwk object the GS provided with the access handle. 
 
-This decouples how the AS communicates the Client's public key to the RS from how the AS asserts the Client's public key. The RS can have a consistent mechanism assert the Client's public key across all Clients.
+This decouples how the GS communicates the Client's public key to the RS from how the GS asserts the Client's public key. The RS can have a consistent mechanism assert the Client's public key across all Clients.
 
-One advantage of this is the AS can create a certificate of a Dynamic Client's public key, and pass it by value or reference to the Client to present to the RS.
+One advantage of this is the GS can create a certificate of a Dynamic Client's public key, and pass it by value or reference to the Client to present to the RS.
 
 All JOSE headers MUST have:
+
 + the "alg" attribute.
 + the "typ" attribute set to "jose".
 + either a "kid" or "jwk" attribute.
 
 \[Editor: should we use indicate the type of token (authorization, refresh, access) using "typ" or "cty"?]
 
-## Authentication Request Token {#AuthenticationRequestToken}
 
-A non-normative example of a payload follows:
+**  Grant Token {#GrantToken}
+
+A non-normative example of a grant token payload follows:
 
     {
-        "as"    :"https://as.example",
-        "type"  :"authentication",
-        "iat"   :"1579046092",
+        "iat"   :15790460234,
         "jti"   :"f6d72254-4f23-417f-b55e-14ad323b1dc1",
-        "handle":"eyJhb958.example.authentication.handle.9yf3szM"
+        "uri"   :"https://as.example/endpoint/example.grant",
+        "verb"  :"GET"
     }
 
-The payload of the authentication token contains:
+The payload of the grant token contains:
 
-**as** - the unique string identifier for the AS.
+**as_uri** - the unique string identifier for the GS.
 
-**type** - the string "authentication", indicating the type of token.
+**iat** - the time the grant token was created as a NumericDate.
 
-**iat** - the time the authentication token was created as a NumericDate.
+**jti** - a unique identifier for the grant token per {{RFC7519}} section 4.1.7.
 
-**jti** - a unique identifier for the authentication token per {{RFC7519}} section 4.1.7.
+**Grant URI** the Grant URI for the Grant.
 
-**handle** the authentication handle the AS provided the Client in the Interaction Response {{InteractionResponseJSON}}.
+**  Refresh Token {#RefreshToken}
 
-## Authorization Request Token {#AuthorizationRequestToken}
+A non-normative example of a refresh token payload follows:
+
+    {
+        "iat"   :15790460234,
+        "jti"   :"473c9a02-966a-4f55-b904-bef5029d0bc7",
+        "uri"   :"https://as.provider/endpoint/example.authn"
+    }
+
+The payload of the refresh token contains:
+
+**as_uri** - the unique string identifier for the GS.
+
+**iat** - the time the refresh token was created as a NumericDate.
+
+**jti** - a unique identifier for the refresh token.
+
+**Authorization URI** - the Authorization URI for the refreshing the access token.
+
+
+**  JOSE Access Token {#JOSEAccessToken}
+
+The "jwk" object in a JOSE access token header MUST be set to the "jwk" value the GS provided for the access handle. 
 
 A non-normative example of a payload follows:
 
     {
-        "as"    :"https://as.example",
-        "type"  :"authorization",
-        "iat"   :"1579046092",
-        "jti"   :"f6d72254-4f23-417f-b55e-14ad323b1dc1",
-        "handle":"eyJhb958.example.authorization.handle.9yf3szM"
-    }
-
-The payload of the authorization token contains:
-
-**as** - the unique string identifier for the AS.
-
-**type** - the string "authorization", indicating the type of token.
-
-**iat** - the time the authorization token was created as a NumericDate.
-
-**jti** - a unique identifier for the authorization token per {{RFC7519}} section 4.1.7.
-
-**handle** the authorization handle the AS provided the Client in the Interaction Response {{InteractionResponseJSON}}.
-
-## Refresh Token {#RefreshRequestToken}
-
-A non-normative example of a payload follows:
-
-    {
-        "as"    :"https://as.example",
-        "type"  :"refresh",
-        "iat"   :"1579049876",
-        "jti"   :"4342046d-83c4-4725-8c72-e9a49245f791",
-        "handle":"eyJhb958.example.refresh.handle.9yf3szM"
-    }
-
-The payload of the authorization token contains:
-
-**as** - the unique string identifier for the AS.
-
-**type** - the string "refresh", indicating the type of token.
-
-**iat** - the time the refresh request token was created as a NumericDate.
-
-**jti** - a unique identifier for the refresh request token.
-
-**handle** the refresh handle the AS provided the Client in the AS Response {{ASResponseJSON}} or access refresh response {{Refresh}}.
-
-## JOSE Access Token {#JOSEAccessToken}
-
-The "jwk" object in a JOSE access token header MUST be set to the "jwk" value the AS provided for the access handle. 
-
-A non-normative example of a payload follows:
-
-    {
-        "type"  :"access",
-        "iat"   :"1579046092",
-        "jti"   :"5ef47057-08f9-4763-be8d-162824d43dfb",
-        "handle":"eyJhb958.example.access.handle.9yf3szM"
+        "iat"           :15790460234,
+        "jti"           :"5ef47057-08f9-4763-be8d-162824d43dfb",
+        "access token"  :"eyJhb958.access.token.9yf3szM"
     }
 
 The payload of the JOSE access token contains:
-
-**type** - the string "access", indicating the type of token.
 
 **iat** - the time the JOSE access token was created as a NumericDate.
 
 **jti** - a unique identifier for the JOSE access token.
 
-**handle** the access handle the AS provided the Client in the AS Response {{ASResponseJSON}} or access refresh response {{Refresh}}.
+
 
 \[Editor: should we include the called URI in the token?]
 
-## HTTP Authorization JOSE Header {#JOSEHTTP}
 
-The Client authenticates requests by setting the HTTP Authorization header to include the "JOSE" parameter, followed by one or more space characters, followed by the appropriate JOSE token. 
+** HTTP Authorization Header {#JOSEHTTP}
+
+HTTP Authorization JOSE Header {#JOSEHTTP}
+
+The Client authenticates requests by setting the HTTP Authentication header to include the "JOSE" parameter, followed by one or more space characters, followed by the appropriate JOSE token. 
 
 A non-normative example:
 
@@ -895,35 +1471,45 @@ A non-normative example:
 
 The authorization request token, refresh request token, and the JOSE access token are all passed in this manner.
 
-## JOSE Token Verification
 
-TBD
+**Authentication Server API**
 
-## AS Request {#ASRequest}
+| Request             |What is signed         | Passed in http
+|:---                 |---                    |:---                
+| Create Grant        | Grant JSON            | body
+| Read Grant          | Grant Token           | header
+| Update Grant        | Grant JSON            | body
+| Delete Grant        | Grant Token           | header
+| Refresh AuthZ       | Refresh Token         | header
 
-The Client creates a JSON document per {{ASRequestJSON}}, signs it using JWS {{RFC7515}}, and sends the JWS token to the AS end point using HTTP POST, with a content-type of application/jose.
+
+
+
+**  Grant Request {#GrantRequest}
+
+The Client creates a JSON document per {{CreateGrantSeq}}, signs it using JWS {{RFC7515}}, and sends the JWS token to the GS end point using HTTP POST, with a content-type of application/jose.
 
 + **Payload Encryption**
 
-The AS may require the AS Request to be encrypted. If so, the JWS token is encrypted per JWE {{RFC7516}} using the public key and algorithm specified by the AS.
+The GS may require the Grant Request to be encrypted. If so, the JWS token is encrypted per JWE {{RFC7516}} using the public key and algorithm specified by the GS.
 
+**  Authorization Request 
 
-## Interaction Response {#InteractionResponse} 
-If the Client set the authenticate_first flag, the response includes an authentication object, otherwise it includes an authorization object. If the AS wants the Client to initiate the User interaction, it sends an interaction object.
+The Client makes an HTTP GET call to the authorization uri, setting the HTTP Authorization header per --JOSE-- with the authorization request token.
 
-If no interaction is required the AS will return an AS Response per {{ASResponse}}, otherwise the AS will return an Interaction Response per {{InteractionResponseJSON}}. 
+A non-normative Authorization Request example:
 
-If the AS wants the Client to start the interaction, an interaction object will be returned in the response.
+    GET /authorization/ey7snHGs HTTP/2
+    Host: as.example
+    Authorization: JOSE eyJhb.example.authorization.token.haDwskpFDBW
 
-+ **Error Responses**
+**  Authentication Request {#AuthenticationRequest}
 
-The AS MAY respond with one of the following errors defined in {{ErrorMessages}}:
+**  Update Grant Request {#UpdateGrantRequest}
 
-    TBD
+**  Delete Grant Request  {#DeleteGrantRequest}
 
-## Deletion Request {#DeletionRequest}
-
-The Client MAY delete an outstanding request using the authorization token by making an HTTP DELETE call to the authorization uri, setting the HTTP Authorization header per {{JOSEHTTP}} with the authorization request token. 
+The Client MAY delete an outstanding request using the authorization token by making an HTTP DELETE call to the authorization uri, setting the HTTP Authorization header per --JOSE-- with the authorization request token. 
 
 A non-normative deletion request example:
 
@@ -933,50 +1519,33 @@ A non-normative deletion request example:
 
 + **Error Responses**
 
-The AS MAY respond with one of the following errors defined in {{ErrorMessages}}:
+The GS MAY respond with one of the following errors defined in {{ErrorResponses}}:
 
     TBD
 
-## Authentication Request {#AuthenticationRequest}
-
-{{AuthenticationRequestToken}}
-
-## Authentication Response {#AuthenticationResponse}
 
 
-## Authorization Request {#AuthorizationRequest}
+If the Client received a refresh handle and uri from the GS in the Interaction Response, and it wants a fresh access token or handle, it creates a refresh request token per xxx.  setting the HTTP Authorization header per --JOSE-- with the refresh request token. The GS will then respond with a refresh response.
 
-The Client makes an HTTP GET call to the authorization uri, setting the HTTP Authorization header per {{JOSEHTTP}} with the authorization request token.
-
-A non-normative Authorization Request example:
-
-    GET /authorization/ey7snHGs HTTP/2
-    Host: as.example
-    Authorization: JOSE eyJhb.example.authorization.token.haDwskpFDBW
++ **Access Response**
 
 
-## AS Response {#ASResponse}
 
-The AS verifies the authorization request token, and then provides a response according to what the User and/or RO have authorized if required. If no signature or encryption was required, the AS will respond with a JSON document with content-type set to application/json.
+If a new refresh handle and/or refresh uri is returned, the Client MUST use the new refresh handle and/or refresh uri
 
-+ **Response Signing**
-
-The AS MAY sign the response with a JWS per {{RFC7515}} and the private key matching the public key the AS defined as its AS Response signing key. The AS will respond with the content-type set to application/jose.
-
-+ **Response Encryption**
-
-The AS MAY encrypt the response using the public key provided by the Client, using JWE per {{RFC7516}}. The AS will respond with the content-type set to application/jose.
+\[Editor: are there other results relevant for {{RAR}}?]
 
 + **Error Responses**
 
-The AS MAY respond with one of the following errors defined in {{ErrorMessages}}:
+The GS MAY respond with one of the following errors defined in {{ErrorResponses}}:
 
     TBD
 
+** RS Access
 
-## Bearer Token RS Access {#Bearer}
+**  Bearer Token {#Bearer}
 
-If the access method in the AS Response authorizations object {{AuthorizationsObject}} was "bearer", then the Client accesses the RS per Section 2.1 of {{RFC6750}}
+If the access method in the Grant Response authorization object {{ResponseAuthorizationObject}} was "bearer", then the Client accesses the RS per Section 2.1 of {{RFC6750}}
 
 A non-normative example of the HTTP request headers follows:
 
@@ -988,9 +1557,9 @@ A non-normative example of the HTTP request headers follows:
 
 TBD
 
-## Proof-of-possession RS Access {#POP}
+**  Proof-of-possession ----
 
-If the access method in the AS Response authorizations object {{AuthorizationsObject}} was "pop", then the Client creates a JOSE access token per {{JOSEAccessToken}} for each call to the RS, setting the HTTP Authorization header per {{JOSEHTTP}} with the JOSE access token.
+If the access method in the Grant Response authorization object {{ResponseAuthorizationObject}} was "pop", then the Client creates a JOSE access token per {{JOSEAccessToken}} for each call to the RS, setting the HTTP Authorization header per --JOSE-- with the JOSE access token.
 
 A non-normative example of the HTTP request headers follows:
 
@@ -1002,119 +1571,18 @@ A non-normative example of the HTTP request headers follows:
 
 TBD
 
-## JOSE Body RS Access {#POPbody}
+**  JOSE Body -
 
-If the access method in the AS Response authorizations object {{AuthorizationsObject}} was "pop_body", then the Client creates a JOSE access token per {{JOSEAccessToken}} for each call to the RS, setting the HTTP Authorization header per {{JOSEHTTP}} with the JOSE access token.
+If the access method in the Grant Response authorization object {{ResponseAuthorizationObject}} was "pop_body", then the Client creates a JOSE access token per {{JOSEAccessToken}} for each call to the RS, setting the HTTP Authorization header per --JOSE-- with the JOSE access token.
 
-The Client creates a JSON document per the RS requirements. The document MUST include the access handle. The CLient then signs the document using JWS [RFC7515], and sends the resulting compact notation JWS token to the RS end point using HTTP POST, with a content-type of application/jose. Note this is similar to the AS Request {{ASRequest}}.
+The Client creates a JSON document per the RS requirements. The document MUST include the access handle. The CLient then signs the document using JWS [RFC7515], and sends the resulting compact notation JWS token to the RS end point using HTTP POST, with a content-type of application/jose. Note this is similar to the Grant Request  .
 
 \[Editor: any isues here? Anything missing that MUST be in the payload? Would an HTTP Authorization header make sense?]
 
-## Access Refresh {#Refresh}
-
-If the Client received a refresh handle and uri from the AS in the Interaction Response, and it wants a fresh access token or handle, it creates a refresh request token per {{RefreshRequestToken}}.  setting the HTTP Authorization header per {{JOSEHTTP}} with the refresh request token. The AS will then respond with a refresh response.
-
-+ **Refresh Response**
-
-A non-normative example refresh response with an access handle:
-
-    {
-        "type"          : "oauth_scope",
-        "scope"         : "read_calendar write_calendar",
-        "expires_in"    : "3600",
-        "method"        : "pop",
-        "access": {
-            "handle"    : "ey.example.access.handle.9yf3iWszM",
-            "jwk": {
-                "x5u"   : "https://as.example/jwk/VBUEOIQA82" 
-            }       
-        },
-        "refresh": {
-            "handle"    : "ey.example.refresh.handle.4SkjIi",
-            "uri"       : "https://as.example/refresh/eyJl4FzM"
-        }
-    }
-
-The refresh response is the same as the authorizations object {{AuthorizationsObject}} in the AS Response. 
-
-If a new refresh handle and/or refresh uri is returned, the Client MUST use the new refresh handle and/or refresh uri
-
-\[Editor: are there other results relevant for {{RAR}}?]
-
-+ **Error Responses**
-
-The AS MAY respond with one of the following errors defined in {{ErrorMessages}}:
-
-    TBD
-
-# Error Messages {#ErrorMessages}
-
-\[Editor: return "wait" time in AS Response when AS wants Client to wait before retying a Authorization Request.
-The Client MUST generate a fresh authorization token when retrying the Authorization Request.
-] 
-
-    TBD
-
-# AS Initiated Sequence {#ASInitiatedSequence}
-
-\[Editor: AS initiated flows have been challenging to implement as OAuth 2.0 did not directly support them, so deployments bounced back and forth between the Client and AS to create a Client initiated flow. Here is a proposal to support AS initiated: authentication; just-in-time (JIT) provisioning; and authorization]
-
-In this sequence the User starts at the AS, and then based on User input, the AS redirects the User to a Client, passing an initiation token {{InitiationToken}}, and then the Client retrieves authorizations and/or identity claims about the User. The Client MUST be a Registered Client. The sequence follows:
-
-1. The User is interacting at the AS and wants to use the Client, and provide the Client identity claims and/or authorizations from the AS that the Client has pre-configured.
-
-2. The AS creates a authorization handle and uri representing the identity claims and authorizations to be provided to the Client. The AS creates an initiation token containing the AS identifier, the authorization handle, and the authorization uri.
-
-3. The AS redirects the User to a URI the Client has configured to accept initiation tokens, passing the initiation token as a query parameters with the name "token".
-
-4. The Client verifies the initiation token.
-
-5. The Client makes an Authorization Request per {{AuthorizationRequest}}.
-
-6. The AS responds with an AS Response JSON document {{ASResponseJSON}} per {{ASResponse}}.
-
-The Client now has the User identity claims and/or authorizations. If Client policy permits, the Client can perform JIT provisioning if the User is new to the Client.
-
-**AS Initiated Sequence Diagram**
-
-    +--------+              +-------------+             +---------------+
-    |        |              |             |             |               |
-    |        |              |    User     |-------(1)-->|               |
-    |        |              |             |             |               |
-    |        |              +-------------+             |  (2)          |
-    |        |                    /\                    |               |
-    | Client |<--- initiation ---/  \-------------(3)---| Authorization |
-    |        |         token                            |    Server     |
-    |    (4) |                                          |               |
-    |        |                                          |               |
-    |        |--(5)------- Authorization Request ------>|               |
-    |        |                                          |               |
-    |        |<-(6)------- AS Response -----------------|               |
-    |        |                                          |               | 
-    +--------+                                          +---------------+
-
-## Initiation Token {#InitiationToken}
-
-A non-normative example of an initiation token payload follows:
-
-    {
-        "as": "https://as.example",
-        "authorization": {
-            "handle" : "eyJhb958.example.authorization.handle.9yf3szM",
-            "uri"    : "https://as.example/authorization/ey7snHGs"
-        }
-    }
 
 
-+ **as** - the "as" identifier for the AS. This attribute is REQUIRED.
 
-+ **authorization** - the authorization object has the following attributes:
 
-    + **handle** - the authorization handle. This attribute is REQUIRED.
-
-    + **uri** - the authorization URI. This attribute is REQUIRED.
-
-The initiation token is signed with JWS and uses the compact serialization. 
 
 # Extensibility
 
@@ -1124,19 +1592,22 @@ This standard can be extended in a number of areas:
 
 An extension could define other mechanisms for the Client to authenticate and replace JOSE in {{ClientAuthN}} with Mutual TLS or HTTP Signing. Constrained environments could use CBOR {{RFC7049}} instead of JSON, and COSE {{RFC8152}} instead of JOSE, and CoAP {{RFC8323}} instead of HTTP/2.
 
-+ **AS Request**
++ **Grant**
 
-An additional top level object could be added to the AS Request payload if the AS can manage delegations other than authorizations or claims, or some other functionality.
+An extension can define new objects in the Grant Request and Grant Response JSON. 
+
++ **Top Level**
+Top level objects SHOULD only be defined to represent functionality other the existing top level objects and attributes.
 
 + **"client" Object**
 
-Additional information about the Client that the AS would require related to an extension.
+Additional information about the Client that the GS would require related to an extension.
 
 + **"user" Object**
 
-Additional information about the Client that the AS would require related to an extension.
+Additional information about the User that the GS would require related to an extension.
 
-+ **"authorizations" Object**
++ **"authorization" Object**
 
 Additional types of authorizations in addition to OAuth 2.0 scopes and RAR.
 
@@ -1144,13 +1615,13 @@ Additional types of authorizations in addition to OAuth 2.0 scopes and RAR.
 
 Additional types of identity claims in addition to OpenID Connect claims and Verified Credentials.
 
-+ **Interaction**
++ **Interaction types**
 
-Additional mechanisms for the Client to start an interaction with the User.
+Additional types of interactions a Client can start with the User.
 
-+ **Access Methods**
++ **Access Mechanisms**
 
-Additional mechanisms for the Client to present authorization to a resource.
+Additional mechanisms for the Client to present access tokens to a resource.
 
 
 + **Continuous Authentication**
@@ -1163,25 +1634,25 @@ An extension could define a new handle for the Client to use to regularly provid
 
 # Rational
 
-1. **Why is there only one mechanism for the Client to authenticate with the AS? Why not support other mechanisms?**
+1. **Why is there only one mechanism for the Client to authenticate with the GS? Why not support other mechanisms?**
 
     Having choices requires implementers to understand which choice is preferable for them. Having one default mechanism in the document for the Client to authenticate simplifies most implementations. Extensions can specify other mechanisms that are preferable in specific environments. 
 
 1. **Why is the default Client authentication JOSE rather than MTLS?**
 
-    MTLS cannot be used today by a Dynamic Client. MTLS requires the application to have access below what is typically the application layer, that is often not available on some platforms. JOSE is done at the application layer. Many AS deployments will be an application behind a proxy performing TLS, and there are risks in the proxy passing on the results of MTLS.
+    MTLS cannot be used today by a Dynamic Client. MTLS requires the application to have access below what is typically the application layer, that is often not available on some platforms. JOSE is done at the application layer. Many GS deployments will be an application behind a proxy performing TLS, and there are risks in the proxy passing on the results of MTLS.
 
 1. **Why is the default Client authentication JOSE rather than HTTP signing?**
 
-    There is currently no widely deployed open standard for HTTP signing. Additionally, HTTP signing requires passing all the relevant parts of the HTTP request to downstream services within an AS that may need to independently verify the Client identity.
+    There is currently no widely deployed open standard for HTTP signing. Additionally, HTTP signing requires passing all the relevant parts of the HTTP request to downstream services within an GS that may need to independently verify the Client identity.
 
-1. **What are the advantages of using JOSE for the Client to authenticate to the AS and a resource?**
+1. **What are the advantages of using JOSE for the Client to authenticate to the GS and a resource?**
     
-    Both Registered Clients and Dynamic Clients can have a private key, eliminating the public Client issues in OAuth 2.0, as a Dynamic Client can create an ephemeral key pair. Using asymetric cryptography also allows each instance of a Registered Client to have its own private key if it can obtain a certificate binding its public key to the public key the AS has for the Client. Signed tokens can be passed to downstream components in a AS or RS to enable independent verification of the Client and its request. The AS Initiated Sequence {{ASInitiatedSequence}} requires a URL safe parameter, and JOSE is URL safe.
+    Both Registered Clients and Dynamic Clients can have a private key, eliminating the public Client issues in OAuth 2.0, as a Dynamic Client can create an ephemeral key pair. Using asymetric cryptography also allows each instance of a Registered Client to have its own private key if it can obtain a certificate binding its public key to the public key the GS has for the Client. Signed tokens can be passed to downstream components in a GS or RS to enable independent verification of the Client and its request. The GS Initiated Sequence {{GSInitiatedGrant}} requires a URL safe parameter, and JOSE is URL safe.
 
-1. **Why does the AS not return parameters to the Client in the redirect url?**
+1. **Why does the GS not return parameters to the Client in the redirect url?**
 
-    Passing parameters via a browser redirection is the source of many of the security risks in OAuth 2.0. It also presents a challenge for smart devices. In this protocol, the redirection from the Client to the AS is to enable the AS to interact with the User, and the redirection back to the Client is to hand back interaction control to the Client if the redirection was a full browser redirect. Unlike OAuth 2.0, the identity of the Client is independent of the URI the AS redirects to.
+    Passing parameters via a browser redirection is the source of many of the security risks in OAuth 2.0. It also presents a challenge for smart devices. In this protocol, the redirection from the Client to the GS is to enable the GS to interact with the User, and the redirection back to the Client is to hand back interaction control to the Client if the redirection was a full browser redirect. Unlike OAuth 2.0, the identity of the Client is independent of the URI the GS redirects to.
 
 1. **Why is there not a UserInfo endpoint as there is with OpenID Connect?**
 
@@ -1191,31 +1662,31 @@ An extension could define a new handle for the Client to use to regularly provid
     
 1. **Why is there still a Client ID? Could we not use a fingerprint of the public key to identify the Client?**
 
-    Some AS deployments do not allow calls from Registered Clients, and provide different functionality to different Clients. A permanent identifier for the Client is needed for the Client developer and the AS admin to ensure they are referring to the same Client. The Client ID was used in OAuth 2.0, and it served the same purpose. 
+    Some GS deployments do not allow calls from Registered Clients, and provide different functionality to different Clients. A permanent identifier for the Client is needed for the Client developer and the GS admin to ensure they are referring to the same Client. The Client ID was used in OAuth 2.0, and it served the same purpose. 
 
 1. **Why have both claims and authorizations?**
 
     There are use cases for each that are independent: authenticating a user vs granting access to a resource. A request for an authorization returns an access token or handle, while a request for a claim returns the claim.
 
-1. **Why specify HTTP/2 or later and TLS 1.3 or later for Client and AS communication in {{ClientAuthN}}?**
+1. **Why specify HTTP/2 or later and TLS 1.3 or later for Client and GS communication in {{ClientAuthN}}?**
 
-    Knowing the AS supports HTTP/2 enables a Client to set up a connection faster. HTTP/2 will be more efficient when Clients have large numbers of access tokens and are frequently refreshing them at the AS as there will be less network traffic. Mandating TLS 1.3 similarly improves the performance and security of Clients and AS when setting up a TLS connection.
+    Knowing the GS supports HTTP/2 enables a Client to set up a connection faster. HTTP/2 will be more efficient when Clients have large numbers of access tokens and are frequently refreshing them at the GS as there will be less network traffic. Mandating TLS 1.3 similarly improves the performance and security of Clients and GS when setting up a TLS connection.
 
-1. **Why do some of the JSON objects only have one child, such as the identifiers object in the user object in the AS Request?**
+1. **Why do some of the JSON objects only have one child, such as the identifiers object in the user object in the Grant Request?**
 
     It is difficult to forecast future use cases. Having more resolution may mean the difference between a simple extension, and a convoluted extension.
 
-1. **Why is the "iss" included in the "oidc" identifier object? Would the "sub" not be enough for the AS to identify the User?**
+1. **Why is the "iss" included in the "oidc" identifier object? Would the "sub" not be enough for the GS to identify the User?**
 
-    The AS may use another AS to authenticate Users. The "iss" and "sub" combination is required to uniquely identify the User for any AS. 
+    The GS may use another GS to authenticate Users. The "iss" and "sub" combination is required to uniquely identify the User for any GS. 
 
-1. **Why complicate the sequence with authentication first?**
+1. **Why complicate the sequence with authentication_first?**
 
-    A common pattern is to use an AS to authenticate the User at the Client. The Client does not know a priori if the User is a new User, or a returning User. Asking a returning User to consent releasing identity claims and/or authorizations they have already provided is a poor User experience, as is sending the User back to the AS. The Client requesting identity first enables the Client to get a response from the AS while the AS is still interacting with the User, so that the Client can request any identity claims/or authorizations required or desired.
+    A common pattern is to use an GS to authenticate the User at the Client. The Client does not know a priori if the User is a new User, or a returning User. Asking a returning User to consent releasing identity claims and/or authorizations they have already provided is a poor User experience, as is sending the User back to the GS. The Client requesting identity first enables the Client to get a response from the GS while the GS is still interacting with the User, so that the Client can request any identity claims/or authorizations required or desired.
 
-1. **Why is there a JOSE Body access {{POPbody}} method for the Client?** 
+1. **Why is there a JOSE Body access **POPBody** method for the Client?** 
 
-    There are numerous use cases where the RS wants non-repudiation and providence of API calls. For example, the UAS Service Supplier Framework for Authentication and Authorization {{UTM}}.
+    There are numerous use cases where the RS wants non-repudiation and providence of API calls. For example, the UGS Service Supplier Framework for Authentication and Authorization {{UTM}}.
 
 
 # Acknowledgments
@@ -1247,28 +1718,38 @@ TBD
 - text clean up
 - added OIDC4IA claims
 - added "jws" method for accessing a resource.
-- renamed Initiation Request -> AS Request
+- renamed Initiation Request -> Grant Request
 - renamed Initiation Response -> Interaction Response
 - renamed Completion Request -> Authorization Request
-- renamed Completion Response -> AS Request
+- renamed Completion Response -> Grant Request
 - renamed completion handle -> authorization handle
 - added Authentication Request, Authentication Response, authentication handle
+
+## draft-hardt-xauth-protocol-02
+
+- text clean up
+- removed discovery from sequence diagram
+- renamed
+- GS Endpoint is identifier for GS. Decouple GS Endpoint from OIDC issuer.
+
 
 # Comparison with OAuth 2.0 and OpenID Connect
 
 **Changed Features**
 
-The major differences between this protocol and OAuth 2.0 and OpenID Connect are:
+The major changes between this protocol and OAuth 2.0 and OpenID Connect are:
 
 + The Client uses a private key to authenticate in this protocol instead of the client secret in OAuth 2.0 and OpenID Connect.
 
-+ The Client initiates the protocol by making a signed request directly to the AS instead of redirecting the User to the AS.
++ The Client initiates the protocol by making a signed request directly to the GS instead of redirecting the User to the GS.
 
-+ The Client does not receive any parameters from a redirection of the User back from the AS.
++ The Client does not pass any parameters in redirecting the User to the GS, nor receive any parameters in the redirection back from the GS.
 
-+ Refreshing an access token requires creating a refresh token from a refresh handle, rather than an authenticated call with a refresh token.
++ The refresh_token has been replaced with a AuthZ URI that both represents the access, and is the URI to call to refresh access.
 
 + The Client can request identity claims to be returned independent of the ID Token. There is no UserInfo endpoint to query claims as there is in OpenID Connect.
+
++ The GS URI is the token endpoint. CHECK!!!s
 
 **Preserved Features** 
 
@@ -1276,4 +1757,26 @@ The major differences between this protocol and OAuth 2.0 and OpenID Connect are
 
 + This protocol reuses the Client IDs, Claims and ID Token of OpenID Connect.
 
-+ No change is required by the Client or the RS for existing APIs.
++ No change is required by the Client or the RS for existing bearer token protected APIs.
+
+**New Features**
+
++ A Grant represents the user identity claims and RS access granted to the Client.
+
++ The Client can update, retrieve, and delete a Grant.
+
++ The GS can initiate a flow by creating a Grant and redirecting the User to the Client with the Grant URI.
+
++ The Client can discovery if an GS has a User with an identifier before the GS interacts with the User.
+
++ The Client can request the GS to first authenticate the User and return User identity claims, and then the Client can update Grant request based on the User identity.
+
++ Support for QR Code initiated interactions.
+
++ Each Client instance can have its own private / public key pair.
+
++ More Extensibility dimensions.
+
+# Open Questions
+
+1. 
