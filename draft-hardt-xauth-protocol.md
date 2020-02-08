@@ -1620,6 +1620,11 @@ This standard can be extended in a number of areas:
 
     Maybe there are no use cases for them \[that the editor knows of], but the GS can not implement, and they are available if use cases come up.
 
+1. **Why list explicit interactions, instead of the Client and GS negotiating interaction capabilities?**
+
+    The Client knows what interactions it is capable of, and prefers. Telling the GS the interaction allows the GS to know what interaction the User will have. Knowing how the Client will transition the interaction will enable the GS to provider a better User experience. For example, the GS may want to provide a short URL if it knows the Client will be showing a QR code vs a redirect, or have a different layout if it is a popup vs a redirect. 
+
+
 # Acknowledgments
 
 This draft derives many of its concepts from Justin Richer's Transactional Authorization draft {{TxAuth}}. 
