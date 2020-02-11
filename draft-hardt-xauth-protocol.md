@@ -1277,7 +1277,7 @@ The following table shows the verb, uri and token location for each Client reque
 | Create Grant       | POST      | GS URI       | body
 | Read Grant         | GET       | Grant URI    | header 
 | Update Grant       | PUT       | Grant URI    | body
-| Delete Grant       | DELETE    | Grant URI    | success 
+| Delete Grant       | DELETE    | Grant URI    | header 
 | Refresh AuthZ      | GET       | AuthZ URI    | body 
 | Update AuthZ       | PUT       | AuthZ URI    | body 
 | Delete AuthZ       | DELETE    | AuthZ URI    | header 
