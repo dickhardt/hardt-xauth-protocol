@@ -4,12 +4,12 @@
 
 Network Working Group                                      D. Hardt, Ed.
 Internet-Draft                                                SignIn.Org
-Intended status: Standards Track                         8 February 2020
-Expires: 11 August 2020
+Intended status: Standards Track                        13 February 2020
+Expires: 16 August 2020
 
 
                            The XAuth Protocol
-                     draft-hardt-xauth-protocol-02
+                     draft-hardt-xauth-protocol-03
 
 Abstract
 
@@ -45,7 +45,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 11 August 2020.
+   This Internet-Draft will expire on 16 August 2020.
 
 Copyright Notice
 
@@ -245,11 +245,11 @@ Table of Contents
    *  *Resource Server* (RS) - has API resources that require an access
       token from the GS.  Owned by the Resource Owner.
 
-   *  *Resource Owner* (RO) - owns the RS, and has delegated RS access
-      management to the GS.  The RO may be the same entity as the User,
-      or may be a different entity that the GS interacts with
-      independently.  GS and RO interactions are out of scope of this
-      document.
+   *  *Resource Owner* (RO) - owns resources at the RS, and has
+      delegated RS access management to the GS.  The RO may be the same
+      entity as the User, or may be a different entity that the GS
+      interacts with independently.  GS and RO interactions are out of
+      scope of this document.
 
 2.2.  Reused Terms
 
@@ -2055,9 +2055,14 @@ Table of Contents
    8.   *Why have both claims and authorizations?*
 
         There are use cases for each that are independent:
-        authenticating a user vs granting access to a resource.  A
-        request for an authorization returns an access token or handle,
-        while a request for a claim returns the claim.
+        authenticating a user and providing claims vs granting access to
+        a resource.  A request for an authorization returns an access
+        token which may have full CRUD capabilities, while a request for
+        a claim returns the claim about the User - with no create,
+        update or delete capabilities.  While the UserInfo endpoint in
+        OIDC may be thought of as a resource, separating the concepts
+        and how they are requested keeps each of them simpler in the
+        Editor's opinion. :)
 
    9.   *Why specify HTTP/2 or later and TLS 1.3 or later for Client and
         GS communication in ?*Section 10
@@ -2084,21 +2089,34 @@ Table of Contents
         OP issuer identifier will likely not be the same as the GS URI.
         The GS may also provide claims from multiple OPs.
 
-   12.  *Why complicate the sequence with "interaction"."keep"?*
+   12.  *Why complicate things with "interaction"."keep"?*
 
-        A common pattern is to use an GS to authenticate the User at the
-        Client.  The Client does not know a priori if the User is a new
+        The common sequence has a back and forth between the Client and
+        the GS, and the Client can update the Grant and have a new
+        interaction.  Keeping the interaction provides a more seamless
+        user experience where the results from the first request
+        determine subsequent requests.  For example, a common pattern is
+        to use a GS to authenticate the User at the Client, and to
+        register the User at the Client using additional claims from the
+        GS.  The Client does not know a priori if the User is a new
         User, or a returning User.  Asking a returning User to consent
-        releasing identity claims and/or authorizations they have
-        already provided is a poor User experience, as is sending the
-        User back to the GS.  The Client requesting identity first
-        enables the Client to get a response from the GS while the GS is
-        still interacting with the User, so that the Client can request
-        any identity claims/or authorizations required or desired.
+        releasing claims they have already provided is a poor User
+        experience, as is sending the User back to the GS.  The Client
+        requesting identity first enables the Client to get a response
+        from the GS while the GS is still interacting with the User, so
+        that the Client can request additional claims only if needed.
         Additionally, the claims a Client may want about a User may be
         dependent on some initial Claims.  For example, if a User is in
         a particular country, additional or different Claims my be
-        required by the Client
+        required by the Client.
+
+        There are also benefits for the GS.  Today, a GS usually keeps
+        track of which claims a Client has requested for a User.
+        Storing this information for all Clients a User uses may be
+        undesirable for a GS that does not want to have that information
+        about the User.  Keeping the interaction allows the Client to
+        track what information it has about the User, and the GS can
+        remain stateless.
 
    13.  *Why is there a "jose+body" RS access mechanism method for the
         Client?*Section 10.2.3
@@ -2149,6 +2167,10 @@ Table of Contents
         a short URL if it knows the Client will be showing a QR code vs
         a redirect, or have a different layout if it is a popup vs a
         redirect.
+
+        [Editor: are there use cases where the Client would want to
+        provide a list of interaction types so the GS can select which
+        one it can support? ]
 
 13.  Acknowledgments
 
