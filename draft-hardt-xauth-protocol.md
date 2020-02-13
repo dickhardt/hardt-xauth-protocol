@@ -1,7 +1,7 @@
 ---
-docname: draft-hardt-xauth-protocol-02
+docname: draft-hardt-xauth-protocol-03
 title: The XAuth Protocol
-date: 2020-02-08
+date: 2020-02-13
 category: std
 ipr: trust200902
 area: Security
@@ -184,7 +184,7 @@ The parties and their relationships to each other:
 
 - **Resource Server** (RS) - has API resources that require an access token from the GS. Owned by the Resource Owner.
 
-- **Resource Owner** (RO) - owns the RS, and has delegated RS access management to the GS. The RO may be the same entity as the User, or may be a different entity that the GS interacts with independently. GS and RO interactions are out of scope of this document.
+- **Resource Owner** (RO) - owns resources at the RS, and has delegated RS access management to the GS. The RO may be the same entity as the User, or may be a different entity that the GS interacts with independently. GS and RO interactions are out of scope of this document.
 
 ## Reused Terms
 
@@ -1586,7 +1586,7 @@ This standard can be extended in a number of areas:
 
 1. **Why have both claims and authorizations?**
 
-    There are use cases for each that are independent: authenticating a user vs granting access to a resource. A request for an authorization returns an access token or handle, while a request for a claim returns the claim.
+    There are use cases for each that are independent: authenticating a user and providing claims vs granting access to a resource. A request for an authorization returns an access token which may have full CRUD capabilities, while a request for a claim returns the claim about the User -- with no create, update or delete capabilities. While the UserInfo endpoint in OIDC may be thought of as a resource, separating the concepts and how they are requested keeps each of them simpler in the Editor's opinion. :)
 
 1. **Why specify HTTP/2 or later and TLS 1.3 or later for Client and GS communication in {{JOSEauthN}}?**
 
@@ -1600,9 +1600,11 @@ This standard can be extended in a number of areas:
 
     This decouples the GS from the OpenID Provider (OP). The GS identifier is the GS URI, which is the endpoint at the GS. The OP issuer identifier will likely not be the same as the GS URI. The GS may also provide claims from multiple OPs.
 
-1. **Why complicate the sequence with "interaction"."keep"?**
+1. **Why complicate things with "interaction"."keep"?**
 
-    A common pattern is to use an GS to authenticate the User at the Client. The Client does not know a priori if the User is a new User, or a returning User. Asking a returning User to consent releasing identity claims and/or authorizations they have already provided is a poor User experience, as is sending the User back to the GS. The Client requesting identity first enables the Client to get a response from the GS while the GS is still interacting with the User, so that the Client can request any identity claims/or authorizations required or desired. Additionally, the claims a Client may want about a User may be dependent on some initial Claims. For example, if a User is in a particular country, additional or different Claims my be required by the Client
+    The common sequence has a back and forth between the Client and the GS, and the Client can update the Grant and have a new interaction. Keeping the interaction provides a more seamless user experience where the results from the first request determine subsequent requests. For example, a common pattern is to use a GS to authenticate the User at the Client, and to register the User at the Client using additional claims from the GS. The Client does not know a priori if the User is a new User, or a returning User. Asking a returning User to consent releasing claims they have already provided is a poor User experience, as is sending the User back to the GS. The Client requesting identity first enables the Client to get a response from the GS while the GS is still interacting with the User, so that the Client can request additional claims only if needed. Additionally, the claims a Client may want about a User may be dependent on some initial Claims. For example, if a User is in a particular country, additional or different Claims my be required by the Client.
+
+    There are also benefits for the GS. Today, a GS usually keeps track of which claims a Client has requested for a User. Storing this information for all Clients a User uses may be undesirable for a GS that does not want to have that information about the User. Keeping the interaction allows the Client to track what information it has about the User, and the GS can remain stateless.
 
 1. **Why is there a "jose+body" RS access mechanism method {{jose_bodyMech}} for the Client?** 
 
@@ -1622,7 +1624,9 @@ This standard can be extended in a number of areas:
 
 1. **Why list explicit interactions, instead of the Client and GS negotiating interaction capabilities?**
 
-    The Client knows what interactions it is capable of, and prefers. Telling the GS the interaction allows the GS to know what interaction the User will have. Knowing how the Client will transition the interaction will enable the GS to provider a better User experience. For example, the GS may want to provide a short URL if it knows the Client will be showing a QR code vs a redirect, or have a different layout if it is a popup vs a redirect. 
+    The Client knows what interactions it is capable of, and prefers. Telling the GS the interaction allows the GS to know what interaction the User will have. Knowing how the Client will transition the interaction will enable the GS to provider a better User experience. For example, the GS may want to provide a short URL if it knows the Client will be showing a QR code vs a redirect, or have a different layout if it is a popup vs a redirect.
+
+    \[Editor: are there use cases where the Client would want to provide a list of interaction types so the GS can select which one it can support? ]
 
 
 # Acknowledgments
