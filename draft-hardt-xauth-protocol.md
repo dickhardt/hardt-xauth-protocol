@@ -1614,11 +1614,11 @@ This standard can be extended in a number of areas:
 
     A URI is an identifier just like a handle that can contain GS information that is opaque to the Client -- so it has all the features of a handle, plus it can be the URL that is resolved to manipulate a Grant or an Authorization. As the Grant URI and AuthZ URI are defined to start with the GS URI, the Client (and GS) can easily determine which GS a Grant or Authorization belong to. URIs also enable a RESTful interface to the GS functionality.
 
-1. **Why have an OPTIONS verb on the GS URI? Why not use a .well-known mechanism?**
+1. **Why use the OPTIONS verb on the GS URI? Why not use a .well-known mechanism?**
 
     Having the GS URI endpoint respond to the metadata allows the GS to provide Client specific results using the same Client authentication used for other requests to the GS. It also reduces the risk of a mismatch between what the advertised metadata, and the actual metadata. A .well-known discovery mechanism may be defined to resolve from a hostname to the GS URI.
 
-1. **Why have an UPDATE, DELETE, and OPTIONS verbs on the AuthZ URI?**
+1. **Why support UPDATE, DELETE, and OPTIONS verbs on the AuthZ URI?**
 
     Maybe there are no use cases for them \[that the editor knows of], but the GS can not implement, and they are available if use cases come up.
 
