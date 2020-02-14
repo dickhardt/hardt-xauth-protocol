@@ -4,8 +4,8 @@
 
 Network Working Group                                      D. Hardt, Ed.
 Internet-Draft                                                SignIn.Org
-Intended status: Standards Track                        13 February 2020
-Expires: 16 August 2020
+Intended status: Standards Track                        14 February 2020
+Expires: 17 August 2020
 
 
                            The XAuth Protocol
@@ -45,7 +45,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 August 2020.
+   This Internet-Draft will expire on 17 August 2020.
 
 Copyright Notice
 
@@ -143,6 +143,7 @@ Table of Contents
        A.1.  draft-hardt-xauth-protocol-00
        A.2.  draft-hardt-xauth-protocol-01
        A.3.  draft-hardt-xauth-protocol-02
+       A.4.  draft-hardt-xauth-protocol-03
    Appendix B.  Comparison with OAuth 2.0 and OpenID Connect
    Appendix C.  Open Questions
    Author's Address
@@ -1017,19 +1018,16 @@ Table of Contents
       This attribute is OPTIONAL
 
       -  *type* - contains one of the following values: "popup",
-         "redirect", or "qrcode".  Details in Section 7.4.7.  This
-         attribute is REQUIRED.
+         "redirect", "qrcode", or "code".  Details in Section 7.4.7.
+         This attribute is REQUIRED.
 
-      -  *redirect_uri* - this attribute is REQUIRED if the type is
-         "redirect".  It is the URI that the Client requests the GS to
-         redirect the User to after the GS has completed interacting
-         with the User.  If the Client manages session state in URIs,
-         then the redirect_uri SHOULD contain that state.
+   [Editor: do we want this to be an array of types the Client can
+   support?  This would only be the case if the GS is not able to
+   support all types and negotiation is required.  Is that required?]
 
-      -  *ui_locales* - End-User's preferred languages and scripts for
-         the user interface, represented as a space-separated list of
-         [RFC5646] language tag values, ordered by preference.  This
-         attribute is OPTIONAL.
+   + **redirect_uri** - this attribute is REQUIRED if the type is "redirect". It is the URI that the Client requests the GS to redirect the User to after the GS has completed interacting with the User. If the Client manages session state in URIs, then the redirect_uri SHOULD contain that state.
+
+   + **ui_locales** - End-User's preferred languages and scripts for the user interface, represented as a space-separated list of {{RFC5646}} language tag values, ordered by preference. This attribute is OPTIONAL.
 
    [Editor: do we need max pixels or max chars for qrcode interaction?
    Either passed to GS, or max specified values here?]
@@ -1427,16 +1425,20 @@ Table of Contents
    *  *type* - this MUST match the type provided by the Client in the
       Grant Request client.interaction object.
 
-   *  *uri* - the URI to interact with the User per the type.  This may
-      be a temporary short URL if the type is qrcode so that it is easy
-      to scan.
+   [Editor: may update to be one of the types provided by the Client]
 
-   *  *message* - a text string to display to the User if type is
-      qrcode.
+   *  *uri* - the URI to interact with the User per the type.
 
-   [Editor: do we specify a maximum length for the uri and message so
-   that a device knows the maximum it needs to support?  A smart device
-   may have limited screen real estate.]
+   *  *qr* - the URI to show as a QR code.  Included if type is "qrcode"
+
+   *  *code* - a text string of the code to display to the User if type
+      is "qrcode" or "code".
+
+   [Editor: do we specify a maximum length for the uri and code so that
+   a device knows the maximum it needs to support?  A smart device may
+   have limited screen real estate.]
+
+   See Interaction Types Section 7.4.7 for details.
 
 7.4.2.  "user" Object
 
@@ -1533,12 +1535,11 @@ Table of Contents
    initiate the interaction with the User in one of the following ways:
 
    *  *popup* The Client will create a new popup child browser window
-      containing the "interaction"."uri" attribute.  [Editor: more
-      details on how to do this]
-
-   The GS will close the popup window when the interactions with the
-   User are complete.  [Editor: confirm GS can do this still on all
-   browsers, or does Client need to close]
+      with URI contained in the "interaction"."uri" attribute.  [Editor:
+      more details on how to do this] The GS will close the popup window
+      when the interactions with the User are complete.  [Editor:
+      confirm GS can do this still on all browsers, or does Client need
+      to close?]
 
    *  *redirect* The Client will redirect the User to the
       "interaction"."uri" attribute.  When the GS interactions with the
@@ -1547,11 +1548,18 @@ Table of Contents
       Grant Request.
 
    *  *qrcode* The Client will create a [QR_Code] of the
-      "interaction"."uri" attribute and display the resulting graphic
-      and the "interaction"."message" attribute as a character string.
+      "interaction"."qr" attribute and display the resulting graphic.
+      The CLient will also display the "interaction"."uri" and
+      "interaction"."code" per the "code" type.
 
-   An GS MUST support the "popup", "redirect", and "qrcode" interaction
-   types.
+   *  *code* The Client will display the "interaction"."code" contents
+      and direct the User to navigate to the "interaction"."uri" value
+      and enter the code.
+
+   A GS MUST support the "popup", "redirect", "qrcode", and "code"
+   interaction types.
+
+   [Editor: is this too restrictive?]
 
 7.4.8.  Signing and Encryption
 
@@ -2138,7 +2146,7 @@ Table of Contents
         belong to.  URIs also enable a RESTful interface to the GS
         functionality.
 
-   15.  *Why have an OPTIONS verb on the GS URI?  Why not use a .well-
+   15.  *Why use the OPTIONS verb on the GS URI?  Why not use a .well-
         known mechanism?*
 
         Having the GS URI endpoint respond to the metadata allows the GS
@@ -2149,7 +2157,7 @@ Table of Contents
         mechanism may be defined to resolve from a hostname to the GS
         URI.
 
-   16.  *Why have an UPDATE, DELETE, and OPTIONS verbs on the AuthZ
+   16.  *Why support UPDATE, DELETE, and OPTIONS verbs on the AuthZ
         URI?*
 
         Maybe there are no use cases for them [that the editor knows
@@ -2333,13 +2341,24 @@ A.2.  draft-hardt-xauth-protocol-01
 
 A.3.  draft-hardt-xauth-protocol-02
 
-   *  handles are now URIs
+   *  major rewrite
 
-   *  the
+   *  handles are now URIs
 
    *  the collection of claims and authorizations are a Grant
 
-   *  
+   *  an Authorization is its own type
+
+   *  lots of sequences added
+
+A.4.  draft-hardt-xauth-protocol-03
+
+   *  fixed RO definition
+
+   *  improved language in Rationals
+
+   *  added user code interaction method, and aligned qrcode interaction
+      method
 
 Appendix B.  Comparison with OAuth 2.0 and OpenID Connect
 
