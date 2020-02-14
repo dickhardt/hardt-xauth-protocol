@@ -1,7 +1,7 @@
 ---
 docname: draft-hardt-xauth-protocol-03
 title: The XAuth Protocol
-date: 2020-02-13
+date: 2020-02-14
 category: std
 ipr: trust200902
 area: Security
@@ -782,7 +782,9 @@ The interaction object contains the type of interaction the Client will provide 
 + **keep** - a JSON boolean. If set to the JSON value true, the GS will not transfer the User interaction back to the Client after processing the Grant request. The JSON value false is equivalent to the attribute not being present, and the GS will transfer the User interaction back to the Client after processing the request. This attribute is OPTIONAL
 
 
-    + **type** - contains one of the following values: "popup", "redirect", or "qrcode". Details in {{InteractionType}}. This attribute is REQUIRED.
+    + **type** - contains one of the following values: "popup", "redirect", "qrcode", or "code". Details in {{InteractionType}}. This attribute is REQUIRED.
+
+\[Editor: do we want this to be an array of types the Client can support? This would only be the case if the GS is not able to support all types and negotiation is required. Is that required?]
 
     + **redirect_uri** - this attribute is REQUIRED if the type is "redirect". It is the URI that the Client requests the GS to redirect the User to after the GS has completed interacting with the User. If the Client manages session state in URIs, then the redirect_uri SHOULD contain that state.
 
@@ -1125,12 +1127,17 @@ If the GS wants the Client to start the interaction, the GS MUST select one of t
 
 + **type** - this MUST match the type provided by the Client in the Grant Request client.interaction object.
 
-+ **uri** - the URI to interact with the User per the type. This may be a temporary short URL if the type is qrcode so that it is easy to scan. 
+\[Editor: may update to be one of the types provided by the Client]
 
-+ **message** - a text string to display to the User if type is qrcode.
++ **uri** - the URI to interact with the User per the type. 
 
-\[Editor: do we specify a maximum length for the uri and message so that a device knows the maximum it needs to support? A smart device may have limited screen real estate.]
++ **qr** - the URI to show as a QR code. Included if type is "qrcode"
 
++ **code** - a text string of the code to display to the User if type is "qrcode" or "code".
+
+\[Editor: do we specify a maximum length for the uri and code so that a device knows the maximum it needs to support? A smart device may have limited screen real estate.]
+
+See Interaction Types {{InteractionType}} for details.
 
 ### "user" Object
 
@@ -1202,21 +1209,21 @@ One or more of the following objects from the Request JSON {{RequestJSON}} are i
 If the GS wants the Client to initiate the interaction with the User, then the GS will return an Interaction Response. The Client will initiate the interaction with the User in one of the following ways: 
 
 + **popup**
-The Client will create a new popup child browser window containing the "interaction"."uri" attribute. 
-\[Editor: more details on how to do this]
-
-The GS will close the popup window when the interactions with the User are complete. 
-\[Editor: confirm GS can do this still on all browsers, or does Client need to close] 
+The Client will create a new popup child browser window with URI contained in the "interaction"."uri" attribute. 
+\[Editor: more details on how to do this] The GS will close the popup window when the interactions with the User are complete. \[Editor: confirm GS can do this still on all browsers, or does Client need to close?] 
 
 + **redirect**
 The Client will redirect the User to the "interaction"."uri" attribute. When the GS interactions with the User are complete, the GS will redirect the User to the "interaction"."redirect_uri" attribute the Client provided in the Grant Request.
 
-
 + **qrcode**
-The Client will create a {{QR Code}} of the "interaction"."uri" attribute  and display the resulting graphic and the "interaction"."message" attribute as a character string.
+The Client will create a {{QR Code}} of the "interaction"."qr" attribute and display the resulting graphic. The CLient will also display the "interaction"."uri" and "interaction"."code" per the "code" type.
 
-An GS MUST support the "popup", "redirect", and "qrcode" interaction types.
++ **code**
+The Client will display the "interaction"."code" contents and direct the User to navigate to the "interaction"."uri" value and enter the code.
 
+A GS MUST support the "popup", "redirect", "qrcode", and "code" interaction types.
+
+\[Editor: is this too restrictive?]
 
 ### Signing and Encryption
 
@@ -1667,11 +1674,17 @@ TBD
 
 ## draft-hardt-xauth-protocol-02
 
+- major rewrite
 - handles are now URIs
-- the 
 - the collection of claims and authorizations are a Grant
-- 
+- an Authorization is its own type
+- lots of sequences added
 
+## draft-hardt-xauth-protocol-03
+
+- fixed RO definition
+- improved language in Rationals
+- added user code interaction method, and aligned qrcode interaction method
 
 
 # Comparison with OAuth 2.0 and OpenID Connect
