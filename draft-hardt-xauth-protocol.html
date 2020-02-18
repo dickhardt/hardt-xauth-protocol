@@ -2132,23 +2132,24 @@ Example 3
 <p id="section-5.5.2-1">The interaction object contains the type of interaction the Client will provide the User. Other attributes<a href="#section-5.5.2-1" class="pilcrow">¶</a></p>
 <ul>
 <li id="section-5.5.2-2.1">
-              <p id="section-5.5.2-2.1.1"><strong>keep</strong> - a JSON boolean. If set to the JSON value true, the GS will not transfer the User interaction back to the Client after processing the Grant request. The JSON value false is equivalent to the attribute not being present, and the GS will transfer the User interaction back to the Client after processing the request. This attribute is OPTIONAL  <a href="#section-5.5.2-2.1.1" class="pilcrow">¶</a></p>
-<ul>
-<li id="section-5.5.2-2.1.2.1">
-                  <strong>type</strong> - contains one of the following values: "popup", "redirect", "qrcode", or "code". Details in <a href="#InteractionType" class="xref">Section 7.4.7</a>. This attribute is REQUIRED.<a href="#section-5.5.2-2.1.2.1" class="pilcrow">¶</a>
+              <strong>keep</strong> - a JSON boolean. If set to the JSON value true, the GS will not transfer the User interaction back to the Client after processing the Grant request. The JSON value false is equivalent to the attribute not being present, and the GS will transfer the User interaction back to the Client after processing the request. This attribute is OPTIONAL<a href="#section-5.5.2-2.1" class="pilcrow">¶</a>
 </li>
-              </ul>
+            <li id="section-5.5.2-2.2">
+              <strong>type</strong> - contains one of the following values: "popup", "redirect", "qrcode", or "code". Details in <a href="#InteractionType" class="xref">Section 7.4.7</a>. This attribute is REQUIRED.<a href="#section-5.5.2-2.2" class="pilcrow">¶</a>
 </li>
           </ul>
 <p id="section-5.5.2-3">[Editor: do we want this to be an array of types the Client can support? This would only be the case if the GS is not able to support all types and negotiation is required. Is that required?]<a href="#section-5.5.2-3" class="pilcrow">¶</a></p>
-<div class="artwork art-text alignLeft" id="section-5.5.2-4">
-<pre>
-+ **redirect_uri** - this attribute is REQUIRED if the type is "redirect". It is the URI that the Client requests the GS to redirect the User to after the GS has completed interacting with the User. If the Client manages session state in URIs, then the redirect_uri SHOULD contain that state.
-
-+ **ui_locales** - End-User's preferred languages and scripts for the user interface, represented as a space-separated list of {{RFC5646}} language tag values, ordered by preference. This attribute is OPTIONAL.
-</pre>
-<a href="#section-5.5.2-4" class="pilcrow">¶</a>
-</div>
+<ul>
+<li id="section-5.5.2-4.1">
+              <strong>redirect_uri</strong> - this attribute is REQUIRED if the type is "redirect". It is the URI that the Client requests the GS to redirect the User to after the GS has completed interacting with the User. If the Client manages session state in URIs, then the redirect_uri SHOULD contain that state.<a href="#section-5.5.2-4.1" class="pilcrow">¶</a>
+</li>
+            <li id="section-5.5.2-4.2">
+              <strong>completion_uri</strong> - this attribute is OPTIONAL and is ignored unless the type is "qrcode" or "code". This is the URI the Client would like the GS to redirect the User to after the interaction with the User is complete.<a href="#section-5.5.2-4.2" class="pilcrow">¶</a>
+</li>
+            <li id="section-5.5.2-4.3">
+              <strong>ui_locales</strong> - End-User's preferred languages and scripts for the user interface, represented as a space-separated list of <span>[<a href="#RFC5646" class="xref">RFC5646</a>] language tag values, ordered by preference. This attribute is OPTIONAL.</span><a href="#section-5.5.2-4.3" class="pilcrow">¶</a>
+</li>
+          </ul>
 <p id="section-5.5.2-5">[Editor: do we need max pixels or max chars for qrcode interaction? Either passed to GS, or max specified values here?]<a href="#section-5.5.2-5" class="pilcrow">¶</a></p>
 <p id="section-5.5.2-6">[Editor: other possible interaction models could be a "webview", where the Client can display a web page, or just a "message", where the client can only display a text message]<a href="#section-5.5.2-6" class="pilcrow">¶</a></p>
 <p id="section-5.5.2-7">[Editor: we may need to include interaction types for iOS and Android as the mobile OS APIs evolve.]<a href="#section-5.5.2-7" class="pilcrow">¶</a></p>
@@ -3604,6 +3605,8 @@ The Client knows what interactions it is capable of, and prefers. Telling the GS
           <li id="section-a.4-1.2">improved language in Rationals<a href="#section-a.4-1.2" class="pilcrow">¶</a>
 </li>
           <li id="section-a.4-1.3">added user code interaction method, and aligned qrcode interaction method<a href="#section-a.4-1.3" class="pilcrow">¶</a>
+</li>
+          <li id="section-a.4-1.4">added completion_uri for code flows<a href="#section-a.4-1.4" class="pilcrow">¶</a>
 </li>
         </ul>
 </section>
