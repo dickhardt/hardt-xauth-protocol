@@ -782,13 +782,15 @@ The interaction object contains the type of interaction the Client will provide 
 + **keep** - a JSON boolean. If set to the JSON value true, the GS will not transfer the User interaction back to the Client after processing the Grant request. The JSON value false is equivalent to the attribute not being present, and the GS will transfer the User interaction back to the Client after processing the request. This attribute is OPTIONAL
 
 
-    + **type** - contains one of the following values: "popup", "redirect", "qrcode", or "code". Details in {{InteractionType}}. This attribute is REQUIRED.
++ **type** - contains one of the following values: "popup", "redirect", "qrcode", or "code". Details in {{InteractionType}}. This attribute is REQUIRED.
 
 \[Editor: do we want this to be an array of types the Client can support? This would only be the case if the GS is not able to support all types and negotiation is required. Is that required?]
 
-    + **redirect_uri** - this attribute is REQUIRED if the type is "redirect". It is the URI that the Client requests the GS to redirect the User to after the GS has completed interacting with the User. If the Client manages session state in URIs, then the redirect_uri SHOULD contain that state.
++ **redirect_uri** - this attribute is REQUIRED if the type is "redirect". It is the URI that the Client requests the GS to redirect the User to after the GS has completed interacting with the User. If the Client manages session state in URIs, then the redirect_uri SHOULD contain that state.
 
-    + **ui_locales** - End-User's preferred languages and scripts for the user interface, represented as a space-separated list of {{RFC5646}} language tag values, ordered by preference. This attribute is OPTIONAL.
++ **completion_uri** - this attribute is OPTIONAL and is ignored unless the type is "qrcode" or "code". This is the URI the Client would like the GS to redirect the User to after the interaction with the User is complete. 
+
++ **ui_locales** - End-User's preferred languages and scripts for the user interface, represented as a space-separated list of {{RFC5646}} language tag values, ordered by preference. This attribute is OPTIONAL.
 
 \[Editor: do we need max pixels or max chars for qrcode interaction? Either passed to GS, or max specified values here?]
 
@@ -1685,7 +1687,7 @@ TBD
 - fixed RO definition
 - improved language in Rationals
 - added user code interaction method, and aligned qrcode interaction method
-
+- added completion_uri for code flows
 
 # Comparison with OAuth 2.0 and OpenID Connect
 
