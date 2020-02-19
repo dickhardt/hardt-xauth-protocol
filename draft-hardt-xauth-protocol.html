@@ -815,7 +815,7 @@ table.left {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Hardt</td>
-<td class="center">Expires 17 August 2020</td>
+<td class="center">Expires 21 August 2020</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -825,12 +825,12 @@ table.left {
 <dd class="internet-draft">draft-hardt-xauth-protocol-03</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2020-02-14" class="published">14 February 2020</time>
+<time datetime="2020-02-18" class="published">18 February 2020</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2020-08-17">17 August 2020</time></dd>
+<dd class="expires"><time datetime="2020-08-21">21 August 2020</time></dd>
 <dt class="label-authors">Author:</dt>
 <dd class="authors">
 <div class="author">
@@ -875,7 +875,7 @@ table.left {
         material or to cite them other than as "work in progress."
         <a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 17 August 2020.
+        This Internet-Draft will expire on 21 August 2020.
         <a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2625,26 +2625,24 @@ Example 3
           <h4 id="name-interaction-object-2">
 <a href="#section-7.4.1" class="section-number selfRef">7.4.1. </a><a href="#name-interaction-object-2" class="section-name selfRef">"interaction" Object</a>
           </h4>
-<p id="section-7.4.1-1">If the GS wants the Client to start the interaction, the GS MUST select one of the interaction mechanisms provided by the Client in the Grant Request, and include the matching attribute in the interaction object:<a href="#section-7.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.4.1-1">If the GS wants the Client to start the interaction, the GS MUST return the interaction mechanism provided by the Client in the Grant Request, and include the required attributes in the interaction object:<a href="#section-7.4.1-1" class="pilcrow">¶</a></p>
 <ul>
 <li id="section-7.4.1-2.1">
               <strong>type</strong> - this MUST match the type provided by the Client in the Grant Request client.interaction object.<a href="#section-7.4.1-2.1" class="pilcrow">¶</a>
 </li>
-          </ul>
-<p id="section-7.4.1-3">[Editor: may update to be one of the types provided by the Client]<a href="#section-7.4.1-3" class="pilcrow">¶</a></p>
-<ul>
-<li id="section-7.4.1-4.1">
-              <strong>uri</strong> - the URI to interact with the User per the type.<a href="#section-7.4.1-4.1" class="pilcrow">¶</a>
+            <li id="section-7.4.1-2.2">
+              <strong>uri</strong> - the URI to redirect the user to, load in the popup, or show the User to navigate to. This attribute is REQUIRED.<a href="#section-7.4.1-2.2" class="pilcrow">¶</a>
 </li>
-            <li id="section-7.4.1-4.2">
-              <strong>qr</strong> - the URI to show as a QR code. Included if type is "qrcode"<a href="#section-7.4.1-4.2" class="pilcrow">¶</a>
+            <li id="section-7.4.1-2.3">
+              <strong>qr</strong> - the URI to show as a QR code. MUST be included if type is "qrcode"<a href="#section-7.4.1-2.3" class="pilcrow">¶</a>
 </li>
-            <li id="section-7.4.1-4.3">
-              <strong>code</strong> - a text string of the code to display to the User if type is "qrcode" or "code".<a href="#section-7.4.1-4.3" class="pilcrow">¶</a>
+            <li id="section-7.4.1-2.4">
+              <strong>code</strong> - a text string of the code to display to the User if type is "qrcode" or "code".<a href="#section-7.4.1-2.4" class="pilcrow">¶</a>
 </li>
           </ul>
-<p id="section-7.4.1-5">[Editor: do we specify a maximum length for the uri and code so that a device knows the maximum it needs to support? A smart device may have limited screen real estate.]<a href="#section-7.4.1-5" class="pilcrow">¶</a></p>
-<p id="section-7.4.1-6">See Interaction Types <a href="#InteractionType" class="xref">Section 7.4.7</a> for details.<a href="#section-7.4.1-6" class="pilcrow">¶</a></p>
+<p id="section-7.4.1-3">[Editor: do we specify a maximum length for the displayed uri and code so that a device knows the maximum it needs to support? A smart device may have limited screen real estate.]<a href="#section-7.4.1-3" class="pilcrow">¶</a></p>
+<p id="section-7.4.1-4">TBD: entropy and other security considerations for the redirect and popup URI, and the code.<a href="#section-7.4.1-4" class="pilcrow">¶</a></p>
+<p id="section-7.4.1-5">See Interaction Types <a href="#InteractionType" class="xref">Section 7.4.7</a> for details.<a href="#section-7.4.1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="user-object">
@@ -3397,7 +3395,7 @@ The Client knows what interactions it is capable of, and prefers. Telling the GS
 <a href="#section-13" class="section-number selfRef">13. </a><a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
 <p id="section-13-1">This draft derives many of its concepts from Justin Richer's Transactional Authorization draft <span>[<a href="#TxAuth" class="xref">TxAuth</a>].</span><a href="#section-13-1" class="pilcrow">¶</a></p>
-<p id="section-13-2">Additional thanks to Justin Richer for his strong critique of earlier drafts.<a href="#section-13-2" class="pilcrow">¶</a></p>
+<p id="section-13-2">Additional thanks to Justin Richer and Annabelle Richard Backman for their strong critique of earlier drafts.<a href="#section-13-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">

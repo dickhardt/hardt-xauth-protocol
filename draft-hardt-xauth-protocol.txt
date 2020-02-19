@@ -4,8 +4,8 @@
 
 Network Working Group                                      D. Hardt, Ed.
 Internet-Draft                                                SignIn.Org
-Intended status: Standards Track                        14 February 2020
-Expires: 17 August 2020
+Intended status: Standards Track                        18 February 2020
+Expires: 21 August 2020
 
 
                            The XAuth Protocol
@@ -45,7 +45,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 17 August 2020.
+   This Internet-Draft will expire on 21 August 2020.
 
 Copyright Notice
 
@@ -1430,25 +1430,28 @@ Table of Contents
 7.4.1.  "interaction" Object
 
    If the GS wants the Client to start the interaction, the GS MUST
-   select one of the interaction mechanisms provided by the Client in
-   the Grant Request, and include the matching attribute in the
-   interaction object:
+   return the interaction mechanism provided by the Client in the Grant
+   Request, and include the required attributes in the interaction
+   object:
 
    *  *type* - this MUST match the type provided by the Client in the
       Grant Request client.interaction object.
 
-   [Editor: may update to be one of the types provided by the Client]
+   *  *uri* - the URI to redirect the user to, load in the popup, or
+      show the User to navigate to.  This attribute is REQUIRED.
 
-   *  *uri* - the URI to interact with the User per the type.
-
-   *  *qr* - the URI to show as a QR code.  Included if type is "qrcode"
+   *  *qr* - the URI to show as a QR code.  MUST be included if type is
+      "qrcode"
 
    *  *code* - a text string of the code to display to the User if type
       is "qrcode" or "code".
 
-   [Editor: do we specify a maximum length for the uri and code so that
-   a device knows the maximum it needs to support?  A smart device may
-   have limited screen real estate.]
+   [Editor: do we specify a maximum length for the displayed uri and
+   code so that a device knows the maximum it needs to support?  A smart
+   device may have limited screen real estate.]
+
+   TBD: entropy and other security considerations for the redirect and
+   popup URI, and the code.
 
    See Interaction Types Section 7.4.7 for details.
 
@@ -2197,8 +2200,8 @@ Table of Contents
    This draft derives many of its concepts from Justin Richer's
    Transactional Authorization draft [TxAuth].
 
-   Additional thanks to Justin Richer for his strong critique of earlier
-   drafts.
+   Additional thanks to Justin Richer and Annabelle Richard Backman for
+   their strong critique of earlier drafts.
 
 14.  IANA Considerations
 
