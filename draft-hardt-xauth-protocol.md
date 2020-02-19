@@ -1,7 +1,7 @@
 ---
-docname: draft-hardt-xauth-protocol-03
+docname: draft-hardt-xauth-protocol-04
 title: The XAuth Protocol
-date: 2020-02-18
+date: 2020-02-19
 category: std
 ipr: trust200902
 area: Security
@@ -671,9 +671,9 @@ Following is a non-normative example where the Client is requesting the GS to ke
             "id"        : "di3872h34dkJW"
         },
         "interaction": {
-            "keep"      : true,
-            "type"      : "redirect",
-            "uri"       : "https://web.example/return"
+            "keep"          : true,
+            "type"          : "redirect",
+            "redirect_uri"  : "https://web.example/return"
         },
         "user": {
             "identifiers": {
@@ -809,8 +809,7 @@ The interaction object contains the type of interaction the Client will provide 
 
     + **email** - contains an email address per {{RFC5322}}.
 
-    + **oidc** - is an object containing both the "iss" and "sub" attributes from an OpenID Connect ID Token per {{OIDC}} Section 2.
-
+    + **oidc_id_token** - is an OpenID Connect ID Token per {{OIDC}} Section 2.
 
 ### "authorization" Object {#AuthorizationObject}
 
@@ -1082,8 +1081,8 @@ A non-normative example of an Interaction Response follows:
         "nonce"     : "0d1998d8-fbfa-4879-b942-85a88bff1f3b",
         "uri"       : "https://as.example/endpoint/grant/example4",
         "interaction" : {
-            "type"      : "popup",
-            "uri"       : "https://as.example/popup/example4"
+            "type"                  : "popup",
+            "authorization_uri"     : "https://as.example/popup/example4"
         },
         "user": {
             "exists" : true
@@ -1100,7 +1099,7 @@ The Wait Response MUST include the following from the Response JSON {{ResponseJS
 + uri
 + wait
 
-A non-normative example of an Wait Response follows:
+A non-normative example of Wait Response follows:
 
     {
         "iat"       : 15790460234,
@@ -1129,15 +1128,19 @@ If the GS wants the Client to start the interaction, the GS MUST return the inte
 
 + **type** - this MUST match the type provided by the Client in the Grant Request client.interaction object.
 
-+ **uri** - the URI to redirect the user to, load in the popup, or show the User to navigate to. This attribute is REQUIRED.
++ **authorization_uri** - the URI to redirect the user to or load in the popup. Must be included if type is  "popup" and "redirect"
 
-+ **qr** - the URI to show as a QR code. MUST be included if type is "qrcode"
++ **display_uri** - the URI to be displayed to the User for them to navigate to and enter the code. Must be included if type is "qrcode" and "code"
 
-+ **code** - a text string of the code to display to the User if type is "qrcode" or "code".
++ **qr_uri** - the URI to show as a QR code. MUST be included if type is "qrcode"
 
-\[Editor: do we specify a maximum length for the displayed uri and code so that a device knows the maximum it needs to support? A smart device may have limited screen real estate.]
++ **user_code** - a text string of the code to display to the User. Must be included if type is "qrcode" or "code".
 
-TBD: entropy and other security considerations for the redirect and popup URI, and the code.
+\[Editor: do we specify a maximum length for the display_uri and code so that a device knows the maximum it needs to support? A smart device may have limited screen real estate.]
+
+The authorization_uri, qr_uri, and user_code MUST be unique and only match the associated Grant URI.
+
+TBD: entropy and other security considerations for the authorization_uri, qr_uri, and the user_code.
 
 See Interaction Types {{InteractionType}} for details.
 
@@ -1211,17 +1214,17 @@ One or more of the following objects from the Request JSON {{RequestJSON}} are i
 If the GS wants the Client to initiate the interaction with the User, then the GS will return an Interaction Response. The Client will initiate the interaction with the User in one of the following ways: 
 
 + **popup**
-The Client will create a new popup child browser window with URI contained in the "interaction"."uri" attribute. 
-\[Editor: more details on how to do this] The GS will close the popup window when the interactions with the User are complete. \[Editor: confirm GS can do this still on all browsers, or does Client need to close?] 
+The Client will create a new popup child browser window with URI contained in the "interaction"."authorization_uri" attribute. 
+\[Editor: more details on how to do this] The GS will close the popup window when the interactions with the User are complete. \[Editor: confirm GS can stll do this on all browsers, or does Client need to close? If so, then Client needs to provide a redirect_uri.] 
 
 + **redirect**
-The Client will redirect the User to the "interaction"."uri" attribute. When the GS interactions with the User are complete, the GS will redirect the User to the "interaction"."redirect_uri" attribute the Client provided in the Grant Request.
+The Client will redirect the User to the "interaction"."authorization_uri" attribute. When the GS interactions with the User are complete, the GS will redirect the User to the "interaction"."redirect_uri" attribute the Client provided in the Grant Request.
 
 + **qrcode**
-The Client will create a {{QR Code}} of the "interaction"."qr" attribute and display the resulting graphic. The CLient will also display the "interaction"."uri" and "interaction"."code" per the "code" type.
+The Client will create a {{QR Code}} of the "interaction"."qr" attribute and display the resulting graphic. The Client will also display the "interaction"."display_uri" and "interaction"."user_code" per the "code" type.
 
 + **code**
-The Client will display the "interaction"."code" contents and direct the User to navigate to the "interaction"."uri" value and enter the code.
+The Client will display the "interaction"."user_code" contents and direct the User to navigate to the "interaction"."display_uri" value and enter the code.
 
 A GS MUST support the "popup", "redirect", "qrcode", and "code" interaction types.
 
@@ -1688,6 +1691,10 @@ TBD
 - improved language in Rationals
 - added user code interaction method, and aligned qrcode interaction method
 - added completion_uri for code flows
+
+## draft-hardt-xauth-protocol-03
+
+- renamed interaction uris to have purpose specific names
 
 # Comparison with OAuth 2.0 and OpenID Connect
 
