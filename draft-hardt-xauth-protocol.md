@@ -1,7 +1,7 @@
 ---
 docname: draft-hardt-xauth-protocol-03
 title: The XAuth Protocol
-date: 2020-02-14
+date: 2020-02-18
 category: std
 ipr: trust200902
 area: Security
@@ -1125,19 +1125,19 @@ Details of the JSON document:
 
 ### "interaction" Object {#interactionObject}
 
-If the GS wants the Client to start the interaction, the GS MUST select one of the interaction mechanisms provided by the Client in the Grant Request, and include the matching attribute in the interaction object: 
+If the GS wants the Client to start the interaction, the GS MUST return the interaction mechanism provided by the Client in the Grant Request, and include the required attributes in the interaction object: 
 
 + **type** - this MUST match the type provided by the Client in the Grant Request client.interaction object.
 
-\[Editor: may update to be one of the types provided by the Client]
++ **uri** - the URI to redirect the user to, load in the popup, or show the User to navigate to. This attribute is REQUIRED.
 
-+ **uri** - the URI to interact with the User per the type. 
-
-+ **qr** - the URI to show as a QR code. Included if type is "qrcode"
++ **qr** - the URI to show as a QR code. MUST be included if type is "qrcode"
 
 + **code** - a text string of the code to display to the User if type is "qrcode" or "code".
 
-\[Editor: do we specify a maximum length for the uri and code so that a device knows the maximum it needs to support? A smart device may have limited screen real estate.]
+\[Editor: do we specify a maximum length for the displayed uri and code so that a device knows the maximum it needs to support? A smart device may have limited screen real estate.]
+
+TBD: entropy and other security considerations for the redirect and popup URI, and the code.
 
 See Interaction Types {{InteractionType}} for details.
 
@@ -1642,7 +1642,7 @@ This standard can be extended in a number of areas:
 
 This draft derives many of its concepts from Justin Richer's Transactional Authorization draft {{TxAuth}}. 
 
-Additional thanks to Justin Richer for his strong critique of earlier drafts.
+Additional thanks to Justin Richer and Annabelle Richard Backman for their strong critique of earlier drafts.
 
 # IANA Considerations
 
