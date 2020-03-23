@@ -1,7 +1,7 @@
 ---
-docname: draft-hardt-xauth-protocol-05
+docname: draft-hardt-xauth-protocol-06
 title: The XAuth Protocol
-date: 2020-03-07
+date: 2020-03-22
 category: std
 ipr: trust200902
 area: Security
@@ -725,7 +725,7 @@ The GS MUST respond with one of Grant Response {{GrantResponse}}, Interaction Re
 
 from Error Responses {{ErrorResponses}}.
 
-Following is a non-normative example where the Client wants to interact with the User with a popup and is requesting identity claims about the User and read access to the User's contacts:
+Following is a non-normative example where the Client wants is requesting identity claims about the User and read access to the User's contacts:
 
     Example 1
 
@@ -740,7 +740,8 @@ Following is a non-normative example where the Client wants to interact with the
             }
         },
         "interaction": {
-            "type"      : "popup"
+            "type"              : "redirect",
+            "completion_uri"    : "https://web.example/return"
         },
         "authorization": {
             "type"      : "oauth_scope",
@@ -773,9 +774,9 @@ Following is a non-normative example where the Client is requesting the GS to ke
             "id"        : "di3872h34dkJW"
         },
         "interaction": {
-            "keep"          : true,
-            "type"          : "redirect",
-            "redirect_uri"  : "https://web.example/return"
+            "keep"              : true,
+            "type"              : "redirect",
+            "completion_uri"    : "https://web.example/return"
         },
         "user": {
             "identifiers": {
@@ -1122,12 +1123,12 @@ The Grant Response MUST include the following from the Response JSON {{ResponseJ
 + iat
 + nonce
 + uri
-+ expires_in
 
 and MAY include the following from the Response JSON {{ResponseJSON}}
 
 + authorization or authorizations
 + claims
++ expires_in
 
 Example non-normative Grant Response JSON document for Example 1 in {{CreateGrant}}:
 
@@ -1187,8 +1188,8 @@ A non-normative example of an Interaction Response follows:
         "nonce"     : "0d1998d8-fbfa-4879-b942-85a88bff1f3b",
         "uri"       : "https://as.example/endpoint/grant/example4",
         "interaction" : {
-            "type"                  : "popup",
-            "authorization_uri"     : "https://as.example/popup/example4"
+            "type"             : "redirect",
+            "redirect_uri"     : "https://as.example/i/example4"
         },
         "user": {
             "exists" : true
@@ -1766,12 +1767,6 @@ This standard can be extended in a number of areas:
 
     Maybe there are no use cases for them \[that the editor knows of], but the GS can not implement, and they are available if use cases come up.
 
-1. **Why list explicit interactions, instead of the Client and GS negotiating interaction capabilities?**
-
-    The Client knows what interactions it is capable of, and prefers. Telling the GS the interaction allows the GS to know what interaction the User will have. Knowing how the Client will transition the interaction will enable the GS to provider a better User experience. For example, the GS may want to provide a short URL if it knows the Client will be showing a QR code vs a redirect, or have a different layout if it is a popup vs a redirect.
-
-    \[Editor: are there use cases where the Client would want to provide a list of interaction types so the GS can select which one it can support? ]
-
 
 # Acknowledgments
 
@@ -1837,6 +1832,10 @@ TBD
 - added in language for Client to verify interaction completion
 - added Verify Grant API and Interaction Nonce
 - replaced Refresh AuthZ with Read AuthZ. Read and refresh are same operation.
+
+## draft-hardt-xauth-protocol-06
+
+- fixup examples to match specification
 
 # Comparison with OAuth 2.0 and OpenID Connect
 
