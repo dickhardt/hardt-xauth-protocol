@@ -17,7 +17,7 @@ This requires that you have the necessary software installed.  See
 
 ## Implementations
 
-See [XAuth PoC}(https://github.com/dickhardt/XAuth-poc)
+See [XAuth PoC](https://github.com/dickhardt/XAuth-poc)
 
 ## Contributing
 
