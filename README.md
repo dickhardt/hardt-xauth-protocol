@@ -2,7 +2,6 @@
 
 This is the working area for the individual Internet-Draft, "The XAuth Protocol".
 
-* [Editor's Copy](https://dickhardt.github.io/hardt-xauth-protocol/draft-hardt-xauth-protocol.html)
 * [Individual Draft](https://tools.ietf.org/html/draft-hardt-xauth-protocol)
 
 ## Building the Draft
@@ -16,6 +15,9 @@ $ make
 This requires that you have the necessary software installed.  See
 [the instructions](https://github.com/martinthomson/i-d-template/blob/master/doc/SETUP.md).
 
+## Implementations
+
+See [XAuth PoC}(https://github.com/dickhardt/XAuth-poc)
 
 ## Contributing
 
