@@ -1,7 +1,7 @@
 ---
-docname: draft-hardt-gnap-advanced-00
+docname: draft-hardt-gnap-advanced-01
 title: The Grant Negotiation and Authorization Protocol - Advanced Features
-date: 2020-06-07
+date: 2020-07-04
 category: std
 ipr: trust200902
 area: Security
@@ -421,24 +421,26 @@ TBD
 # Document History
 
 ## draft-hardt-gnap-advanced-00
-
 - Initial version
+
+## draft-hardt-gnap-advanced-01
+- renamed verb to method
 
 # GS API Table
 
 Below is a consolidated table of GS APIs from {{GNAP}} and this document:
 
-| request            | http verb | uri          | response     
-|:---                |---        |:---          |:--- 
-| Create Grant       | POST      | GS URI       | interaction, wait, or grant 
-| List Grants        | GET       | GS URI       | grant list
-| Verify Grant       | PATCH     | Grant URI    | grant 
-| Read Grant         | GET       | Grant URI    | wait, or grant 
-| Update Grant       | PUT       | Grant URI    | interaction, wait, or grant 
-| Delete Grant       | DELETE    | Grant URI    | success 
-| Read AuthZ         | GET       | AZ URI       | authorization 
-| Update AuthZ       | PUT       | AZ URI       | authorization 
-| Delete AuthZ       | DELETE    | AZ URI       | success 
-| GS Options         | OPTIONS   | GS URI       | metadata 
-| Grant Options      | OPTIONS   | Grant URI    | metadata 
-| AuthZ Options      | OPTIONS   | AZ URI       | metadata  
+| request            | http method | uri          | response     
+|:---                |---          |:---          |:--- 
+| Create Grant       | POST        | GS URI       | interaction, wait, or grant 
+| List Grants        | GET         | GS URI       | grant list
+| Verify Grant       | PATCH       | Grant URI    | grant 
+| Read Grant         | GET         | Grant URI    | wait, or grant 
+| Update Grant       | PUT         | Grant URI    | interaction, wait, or grant 
+| Delete Grant       | DELETE      | Grant URI    | success 
+| Read AuthZ         | GET         | AZ URI       | authorization 
+| Update AuthZ       | PUT         | AZ URI       | authorization 
+| Delete AuthZ       | DELETE      | AZ URI       | success 
+| GS Options         | OPTIONS     | GS URI       | metadata 
+| Grant Options      | OPTIONS     | Grant URI    | metadata 
+| AuthZ Options      | OPTIONS     | AZ URI       | metadata  

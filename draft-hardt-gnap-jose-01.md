@@ -362,4 +362,3 @@ TBD
 
 ## draft-hardt-gnap-jose-01
 - renamed HTTP verb to method
-
