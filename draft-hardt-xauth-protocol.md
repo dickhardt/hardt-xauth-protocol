@@ -1,7 +1,7 @@
 ---
-docname: draft-hardt-xauth-protocol-11
+docname: draft-hardt-xauth-protocol-12
 title: The Grant Negotiation and Authorization Protocol
-date: 2020-07-04
+date: 2020-07-08
 category: std
 ipr: trust200902
 area: Security
@@ -399,7 +399,7 @@ The Client received an AZ URI from the GS. The Client acquires an access token, 
 
 2. **Resource Request** The Client attempts to access the RS, but receives an error indicating the access token needs to be refreshed. 
 
-3. **Read AuthZ** The Client makes a Read AuthZ ({{ReadAuthZ}}) with an HTTP GET to the AZ URI and receives an Response JSON "authorization" object ({{ResponseAuthorizationObject}}) with a fresh access token.
+3. **Read AuthZ** The Client makes a Read AuthZ ({{ReadAuthZ}}) with an HTTP GET to the AZ URI and receives as Response JSON "authorization" object ({{ResponseAuthorizationObject}}) with a fresh access token.
 
 
 
@@ -441,7 +441,7 @@ and MAY include the following from Request JSON {{RequestJSON}}
 
 + user
 + interaction
-+ authorization or authorizations
++ authorizations
 + claims
 
 The GS MUST respond with one of Grant Response {{GrantResponse}}, Interaction Response {{InteractionResponse}}, Wait Response {{WaitResponse}}, or one of the following errors:
@@ -473,7 +473,7 @@ Following is a non-normative example of a web application Client requesting iden
                 "ui_locals" : "de"
             }
         },
-        "authorization": {
+        "authorizations": {
             "type"      : "oauth_scope",
             "scope"     : "read_contacts"
         },
@@ -492,7 +492,7 @@ Following is a non-normative example of a web application Client requesting iden
     }
 
 
-Following is a non-normative example of a device Client requesting access to play music using "oauth_rich":
+Following is a non-normative example of a device Client requesting two different access tokens, one request with "oauth_scope", the other with "oauth_rich":
 
     Example 2
 
@@ -512,24 +512,29 @@ Following is a non-normative example of a device Client requesting access to pla
                 "information_uri": "https://device.example/c/user_code"
              }
         },
-        "authorization": {
-            "type"      : "oauth_rich",
-            "scope"     : "play_music",
-            "authorization_details" [
-                {
-                    "type": "customer_information",
-                    "locations": [
-                        "https://example.com/customers",
-                    ]
-                    "actions": [
-                        "read"
-                    ],
-                    "datatypes": [
-                        "contacts",
-                        "photos"
-                    ]
-                }
-            ]
+        "authorizations": {
+            "play_music": {
+                "type"      : "oauth_scope",
+                "scope"     : "play_music",
+            },
+            "read_user_info: {
+                "type"      : "oauth_rich",
+                "authorization_details" [
+                    {
+                        "type": "customer_information",
+                        "locations": [
+                            "https://example.com/customers",
+                        ]
+                        "actions": [
+                            "read"
+                        ],
+                        "datatypes": [
+                            "contacts",
+                            "photos"
+                        ]
+                    }
+                ]
+            }
         }
     }
 
@@ -625,7 +630,10 @@ The interaction object contains one or more interaction mode objects per {{Inter
 
     + **oidc_id_token** - an OpenID Connect ID Token per {{OIDC}} Section 2.
 
-### "authorization" Object {#AuthorizationObject}
+### "authorizations" Object {#AuthorizationsObject}
+Contains either an authorization request object, or key / value pairs, where each unique key is created by the client, and the value is an authorization request object {{AuthorizationRequestObject}}. The key value of "type" is reserved and MUST not be used by the client. The GS detects the authorizations object contains an authorization request object by the presence of the "type" property.
+
+### Authorization Request Object {#AuthorizationRequestObject}
 
 + **type** - one of the following values: "oauth_scope" or "oauth_rich". Extensions MAY define additional types, and the required attributes. This attribute is REQUIRED.
 
@@ -635,9 +643,6 @@ The interaction object contains one or more interaction mode objects per {{Inter
 
 *\[Editor: details may change as the RAR document evolves]*
 
-### "authorizations" Object 
-
-One or more key / value pairs, where each unique key is created by the client, and the value is an authorization object per {{AuthorizationObject}}.
 
 ### "claims" Object {#ClaimsObject}
 
@@ -728,7 +733,7 @@ Example non-normative Grant Response JSON document for Example 1 in {{CreateGran
         "nonce"         : "f6a60810-3d07-41ac-81e7-b958c0dd21e4",
         "uri"           : "https://as.example/endpoint/grant/example1",
         "expires_in"    : 300
-        "authorization": {
+        "authorizations": {
             "access": {
                 "type"  : "oauth_scope",
                 "scope" : "read_contacts"
@@ -756,12 +761,13 @@ Example non-normative Grant Response JSON document for Example 2 in {{CreateGran
         "iat"   : 15790460234,
         "nonce" : "5c9360a5-9065-4f7b-a330-5713909e06c6",
         "uri"   : "https://as.example/endpoint/grant/example2",
-        "authorization": {
-            "uri"   : "https://as.example/endpoint/authz/example2"
+        "authorizations": {
+            "play_music": { "uri"       : "https://as.example/endpoint/authz/example2" },
+            "read_user_info: { "uri"    " "https://as.example/endpoint/authz/"}
         }
     }
 
-Note in this example the GS only provided the AZ URI, and Client must acquire the Authorization per {{ReadAuthZ}}
+Note in this example the GS only provided the AZ URIs, and Client must acquire the Authorizations per {{ReadAuthZ}}
 
 ## Interaction Response {#InteractionResponse}
 
@@ -785,7 +791,7 @@ A non-normative example of an Interaction Response follows:
         "nonce"     : "0d1998d8-fbfa-4879-b942-85a88bff1f3b",
         "uri"       : "https://as.example/endpoint/grant/example4",
         "interaction" : {
-            ""redirect" : {
+            "redirect" : {
                 "redirect_uri"     : "https://as.example/i/example4"
             }
         }    
@@ -841,9 +847,13 @@ If the GS wants the Client to start the interaction, the GS MUST return an inter
 + **exists** - a boolean value indicating if the GS has a user with one or more of the provided identifiers in the Request user.identifiers object {{RequestUserObject}}
 
 
-### "authorization" Object {#ResponseAuthorizationObject}
+### "authorizations" Object {#ResponseAuthorizationsObject}
 
-The authorization object MUST contain only a "uri" attribute or the following from Authorization JSON {{AuthorizationJSON}}:
+The authorizations object MUST contain either an authorization response object {{ResponseAuthorizationObject}}, or a key / value pair for each key in the Grant Request "authorizations" object{{AuthorizationsObject}}, and the value is an authorization response object {{ResponseAuthorizationObject}}.
+
+### Authorization response Object {#ResponseAuthorizationObject}
+
+The authorization response object MUST contain only a "uri" attribute or the following from Authorization JSON {{AuthorizationJSON}}:
 
 + mechanism
 + token
@@ -856,14 +866,9 @@ The authorization object MAY contain any of the following from Authorization JSO
 
 If there is no "uri" attribute, the access token can not be refreshed. If only the "uri" attribute is present, the Client MUST acquire the Authorization per {{ReadAuthZ}}
 
-### "authorizations" Object {#ResponseAuthorizationsObject}
-
-A key / value pair for each key in the Grant Request "authorizations" object, and the value is per 
-{{ResponseAuthorizationObject}}.
-
 ### "claims" Object {#ResponseClaimsObject}
 
-The claims object is a response to the Grant Request "claims" object {{AuthorizationObject}}.
+The claims object is a response to the Grant Request "claims" object {{ClaimsObject}}.
 
 + **oidc**
 
@@ -884,11 +889,7 @@ Includes zero or more warnings from {{Warnings}},
 
 ## Authorization JSON {#AuthorizationJSON}
 
-The Authorization JSON is the contents of a Grant Response "authorization" object {{ResponseAuthorizationsObject}} or the response to a Read AuthZ request by the Client {{ReadAuthZ}}.
-
-
-+ **type** - the type of claim request: "oauth_scope" or "oauth_rich". See the "type" object in {{AuthorizationObject}} for details.
-
+The Authorization JSON is a Grant Response Authorization Object {{ResponseAuthorizationObject}} or the response to a Read AuthZ request by the Client {{ReadAuthZ}}.
 
 
 + **mechanism** - the RS access mechanism. This document defines the "bearer" mechanism as defined in {{RSAccess}}
@@ -901,7 +902,7 @@ The Authorization JSON is the contents of a Grant Response "authorization" objec
 
 + **access** - an object containing the access granted:
 
-    + **type** - the type of claim request: "oauth_scope" or "oauth_rich". See the "type" object in {{AuthorizationObject}} for details. This attribute is REQUIRED.
+    + **type** - the type of claim request: "oauth_scope" or "oauth_rich". See the "type" object in {{AuthorizationsObject}} for details. This attribute is REQUIRED.
 
     + **scope** - the scopes the Client was granted authorization for. This will be all, or a subset, of what was requested. This attribute is OPTIONAL.
 
@@ -1206,6 +1207,10 @@ TBD
 - editorial fixes
 - renamed http verb to method
 - added Verify Grant and verification parameters
+
+## draft-hardt-xauth-protocol-11
+- removed authorization object, and made authorizations object polymorphic
+
 
 # Comparison with OAuth 2.0 and OpenID Connect
 
