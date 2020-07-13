@@ -1,5 +1,5 @@
 ---
-docname: draft-hardt-xauth-protocol-12
+docname: draft-hardt-xauth-protocol-13
 title: The Grant Negotiation and Authorization Protocol
 date: 2020-07-13
 category: std
