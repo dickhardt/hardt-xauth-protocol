@@ -1,5 +1,5 @@
 ---
-docname: draft-hardt-gnap-advanced-02
+docname: draft-hardt-gnap-advanced-01
 title: The Grant Negotiation and Authorization Protocol - Advanced Features
 date: 2020-08-15
 category: std
@@ -429,8 +429,6 @@ TBD
 
 ## draft-hardt-gnap-advanced-01
 - renamed verb to method
-
-## draft-hardt-gnap-advanced-02
 - renamed Authorization to Access
 - renamed Client to Grant Client (GC)
 
